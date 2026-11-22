@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  TypeScript ESM API using Node.js 22, Express 5, Prisma 7, PostgreSQL, Zod 4,
+  OpenAPI 3.1, Vitest, Supertest, and Testcontainers. Dependencies flow from
+  src/app to src/modules to src/shared. Modules do not import other modules.
+  Use RFC 9457 Problem Details for errors. Write repository content in English.
+  Every API change must update runtime validation, response validation, tests,
+  and the generated OpenAPI contract together.
+
+rules:
+  proposal:
+    - State the user or operational outcome and explicit non-goals.
+    - Identify API, database migration, security, observability, and documentation impact.
+    - Explain the impact on business, security, and API.
+    - Declare in-scope and out-of-scope items.
+  specs:
+    - Write concrete WHEN/THEN scenarios that can become automated tests.
+    - Include failure and authorization scenarios when relevant.
+    - Describe only observable behavior.
+    - Use SHALL or MUST in requirements.
+    - Every requirement must have at least one testable scenario.
+    - Do not mention controllers, repositories, or implementation details.
+
+  design:
+    - Preserve module isolation and explain contract or migration compatibility.
+    - Record decisions, rejected alternatives, and trade-offs.
+    - Create an ADR when the decision is cross-cutting, hard to reverse, or affects more than one feature.
+
+  tasks:
+    - Order behavior work as failing test, implementation, refactor, and verification.
+    - Organize tasks into SDD, Red, Green, Refactor, and Consolidation phases.
+    - Include an explicit task for the developer to write tests.
+    - Include test execution, typecheck, and strict OpenSpec validation.
+
+operations:
+  archive:
+    guidance:
+      - Before archiving, check if docs/changes/<change-id>.md exists.
+      - Create or update docs/changes/<change-id>.md with the objective, change made, validations executed, result, and links to the change.
+      - Evaluate if there was a relevant architectural decision.
+      - If so, create an ADR in docs/adr/ following the institutional template.
+      - Never create an ADR for local, reversible changes without relevant trade-offs.
+      - Only archive after tests, typecheck, and openspec validate --strict have passed.
+      - Obtain explicit user confirmation immediately before moving the change to the archive. Confirmation of validation warnings or spec synchronization does not count as confirmation to archive.

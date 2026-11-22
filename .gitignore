@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.initialized
+openapi.generated.json
+test-results/
+*.log
+.DS_Store
+
+# generated mirror of .agents/skills/citi-* (see scripts/check-agent-skills.mjs)
+/.claude/skills/citi-*

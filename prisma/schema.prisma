@@ -1,0 +1,20 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/shared/database/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// <example-item-model>
+model ExampleItem {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("example_items")
+}
+// </example-item-model>

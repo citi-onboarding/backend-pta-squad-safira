@@ -1,0 +1,74 @@
+# Repository instructions
+
+- Keep code, comments, errors, documentation, specifications, and test names in English.
+- Use Node.js 22 and pnpm; preserve `pnpm-lock.yaml`.
+- Use kebab-case and concrete imports; do not create barrel files.
+- Dependencies flow from `src/app` to `src/modules` to `src/shared`.
+- Modules must not import other modules.
+- Validate HTTP and external data with Zod and generate OpenAPI from the same schemas.
+- Never log bodies, credentials, cookies, tokens, or personal data.
+- Never delete or rewrite an applied migration.
+- Run the narrowest test first, then all documented gates before handoff.
+
+## OpenSpec and documentation
+
+- The repository uses a dual-folder structure: `openspec/` for executable business specifications and `docs/` for changelogs and architectural decisions.
+- Every feature, behavior change, or relevant decision must start with an OpenSpec change inside `openspec/changes/<change-id>/`.
+- Directory mapping inside OpenSpec (`openspec/specs/` and `openspec/changes/`) must be grouped strictly by business capabilities (e.g., `user-retrieval`), never by HTTP routes, controllers, or database tables.
+- The AI must obtain instructions using `openspec instructions` before filling out each artifact.
+- Before archiving an OpenSpec change, create or update a summary file in `docs/changes/<change-id>.md`.
+- Create an ADR in `docs/adr/` whenever there is an architectural decision, relevant trade-off, or cross-cutting impact.
+- Do not archive a change without passing tests, typecheck, and `openspec validate --strict`.
+- Before archiving an OpenSpec change, always obtain explicit user confirmation immediately before moving the change to the archive. Previous confirmations for validation warnings or spec synchronization do not count as archive confirmation.
+- All documentation in `docs/changes/` must use `docs/templates/change.md`.
+- Every ADR in `docs/adr/` must use `docs/templates/adr.md`.
+- Do not remove mandatory sections from the templates; fill in `Not applicable` when necessary.
+
+## SDD (Specification-Driven Development) Flow
+
+- Read and parse the current OpenSpec artifacts before proposing or writing any code.
+- Production code and automated tests must directly map to the requirements, invariants, and scenarios defined in the OpenSpec.
+- If you discover missing edge cases, ambiguities, or technical constraints during development, halt coding and update the OpenSpec first.
+- The specification is the single source of truth; code is merely the implementation of the specification.
+
+## TDD (Test-Driven Development) Flow
+
+- **Strict Red-Green-Refactor cycle:** You must strictly follow TDD principles.
+- **Pause and Confirm:** Do not advance to the next TDD phase (e.g., from Red to Green, or Green to Refactor) without explicit confirmation from the user.
+- **Phase Explanation (in Portuguese):** Before asking for confirmation to proceed, you must explain entirely in Portuguese everything that will be implemented or changed in the upcoming phase.
+- **Red:** Write the automated tests for the new behavior, feature, or bugfix **before** writing any production code. Run the tests to confirm they fail (this proves the test is valid and testing the right thing).
+- **Green:** Write the minimal amount of production code required to make the failing tests pass.
+- **Refactor:** Improve the code structure, readability, and performance without changing its behavior, ensuring all tests remain green.
+- Never write production code without an accompanying test that validates it.
+- Never mock the system under test; only mock external dependencies when strictly necessary.
+
+## Architecture & Testability
+
+- **Dependency Injection:** Do not instantiate databases, ORMs, or external libraries directly inside Controllers or Use Cases. All external dependencies must be injected via interfaces to enable fast, isolated unit testing.
+- **Single Responsibility Principle:** A Use Case must only orchestrate business logic; a Controller must only handle HTTP requests/responses; a Repository must only handle data persistence.
+
+## Verification
+
+- During development, run the narrowest relevant test first.
+- Before handing off changes, run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`.
+- Run `pnpm test:integration` when database behavior changes.
+- Run `pnpm test:container` when runtime delivery, migrations, health checks, or Docker behavior changes.
+- Keep pre-commit checks fast; full quality gates belong in CI.
+
+## Agent skills
+
+- `.agents/skills/citi-*` holds the CITi workflow skills and is their single source. Codex reads it directly; Claude Code only discovers skills under `.claude/skills/`.
+- `.claude/skills/citi-*` is a generated, git-ignored mirror. `pnpm install` regenerates it through `prepare`. Edit the source, then run `pnpm skills:sync` — never edit the mirror.
+- `openspec-*` skills in both trees are generated by the OpenSpec CLI. Regenerate with `pnpm exec openspec init --tools claude,codex`; never edit them by hand.
+- Use `citi-playbook` to route, `citi-task-spec` to bound a demand, `citi-tdd-cycle` to implement, `citi-verify-scope` to pick and run gates, `citi-close-change` to write the change summary and evaluate an ADR, `citi-review-change` to review, and `citi-prepare-pr` to write the pull request.
+- Skills cite the rules in this file and in `openspec/config.yaml`; they do not restate them. `pnpm skills:check` fails when a rule is copied instead of cited.
+
+## Code Review Rules
+
+- Flag request bodies, credentials, cookies, authorization headers, tokens, or personal data written to logs. Use redacted identifiers instead.
+- Flag internal errors or stack traces returned to clients. Map them to a safe response shape at the boundary.
+- Flag request params, query, body, or external data consumed without Zod validation, and serialized responses sent without validation.
+- Flag `openapi.json` that no longer matches the executable contract. Regenerate it from the same schemas rather than editing it by hand.
+- Flag edits or deletions of an applied migration, and migrations that are not additive and safe for deployed environments. Add a corrective migration instead.
+- Flag a module importing another module, or `src/shared` importing application layers.
+- Flag repository scripts that delete or overwrite paths before validating every expected marker and target. Perform a complete preflight before mutation.

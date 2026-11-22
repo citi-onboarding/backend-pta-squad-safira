@@ -1,0 +1,43 @@
+# pnpm reads its project settings from this file (pnpm >= 12), not from the
+# "pnpm" field in package.json.
+overrides:
+  # Security pin inherited from the npm "overrides" field.
+  esbuild: 0.28.1
+  # Security pins for transitive advisories reported by `pnpm audit`. Remove an
+  # entry once the parent package ships a release that no longer needs it.
+  "brace-expansion@<2": 1.1.21
+  "brace-expansion@>=2 <3": 2.1.7
+  "brace-expansion@>=4 <6": 5.0.12
+  fast-uri: 3.1.8
+  js-yaml@^4: 4.3.2
+  mysql2: 3.24.5
+  deepmerge-ts: 8.0.2
+  "@grpc/grpc-js@^1.14": ^1.14.5
+
+# Advisories accepted on purpose.
+auditConfig:
+  ignoreGhsas:
+    # braces: stack exhaustion on deeply nested brace patterns. No patched
+    # release exists, it is reachable only through dev tooling (ESLint boundaries,
+    # OpenSpec) and those patterns come from repository config, not user input.
+    - GHSA-vfj7-8cjw-p6xm
+
+# Dependency build scripts are opt-in: add an entry here with
+# `pnpm approve-builds` instead of allowing every script.
+allowBuilds:
+  # Downloads the Prisma query and migration engines.
+  "@prisma/engines": true
+  prisma: true
+  # Links the platform-specific esbuild binary used by tsx and Vitest.
+  esbuild: true
+  # Links the native binding used by the TypeScript import resolver in ESLint.
+  unrs-resolver: true
+  # Only prints a shell-completion tip after installing.
+  "@fission-ai/openspec": false
+  # Analytics phone-home pulled in transitively.
+  "@scarf/scarf": false
+  # Optional native accelerations for ssh2 (Testcontainers); the JavaScript
+  # fallback is used when they are not built.
+  cpu-features: false
+  ssh2: false
+  protobufjs: false
