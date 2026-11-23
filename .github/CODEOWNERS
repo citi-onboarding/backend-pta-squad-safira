@@ -1,0 +1,9 @@
+# High-risk code: every change needs Project Manager review.
+/.github/ @safiragomes
+/prisma/ @safiragomes
+/src/shared/erp/ @safiragomes
+/src/modules/auth/ @safiragomes
+/src/modules/users/ @safiragomes
+/src/modules/pedidos/ @safiragomes
+/src/modules/sync/ @safiragomes
+/src/modules/triagem/ @safiragomes
