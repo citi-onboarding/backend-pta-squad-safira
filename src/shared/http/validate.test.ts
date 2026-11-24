@@ -25,6 +25,22 @@ describe("validate", () => {
     expect(next).toHaveBeenCalledOnce();
   });
 
+  it("leaves the request untouched for sections without a schema", () => {
+    const request = {
+      body: { raw: true },
+      params: { id: "5" },
+      query: { active: "true" },
+    } as unknown as Request;
+    const next = vi.fn() as NextFunction;
+
+    validate({})(request, {} as Response, next);
+
+    expect(request.body).toEqual({ raw: true });
+    expect(request.params).toEqual({ id: "5" });
+    expect(request.query).toEqual({ active: "true" });
+    expect(next).toHaveBeenCalledOnce();
+  });
+
   it("throws when the contract is invalid", () => {
     const middleware = validate({
       body: z.object({ name: z.string().min(1) }),
