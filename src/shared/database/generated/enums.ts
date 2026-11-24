@@ -9,7 +9,101 @@
 * 🟢 You can import this file directly.
 */
 
+export const Papel = {
+  VENDEDOR: 'VENDEDOR',
+  GERENTE: 'GERENTE',
+  FINANCEIRO: 'FINANCEIRO',
+  ADMINISTRADOR: 'ADMINISTRADOR'
+} as const
+
+export type Papel = (typeof Papel)[keyof typeof Papel]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const StatusCliente = {
+  ATIVO: 'ATIVO',
+  BLOQUEADO: 'BLOQUEADO',
+  INATIVO: 'INATIVO'
+} as const
+
+export type StatusCliente = (typeof StatusCliente)[keyof typeof StatusCliente]
+
+
+export const StatusPedido = {
+  RASCUNHO: 'RASCUNHO',
+  ENVIANDO: 'ENVIANDO',
+  ENVIADO_AO_ERP: 'ENVIADO_AO_ERP',
+  ERRO_DE_ENVIO: 'ERRO_DE_ENVIO',
+  BLOQUEADO_POR_CREDITO: 'BLOQUEADO_POR_CREDITO',
+  AGUARDANDO_FINANCEIRO: 'AGUARDANDO_FINANCEIRO',
+  APROVADO: 'APROVADO',
+  RECUSADO: 'RECUSADO'
+} as const
+
+export type StatusPedido = (typeof StatusPedido)[keyof typeof StatusPedido]
+
+
+export const OrigemTitulo = {
+  ERP: 'ERP',
+  PLANILHA: 'PLANILHA'
+} as const
+
+export type OrigemTitulo = (typeof OrigemTitulo)[keyof typeof OrigemTitulo]
+
+
+export const StatusTitulo = {
+  EM_ABERTO: 'EM_ABERTO',
+  VENCIDO: 'VENCIDO',
+  PAGO: 'PAGO'
+} as const
+
+export type StatusTitulo = (typeof StatusTitulo)[keyof typeof StatusTitulo]
+
+
+export const TipoDocumento = {
+  PEDIDO: 'PEDIDO',
+  CONTRATO: 'CONTRATO',
+  OUTRO: 'OUTRO'
+} as const
+
+export type TipoDocumento = (typeof TipoDocumento)[keyof typeof TipoDocumento]
+
+
+export const SituacaoDocumento = {
+  ENVIADO: 'ENVIADO',
+  EM_TRIAGEM: 'EM_TRIAGEM',
+  AGUARDANDO_CONFIRMACAO: 'AGUARDANDO_CONFIRMACAO',
+  CONFIRMADO: 'CONFIRMADO',
+  DESCARTADO: 'DESCARTADO',
+  ERRO: 'ERRO'
+} as const
+
+export type SituacaoDocumento = (typeof SituacaoDocumento)[keyof typeof SituacaoDocumento]
+
+
+export const FaixaRisco = {
+  BAIXO: 'BAIXO',
+  MEDIO: 'MEDIO',
+  ALTO: 'ALTO'
+} as const
+
+export type FaixaRisco = (typeof FaixaRisco)[keyof typeof FaixaRisco]
+
+
+export const TipoRegistro = {
+  SINCRONIZACAO_CLIENTES: 'SINCRONIZACAO_CLIENTES',
+  SINCRONIZACAO_PRODUTOS: 'SINCRONIZACAO_PRODUTOS',
+  SINCRONIZACAO_TITULOS: 'SINCRONIZACAO_TITULOS',
+  CARGA_HISTORICO: 'CARGA_HISTORICO'
+} as const
+
+export type TipoRegistro = (typeof TipoRegistro)[keyof typeof TipoRegistro]
+
+
+export const ResultadoRegistro = {
+  EM_ANDAMENTO: 'EM_ANDAMENTO',
+  SUCESSO: 'SUCESSO',
+  PARCIAL: 'PARCIAL',
+  FALHA: 'FALHA'
+} as const
+
+export type ResultadoRegistro = (typeof ResultadoRegistro)[keyof typeof ResultadoRegistro]

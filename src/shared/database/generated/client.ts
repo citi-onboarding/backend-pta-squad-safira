@@ -31,8 +31,8 @@ export * from "./enums.js"
  * const prisma = new PrismaClient({
  *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
  * })
- * // Fetch zero or more ExampleItems
- * const exampleItems = await prisma.exampleItem.findMany()
+ * // Fetch zero or more Usuarios
+ * const usuarios = await prisma.usuario.findMany()
  * ```
  * 
  * Read more in our [docs](https://pris.ly/d/client).
@@ -42,7 +42,67 @@ export type PrismaClient<LogOpts extends Prisma.LogLevel = never, OmitOpts exten
 export { Prisma }
 
 /**
- * Model ExampleItem
+ * Model Usuario
  * 
  */
-export type ExampleItem = Prisma.ExampleItemModel
+export type Usuario = Prisma.UsuarioModel
+/**
+ * Model Cliente
+ * 
+ */
+export type Cliente = Prisma.ClienteModel
+/**
+ * Model Produto
+ * 
+ */
+export type Produto = Prisma.ProdutoModel
+/**
+ * Model Titulo
+ * 
+ */
+export type Titulo = Prisma.TituloModel
+/**
+ * Model Contrato
+ * 
+ */
+export type Contrato = Prisma.ContratoModel
+/**
+ * Model Pedido
+ * 
+ */
+export type Pedido = Prisma.PedidoModel
+/**
+ * Model ItemPedido
+ * 
+ */
+export type ItemPedido = Prisma.ItemPedidoModel
+/**
+ * Model HistoricoStatus
+ * 
+ */
+export type HistoricoStatus = Prisma.HistoricoStatusModel
+/**
+ * Model PedidoHistorico
+ * 
+ */
+export type PedidoHistorico = Prisma.PedidoHistoricoModel
+/**
+ * Model Documento
+ * 
+ */
+export type Documento = Prisma.DocumentoModel
+/**
+ * Model ExecucaoAgente
+ * 
+ */
+export type ExecucaoAgente = Prisma.ExecucaoAgenteModel
+/**
+ * Model RiscoChurn
+ * 
+ */
+export type RiscoChurn = Prisma.RiscoChurnModel
+/**
+ * Model RegistroSincronizacao
+ * 
+ */
+export type RegistroSincronizacao = Prisma.RegistroSincronizacaoModel

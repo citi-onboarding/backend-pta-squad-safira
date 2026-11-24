@@ -7,3 +7,334 @@ datasource db {
   provider = "postgresql"
 }
 
+// Conventions (DATA-01, PRD 7.1):
+// - every id is a uuid String; ERP codes live in codigoErp
+// - money is always Int in cents with the Centavos suffix (RN-13)
+// - day-only dates use @db.Date; the only Float is the churn probability
+// - every foreign key uses onDelete: Restrict (5-year retention, PRD 7.3)
+
+// Enums
+
+enum Papel {
+  VENDEDOR
+  GERENTE
+  FINANCEIRO
+  ADMINISTRADOR
+}
+
+enum StatusCliente {
+  ATIVO
+  BLOQUEADO
+  INATIVO
+}
+
+enum StatusPedido {
+  RASCUNHO
+  ENVIANDO
+  ENVIADO_AO_ERP
+  ERRO_DE_ENVIO
+  BLOQUEADO_POR_CREDITO
+  AGUARDANDO_FINANCEIRO
+  APROVADO
+  RECUSADO
+}
+
+enum OrigemTitulo {
+  ERP
+  PLANILHA
+}
+
+// Mirrors the status values returned by the ERP API (GET /v1/titulos).
+enum StatusTitulo {
+  EM_ABERTO
+  VENCIDO
+  PAGO
+}
+
+enum TipoDocumento {
+  PEDIDO
+  CONTRATO
+  OUTRO
+}
+
+enum SituacaoDocumento {
+  ENVIADO
+  EM_TRIAGEM
+  AGUARDANDO_CONFIRMACAO
+  CONFIRMADO
+  DESCARTADO
+  ERRO
+}
+
+enum FaixaRisco {
+  BAIXO
+  MEDIO
+  ALTO
+}
+
+enum TipoRegistro {
+  SINCRONIZACAO_CLIENTES
+  SINCRONIZACAO_PRODUTOS
+  SINCRONIZACAO_TITULOS
+  CARGA_HISTORICO
+}
+
+enum ResultadoRegistro {
+  EM_ANDAMENTO
+  SUCESSO
+  PARCIAL
+  FALHA
+}
+
+// Models
+
+model Usuario {
+  id             String   @id @default(uuid())
+  nome           String
+  email          String   @unique
+  senhaHash      String
+  papel          Papel
+  ativo          Boolean  @default(true)
+  // Links the user to the ERP salesperson portfolio (RN-08). No foreign key:
+  // the ERP may have salespeople without a portal user.
+  codigoVendedor String?  @unique
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  pedidos               Pedido[]
+  mudancasDeStatus      HistoricoStatus[]
+  documentosEnviados    Documento[]       @relation("DocumentoEnviadoPor")
+  documentosConfirmados Documento[]       @relation("DocumentoConfirmadoPor")
+}
+
+model Cliente {
+  id                    String        @id @default(uuid())
+  codigoErp             String        @unique
+  razaoSocial           String
+  cnpj                  String        @unique
+  cidade                String
+  uf                    String        @db.Char(2)
+  segmento              String?
+  codigoVendedor        String?
+  limiteCreditoCentavos Int
+  status                StatusCliente
+  atualizadoEm          DateTime      @updatedAt
+
+  titulos          Titulo[]
+  pedidos          Pedido[]
+  contratos        Contrato[]
+  pedidosHistorico PedidoHistorico[]
+  riscos           RiscoChurn[]
+  documentos       Documento[]
+
+  @@index([codigoVendedor])
+  @@index([status])
+}
+
+model Produto {
+  id                  String   @id @default(uuid())
+  codigoErp           String   @unique
+  descricao           String
+  categoria           String?
+  unidade             String
+  precoTabelaCentavos Int
+  ativo               Boolean
+  atualizadoEm        DateTime @updatedAt
+
+  itens            ItemPedido[]
+  pedidosHistorico PedidoHistorico[]
+}
+
+model Titulo {
+  id            String       @id @default(uuid())
+  numero        String
+  parcela       Int
+  clienteId     String
+  pedidoErp     String?
+  valorCentavos Int
+  emissao       DateTime     @db.Date
+  vencimento    DateTime     @db.Date
+  pagamento     DateTime?    @db.Date
+  status        StatusTitulo
+  origem        OrigemTitulo
+  atualizadoEm  DateTime     @updatedAt
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+
+  @@unique([numero, parcela])
+  @@index([clienteId, vencimento])
+  @@index([status, vencimento])
+}
+
+model Contrato {
+  id                  String    @id @default(uuid())
+  numero              String    @unique
+  clienteId           String
+  inicio              DateTime  @db.Date
+  fim                 DateTime  @db.Date
+  avisoPrevioDias     Int
+  renovacaoAutomatica Boolean
+  prazoPagamentoDias  Int?
+  volumeMinimo        Int?
+  temAditivo          Boolean   @default(false)
+  // fim - avisoPrevioDias (RN-11), computed by the service and stored.
+  dataLimiteAviso     DateTime  @db.Date
+  arquivo             String
+  documentoId         String?
+  criadoEm            DateTime  @default(now())
+
+  cliente   Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  documento Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([clienteId])
+  @@index([dataLimiteAviso])
+}
+
+model Pedido {
+  id            String       @id @default(uuid())
+  clienteId     String
+  vendedorId    String
+  status        StatusPedido @default(RASCUNHO)
+  totalCentavos Int
+  numeroErp     String?      @unique
+  // Idempotency key sent to the ERP: one portal order, at most one ERP order (RN-07).
+  chaveEnvio    String       @unique @default(uuid())
+  justificativa String?
+  motivoRecusa  String?
+  documentoId   String?
+  criadoEm      DateTime     @default(now())
+  atualizadoEm  DateTime     @updatedAt
+
+  cliente   Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  vendedor  Usuario    @relation(fields: [vendedorId], references: [id], onDelete: Restrict)
+  documento Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  itens     ItemPedido[]
+  historico HistoricoStatus[]
+
+  @@index([clienteId])
+  @@index([vendedorId, status])
+  @@index([status])
+}
+
+model ItemPedido {
+  id                    String @id @default(uuid())
+  pedidoId              String
+  produtoId             String
+  quantidade            Int
+  precoUnitarioCentavos Int
+  subtotalCentavos      Int
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  // One line per product per order (RN-06). The 50-item limit lives in the service.
+  @@unique([pedidoId, produtoId])
+}
+
+model HistoricoStatus {
+  id        String        @id @default(uuid())
+  pedidoId  String
+  de        StatusPedido?
+  para      StatusPedido
+  usuarioId String?
+  motivo    String?
+  em        DateTime      @default(now())
+
+  pedido  Pedido   @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  usuario Usuario? @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([pedidoId, em])
+}
+
+model PedidoHistorico {
+  id                    String   @id @default(uuid())
+  numero                String
+  linha                 Int
+  data                  DateTime @db.Date
+  clienteId             String?
+  clienteNomeOriginal   String?
+  produtoId             String?
+  vendedorNome          String?
+  quantidade            Int
+  precoUnitarioCentavos Int
+  status                String
+
+  cliente Cliente? @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  produto Produto? @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  // Lets the history load run again with the same result (RN-16).
+  @@unique([numero, linha])
+  @@index([clienteId, data])
+}
+
+model Documento {
+  id              String            @id @default(uuid())
+  arquivo         String
+  tipo            TipoDocumento
+  clienteId       String?
+  enviadoPorId    String
+  enviadoEm       DateTime          @default(now())
+  situacao        SituacaoDocumento @default(ENVIADO)
+  confirmadoPorId String?
+  confirmadoEm    DateTime?
+
+  cliente       Cliente? @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  enviadoPor    Usuario  @relation("DocumentoEnviadoPor", fields: [enviadoPorId], references: [id], onDelete: Restrict)
+  confirmadoPor Usuario? @relation("DocumentoConfirmadoPor", fields: [confirmadoPorId], references: [id], onDelete: Restrict)
+
+  execucoes ExecucaoAgente[]
+  pedidos   Pedido[]
+  contratos Contrato[]
+
+  @@index([situacao])
+  @@index([clienteId])
+}
+
+model ExecucaoAgente {
+  id                    String   @id @default(uuid())
+  documentoId           String
+  passos                Json
+  ferramentasChamadas   Json
+  resultado             Json?
+  erro                  String?
+  duracaoMs             Int
+  custoEstimadoCentavos Int?
+  criadoEm              DateTime @default(now())
+
+  documento Documento @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([documentoId])
+}
+
+model RiscoChurn {
+  id                  String     @id @default(uuid())
+  clienteId           String
+  calculadoEm         DateTime
+  // 0 to 1. The only Float in the schema: it is not money.
+  probabilidade       Float
+  faixa               FaixaRisco
+  motivoPrincipal     String
+  versaoModelo        String
+  contatoRegistradoEm DateTime?
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+
+  @@unique([clienteId, calculadoEm])
+  @@index([calculadoEm, faixa])
+}
+
+// Each ERP sync run and each history load. Intentionally has no relations.
+model RegistroSincronizacao {
+  id         String            @id @default(uuid())
+  tipo       TipoRegistro
+  iniciouEm  DateTime          @default(now())
+  terminouEm DateTime?
+  resultado  ResultadoRegistro
+  itensLidos Int               @default(0)
+  erros      Int               @default(0)
+  pendencias Int               @default(0)
+  detalhe    String?
+
+  @@index([tipo, iniciouEm])
+}
