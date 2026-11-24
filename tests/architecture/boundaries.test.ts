@@ -1,10 +1,13 @@
+import { fileURLToPath } from "node:url";
+
 import { ESLint } from "eslint";
 import { describe, expect, it } from "vitest";
 
 // @ts-expect-error The executable ESLint config intentionally remains JavaScript.
 import { createArchitectureConfig } from "../../architecture.config.mjs";
 
-const fixturesRoot = new URL("./fixtures", import.meta.url).pathname;
+// fileURLToPath decodes %20 and Windows drive letters; URL.pathname does not.
+const fixturesRoot = fileURLToPath(new URL("./fixtures", import.meta.url));
 
 async function messages(file: string) {
   const eslint = new ESLint({
