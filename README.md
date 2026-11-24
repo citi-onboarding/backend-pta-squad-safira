@@ -21,19 +21,32 @@ Authentication, Redis, object storage, email, queues, and vendor-specific deploy
 - pnpm 12 or later (enable it with `corepack enable`)
 - Docker for PostgreSQL integration and container tests
 
-## Start a project
-
-After creating a repository from this template:
+## Local setup
 
 ```bash
+git clone https://github.com/citi-onboarding/backend-pta-squad-safira.git
+cd backend-pta-squad-safira
 pnpm install --frozen-lockfile
-pnpm init:project --name "Operations API"
+cp .env.example .env
 docker compose up -d postgres
-pnpm db:migrate --name initial
 pnpm dev
 ```
 
-The initializer updates project metadata, creates `.env`, removes the example module and its template-only migration, and refuses to run twice. When maintaining this boilerplate itself, copy `.env.example` to `.env` instead of running the initializer.
+The default `.env.example` values work with the Compose PostgreSQL service. The
+ERP and AI credentials are not in the repository; ask the Project Manager for
+them through a secure channel and keep them only in your local `.env`.
+
+Before opening a pull request, run `pnpm format:check`, `pnpm verify`,
+`pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
+
+### Windows notes
+
+- Use pnpm 12 for this repository. If `pnpm --version` prints an older major, or
+  a commit hook fails with `pnpm` not recognized, install it once with
+  `npm install -g pnpm@12.5.1` (or run `corepack enable` from an administrator
+  terminal) and open a new terminal.
+- Docker Desktop must be running before `docker compose` or the integration
+  tests.
 
 ## Architecture
 
