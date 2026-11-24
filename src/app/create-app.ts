@@ -14,11 +14,6 @@ import type { Database } from "../shared/database/create-database.js";
 import { createOpenApiDocument } from "../shared/http/openapi.js";
 import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
 import { createLogger } from "../shared/logging/logger.js";
-// <example-item-imports>
-import { ExampleItemRepository } from "../modules/example-items/example-item.repository.js";
-import { createExampleItemRouter } from "../modules/example-items/example-item.router.js";
-import { ExampleItemService } from "../modules/example-items/example-item.service.js";
-// </example-item-imports>
 
 interface CreateAppOptions {
   database: Database;
@@ -91,13 +86,6 @@ export function createApp({
     response.json(openApiDocument),
   );
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
-
-  // <example-item-routes>
-  const exampleItemService = new ExampleItemService(
-    new ExampleItemRepository(database),
-  );
-  app.use("/api/v1/example-items", createExampleItemRouter(exampleItemService));
-  // </example-item-routes>
 
   app.use(notFoundHandler);
   app.use(problemHandler);

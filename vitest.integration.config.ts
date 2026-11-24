@@ -6,6 +6,7 @@ export default defineConfig({
     setupFiles: ["tests/setup-env.ts"],
     include: ["src/**/*.integration.test.ts"],
     fileParallelism: false,
+    passWithNoTests: true,
     testTimeout: 120_000,
     hookTimeout: 120_000,
   },

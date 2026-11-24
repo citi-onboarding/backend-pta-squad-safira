@@ -1,8 +1,5 @@
 import { writeFile } from "node:fs/promises";
 
-// <example-item-openapi>
-import "../src/modules/example-items/example-item.openapi.js";
-// </example-item-openapi>
 import { createOpenApiDocument } from "../src/shared/http/openapi.js";
 
 await writeFile(
