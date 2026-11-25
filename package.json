@@ -45,6 +45,7 @@
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "argon2": "0.45.2",
+    "cookie-parser": "1.4.7",
     "cors": "2.8.6",
     "dotenv": "17.3.1",
     "express": "5.3.0",
@@ -60,6 +61,7 @@
   "devDependencies": {
     "@eslint/js": "9.39.2",
     "@fission-ai/openspec": "1.9.0",
+    "@types/cookie-parser": "1.4.10",
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "22.19.15",
