@@ -7,36 +7,36 @@
 
 ## Red
 
-- [ ] Developer writes unit tests for password hashing: a hash never equals the password, the right password verifies, and a wrong one does not.
-- [ ] Developer writes unit tests for the session token: a valid token returns the user id, and a tampered or expired token is rejected.
-- [ ] Developer writes unit tests for the authentication middleware and the role guard: no session (401), inactive user (401), wrong role (403), allowed role, role read from the database, and cookie renewal.
-- [ ] Developer writes unit tests for the portfolio rule: own portfolio, another portfolio, manager or finance, and salesperson without a code.
-- [ ] Developer writes integration tests for sign-in, current user, sign-out, and a tampered cookie.
-- [ ] Developer writes integration tests for user management: administrator only, list without hashes, create (201, 409, 400, salesperson without code, duplicated salesperson code), update (deactivate, change role, 404), and password reset.
-- [ ] Developer writes tests for the seed: seeded users sign in, and the seed stops without `SEED_PASSWORD`.
-- [ ] Run the tests and confirm that they fail for the expected reason.
+- [x] Developer writes unit tests for password hashing: a hash never equals the password, the right password verifies, and a wrong one does not.
+- [x] Developer writes unit tests for the session token: a valid token returns the user id, and a tampered or expired token is rejected.
+- [x] Developer writes unit tests for the authentication middleware and the role guard: no session (401), inactive user (401), wrong role (403), allowed role, role read from the database, and cookie renewal.
+- [x] Developer writes unit tests for the portfolio rule: own portfolio, another portfolio, manager or finance, and salesperson without a code.
+- [x] Developer writes integration tests for sign-in, current user, sign-out, and a tampered cookie.
+- [x] Developer writes integration tests for user management: administrator only, list without hashes, create (201, 409, 400, salesperson without code, duplicated salesperson code), update (deactivate, change role, 404), and password reset.
+- [x] Developer writes tests for the seed: seeded users sign in, and the seed stops without `SEED_PASSWORD`.
+- [x] Run the tests and confirm that they fail for the expected reason.
 
 ## Green
 
-- [ ] Add `argon2`, `jose`, and `cookie-parser`, and approve the `argon2` build script.
-- [ ] Add `SESSION_SECRET` to `src/shared/config/env.ts`, and `SESSION_SECRET` and `SEED_PASSWORD` to `.env.example` with placeholder values.
-- [ ] Implement password hashing in `src/shared/security`.
-- [ ] Implement the session token in `src/shared/security`.
-- [ ] Implement the authentication middleware, the role guard, and the portfolio rule in `src/shared/http/require-role.ts`.
-- [ ] Generate and implement the `auth` module: sign-in, sign-out, and current user.
-- [ ] Generate and implement the `users` module: list, create, update, and password reset.
-- [ ] Register `cookie-parser` and the new routes in `src/app/create-app.ts`.
-- [ ] Make the seed use the shared password hashing and require `SEED_PASSWORD`.
-- [ ] Regenerate `openapi.json`.
+- [x] Add `argon2`, `jose`, and `cookie-parser`, and record the `argon2` build script decision in `pnpm-workspace.yaml`.
+- [x] Add `SESSION_SECRET` to `src/shared/config/env.ts`, and `SESSION_SECRET` and `SEED_PASSWORD` to `.env.example` with placeholder values.
+- [x] Implement password hashing in `src/shared/security`.
+- [x] Implement the session token in `src/shared/security`.
+- [x] Implement the authentication middleware, the role guard, and the portfolio rule in `src/shared/http/require-role.ts`.
+- [x] Generate and implement the `auth` module: sign-in, sign-out, and current user.
+- [x] Generate and implement the `users` module: list, create, update, and password reset.
+- [x] Register `cookie-parser` and the new routes in `src/app/create-app.ts`.
+- [x] Make the seed use the shared password hashing and require `SEED_PASSWORD`.
+- [x] Regenerate `openapi.json`.
 
 ## Refactor
 
-- [ ] Review names, duplication, and logs, keeping emails, passwords, hashes, and cookies out of every log line.
-- [ ] Run the tests again after refactoring.
+- [x] Review names, duplication, and logs, keeping emails, passwords, hashes, and cookies out of every log line.
+- [x] Run the tests again after refactoring.
 
 ## Consolidation
 
-- [ ] Write the ADR for session storage and password hashing in `docs/adr/`, using `docs/templates/adr.md`.
+- [x] Write the ADR for session storage and password hashing in `docs/adr/`, using `docs/templates/adr.md`.
 - [ ] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
-- [ ] Run `openspec validate add-authentication-and-users --strict`.
+- [x] Run `openspec validate add-authentication-and-users --strict`.
 - [ ] Open the pull request to `develop`, noting the dependency on `feat/prismaSchema`, the new `src/shared/security` folder, and the open points.

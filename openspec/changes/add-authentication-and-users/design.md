@@ -24,7 +24,8 @@ The decisions below follow task BACK-01, PRD section 4.2, RN-08, RN-14, and sect
 - Password hashing and token signing live in `src/shared/security`, because the `auth` module, the `users` module, and the seed all use them, and modules must not import each other.
 - The authentication middleware, the role guard `requireRole(...roles)`, and the portfolio rule live in `src/shared/http/require-role.ts`. The user lookup is injected into the middleware, so it can be tested without a database.
 - The `auth` module owns sign-in, sign-out, and the current user route. The `users` module owns user management.
-- Errors use the existing `HttpProblem` and RFC 9457 problem responses. A unique constraint violation on email or salesperson code is mapped to 409.
+- Errors use the existing `HttpProblem` and RFC 9457 problem responses. The users service checks for a repeated email or salesperson code before writing and the router answers 409.
+- Besides the files listed in the task, each module has a Prisma repository and a `*.router.test.ts` file for the HTTP tests, and the auth module has PostgreSQL integration tests for sign-in, user management, and the seed.
 
 ### Environment
 
