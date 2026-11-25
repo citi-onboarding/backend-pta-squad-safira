@@ -19,6 +19,7 @@ export function createLogger(
           "token",
           "accessToken",
           "refreshToken",
+          "ANTHROPIC_API_KEY",
         ],
         censor: "[REDACTED]",
       },

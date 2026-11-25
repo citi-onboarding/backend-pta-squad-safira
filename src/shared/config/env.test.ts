@@ -33,4 +33,25 @@ describe("parseEnvironment", () => {
       parseEnvironment({ ...validEnvironment, CORS_ORIGINS: " , " }),
     ).toThrow("CORS_ORIGINS must contain at least one origin.");
   });
+
+  it("accepts a missing model key", () => {
+    const environment = parseEnvironment(validEnvironment);
+
+    expect(environment.ANTHROPIC_API_KEY).toBeUndefined();
+  });
+
+  it("exposes a non-empty model key", () => {
+    const environment = parseEnvironment({
+      ...validEnvironment,
+      ANTHROPIC_API_KEY: "model-test-key",
+    });
+
+    expect(environment.ANTHROPIC_API_KEY).toBe("model-test-key");
+  });
+
+  it("rejects an empty model key", () => {
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, ANTHROPIC_API_KEY: "" }),
+    ).toThrow();
+  });
 });

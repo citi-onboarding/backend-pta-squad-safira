@@ -11,6 +11,8 @@ const envSchema = z.object({
     .default("info"),
   CORS_ORIGINS: z.string().default("http://localhost:5173"),
   DATABASE_URL: z.url().startsWith("postgresql://"),
+  // Optional until the triage module uses it; server-only, never logged.
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
 });
 
 export type Environment = z.infer<typeof envSchema> & { corsOrigins: string[] };
