@@ -62,4 +62,15 @@ describe("createApp", () => {
     expect(response.headers["x-request-id"]).toBe("known-request-id");
     expect(response.headers["x-powered-by"]).toBeUndefined();
   });
+
+  it("mounts the authentication routes and documents them", async () => {
+    const app = createApp({ database: createDatabaseDouble(), environment });
+
+    await request(app).get("/auth/me").expect(401);
+    await request(app).post("/auth/login").send({}).expect(400);
+    const contract = await request(app).get("/openapi.json").expect(200);
+    expect(Object.keys(contract.body.paths)).toEqual(
+      expect.arrayContaining(["/auth/login", "/auth/logout", "/auth/me"]),
+    );
+  });
 });

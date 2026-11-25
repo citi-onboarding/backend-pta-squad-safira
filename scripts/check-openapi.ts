@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-
+import "../src/modules/auth/auth.openapi.js";
 import { createOpenApiDocument } from "../src/shared/http/openapi.js";
 
 const expected = `${JSON.stringify(createOpenApiDocument(), null, 2)}\n`;

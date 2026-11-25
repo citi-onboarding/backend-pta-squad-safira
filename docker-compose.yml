@@ -8,6 +8,7 @@ services:
       LOG_LEVEL: info
       CORS_ORIGINS: http://localhost:5173
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/node_boilerplate?schema=public
+      SESSION_SECRET: ${SESSION_SECRET}
     ports:
       - "3001:3001"
     depends_on:

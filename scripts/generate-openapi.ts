@@ -1,5 +1,5 @@
 import { writeFile } from "node:fs/promises";
-
+import "../src/modules/auth/auth.openapi.js";
 import { createOpenApiDocument } from "../src/shared/http/openapi.js";
 
 await writeFile(

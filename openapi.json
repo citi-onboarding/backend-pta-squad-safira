@@ -12,9 +12,173 @@
     }
   ],
   "components": {
-    "schemas": {},
+    "schemas": {
+      "CurrentUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "VENDEDOR",
+              "GERENTE",
+              "FINANCEIRO",
+              "ADMINISTRADOR"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "papel"
+        ],
+        "additionalProperties": false
+      }
+    },
     "parameters": {}
   },
-  "paths": {},
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign in with email and password",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "email",
+                  "senha"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Signed in. Sets the HttpOnly session cookie.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "papel": {
+                      "type": "string",
+                      "enum": [
+                        "VENDEDOR",
+                        "GERENTE",
+                        "FINANCEIRO",
+                        "ADMINISTRADOR"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nome",
+                    "papel"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Invalid email or password"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Sign out and remove the session cookie",
+        "responses": {
+          "204": {
+            "description": "Signed out"
+          }
+        }
+      }
+    },
+    "/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get the signed-in user",
+        "responses": {
+          "200": {
+            "description": "Signed-in user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "papel": {
+                      "type": "string",
+                      "enum": [
+                        "VENDEDOR",
+                        "GERENTE",
+                        "FINANCEIRO",
+                        "ADMINISTRADOR"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nome",
+                    "papel"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session"
+          }
+        }
+      }
+    }
+  },
   "webhooks": {}
 }

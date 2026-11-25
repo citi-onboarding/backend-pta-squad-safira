@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import type { Express } from "express";
@@ -9,11 +10,16 @@ import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 import swaggerUi from "swagger-ui-express";
 
+import { PrismaAuthRepository } from "../modules/auth/auth.repository.js";
+import { createAuthRouter } from "../modules/auth/auth.router.js";
+import { AuthService } from "../modules/auth/auth.service.js";
 import type { Environment } from "../shared/config/env.js";
 import type { Database } from "../shared/database/create-database.js";
 import { createOpenApiDocument } from "../shared/http/openapi.js";
 import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
+import { createAuthenticate } from "../shared/http/require-role.js";
 import { createLogger } from "../shared/logging/logger.js";
+import { verifyPassword } from "../shared/security/password.js";
 
 interface CreateAppOptions {
   database: Database;
@@ -60,6 +66,7 @@ export function createApp({
     }),
   );
   app.use(express.json({ limit: "1mb" }));
+  app.use(cookieParser());
   if (environment.NODE_ENV !== "test") {
     app.use(
       rateLimit({
@@ -86,6 +93,23 @@ export function createApp({
     response.json(openApiDocument),
   );
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
+
+  const secureCookie = environment.NODE_ENV === "production";
+  const authRepository = new PrismaAuthRepository(database);
+  const authenticate = createAuthenticate({
+    secret: environment.SESSION_SECRET,
+    secureCookie,
+    findUserById: (id) => authRepository.findSessionUser(id),
+  });
+  app.use(
+    "/auth",
+    createAuthRouter({
+      authService: new AuthService(authRepository, verifyPassword),
+      authenticate,
+      sessionSecret: environment.SESSION_SECRET,
+      secureCookie,
+    }),
+  );
 
   app.use(notFoundHandler);
   app.use(problemHandler);
