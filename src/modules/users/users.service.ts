@@ -1,0 +1,94 @@
+import type { Papel } from "../../shared/database/generated/enums.js";
+
+export interface UserRecord {
+  id: string;
+  nome: string;
+  email: string;
+  papel: Papel;
+  ativo: boolean;
+  codigoVendedor: string | null;
+}
+
+export interface NewUserData {
+  nome: string;
+  email: string;
+  senhaHash: string;
+  papel: Papel;
+  codigoVendedor: string | null;
+}
+
+export interface UserChanges {
+  nome?: string;
+  papel?: Papel;
+  ativo?: boolean;
+}
+
+export interface CreateUserInput {
+  nome: string;
+  email: string;
+  senha: string;
+  papel: Papel;
+  codigoVendedor?: string | null;
+}
+
+export interface UsersRepository {
+  list(): Promise<UserRecord[]>;
+  findByEmail(email: string): Promise<UserRecord | null>;
+  findBySalespersonCode(code: string): Promise<UserRecord | null>;
+  create(data: NewUserData): Promise<UserRecord>;
+  update(id: string, changes: UserChanges): Promise<UserRecord | null>;
+  updatePasswordHash(id: string, senhaHash: string): Promise<boolean>;
+}
+
+export type HashPassword = (password: string) => Promise<string>;
+
+export class UserConflictError extends Error {
+  constructor(readonly field: "email" | "codigoVendedor") {
+    super(`A user with this ${field} already exists.`);
+    this.name = "UserConflictError";
+  }
+}
+
+export class UsersService {
+  constructor(
+    private readonly repository: UsersRepository,
+    private readonly hashPassword: HashPassword,
+  ) {}
+
+  list(): Promise<UserRecord[]> {
+    return this.repository.list();
+  }
+
+  async create(input: CreateUserInput): Promise<UserRecord> {
+    const codigoVendedor = input.codigoVendedor ?? null;
+
+    if (await this.repository.findByEmail(input.email)) {
+      throw new UserConflictError("email");
+    }
+    if (
+      codigoVendedor !== null &&
+      (await this.repository.findBySalespersonCode(codigoVendedor))
+    ) {
+      throw new UserConflictError("codigoVendedor");
+    }
+
+    return this.repository.create({
+      nome: input.nome,
+      email: input.email,
+      senhaHash: await this.hashPassword(input.senha),
+      papel: input.papel,
+      codigoVendedor,
+    });
+  }
+
+  update(id: string, changes: UserChanges): Promise<UserRecord | null> {
+    return this.repository.update(id, changes);
+  }
+
+  async resetPassword(id: string, senha: string): Promise<boolean> {
+    return this.repository.updatePasswordHash(
+      id,
+      await this.hashPassword(senha),
+    );
+  }
+}
