@@ -14,11 +14,11 @@ let database: Database;
 let app: ReturnType<(typeof import("../../app/create-app.js"))["createApp"]>;
 
 const seedPassword = "seed-integration-password";
-const seededEmails = [
-  "fernanda@distrilux.test",
-  "sergio@distrilux.test",
-  "lucas@distrilux.test",
-  "patricia@distrilux.test",
+const seededUsers = [
+  { email: "fernanda@distrilux.test", papel: "GERENTE", manageUsers: 403 },
+  { email: "sergio@distrilux.test", papel: "FINANCEIRO", manageUsers: 403 },
+  { email: "lucas@distrilux.test", papel: "ADMINISTRADOR", manageUsers: 200 },
+  { email: "patricia@distrilux.test", papel: "VENDEDOR", manageUsers: 403 },
 ];
 
 function runSeed(password: string) {
@@ -81,14 +81,18 @@ describe("development seed", () => {
     await expect(database.usuario.count()).resolves.toBe(0);
   });
 
-  it("creates one user per role who can sign in with SEED_PASSWORD", async () => {
+  it("creates one user per role who can sign in, and only the administrator manages users", async () => {
     runSeed(seedPassword);
 
-    for (const email of seededEmails) {
-      await request(app)
+    for (const { email, papel, manageUsers } of seededUsers) {
+      const agent = request.agent(app);
+      await agent
         .post("/auth/login")
         .send({ email, senha: seedPassword })
         .expect(200);
+      const me = await agent.get("/auth/me").expect(200);
+      expect(me.body.papel).toBe(papel);
+      await agent.get("/users").expect(manageUsers);
     }
   });
 });
