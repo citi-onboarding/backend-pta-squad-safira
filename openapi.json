@@ -39,6 +39,48 @@
           "papel"
         ],
         "additionalProperties": false
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "papel": {
+            "type": "string",
+            "enum": [
+              "VENDEDOR",
+              "GERENTE",
+              "FINANCEIRO",
+              "ADMINISTRADOR"
+            ]
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "codigoVendedor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "nome",
+          "email",
+          "papel",
+          "ativo",
+          "codigoVendedor"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {}
@@ -175,6 +217,357 @@
           },
           "401": {
             "description": "No valid session"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List users",
+        "responses": {
+          "200": {
+            "description": "Users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "nome": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "papel": {
+                        "type": "string",
+                        "enum": [
+                          "VENDEDOR",
+                          "GERENTE",
+                          "FINANCEIRO",
+                          "ADMINISTRADOR"
+                        ]
+                      },
+                      "ativo": {
+                        "type": "boolean"
+                      },
+                      "codigoVendedor": {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "nome",
+                      "email",
+                      "papel",
+                      "ativo",
+                      "codigoVendedor"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "Only the Administrator role may manage users"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "papel": {
+                    "type": "string",
+                    "enum": [
+                      "VENDEDOR",
+                      "GERENTE",
+                      "FINANCEIRO",
+                      "ADMINISTRADOR"
+                    ]
+                  },
+                  "codigoVendedor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "nome",
+                  "email",
+                  "senha",
+                  "papel"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "papel": {
+                      "type": "string",
+                      "enum": [
+                        "VENDEDOR",
+                        "GERENTE",
+                        "FINANCEIRO",
+                        "ADMINISTRADOR"
+                      ]
+                    },
+                    "ativo": {
+                      "type": "boolean"
+                    },
+                    "codigoVendedor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nome",
+                    "email",
+                    "papel",
+                    "ativo",
+                    "codigoVendedor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "Only the Administrator role may manage users"
+          },
+          "409": {
+            "description": "Email or salesperson code already in use"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Change a user's name, role, or active flag",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nome": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "papel": {
+                    "type": "string",
+                    "enum": [
+                      "VENDEDOR",
+                      "GERENTE",
+                      "FINANCEIRO",
+                      "ADMINISTRADOR"
+                    ]
+                  },
+                  "ativo": {
+                    "type": "boolean"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "nome": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "papel": {
+                      "type": "string",
+                      "enum": [
+                        "VENDEDOR",
+                        "GERENTE",
+                        "FINANCEIRO",
+                        "ADMINISTRADOR"
+                      ]
+                    },
+                    "ativo": {
+                      "type": "boolean"
+                    },
+                    "codigoVendedor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "nome",
+                    "email",
+                    "papel",
+                    "ativo",
+                    "codigoVendedor"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "Only the Administrator role may manage users"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/users/{id}/redefinir-senha": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Set a new password for a user",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "senha": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "senha"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Password changed"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "Only the Administrator role may manage users"
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }

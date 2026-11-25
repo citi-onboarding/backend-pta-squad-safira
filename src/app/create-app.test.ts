@@ -73,4 +73,18 @@ describe("createApp", () => {
       expect.arrayContaining(["/auth/login", "/auth/logout", "/auth/me"]),
     );
   });
+
+  it("mounts the user management routes and documents them", async () => {
+    const app = createApp({ database: createDatabaseDouble(), environment });
+
+    await request(app).get("/users").expect(401);
+    const contract = await request(app).get("/openapi.json").expect(200);
+    expect(Object.keys(contract.body.paths)).toEqual(
+      expect.arrayContaining([
+        "/users",
+        "/users/{id}",
+        "/users/{id}/redefinir-senha",
+      ]),
+    );
+  });
 });

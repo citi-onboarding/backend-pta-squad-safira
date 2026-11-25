@@ -13,13 +13,16 @@ import swaggerUi from "swagger-ui-express";
 import { PrismaAuthRepository } from "../modules/auth/auth.repository.js";
 import { createAuthRouter } from "../modules/auth/auth.router.js";
 import { AuthService } from "../modules/auth/auth.service.js";
+import { PrismaUsersRepository } from "../modules/users/users.repository.js";
+import { createUsersRouter } from "../modules/users/users.router.js";
+import { UsersService } from "../modules/users/users.service.js";
 import type { Environment } from "../shared/config/env.js";
 import type { Database } from "../shared/database/create-database.js";
 import { createOpenApiDocument } from "../shared/http/openapi.js";
 import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
 import { createAuthenticate } from "../shared/http/require-role.js";
 import { createLogger } from "../shared/logging/logger.js";
-import { verifyPassword } from "../shared/security/password.js";
+import { hashPassword, verifyPassword } from "../shared/security/password.js";
 
 interface CreateAppOptions {
   database: Database;
@@ -110,7 +113,16 @@ export function createApp({
       secureCookie,
     }),
   );
-
+  app.use(
+    "/users",
+    createUsersRouter({
+      usersService: new UsersService(
+        new PrismaUsersRepository(database),
+        hashPassword,
+      ),
+      authenticate,
+    }),
+  );
   app.use(notFoundHandler);
   app.use(problemHandler);
 
