@@ -45,4 +45,5 @@ The decisions below follow task BACK-01, PRD section 4.2, RN-08, RN-14, and sect
 
 ## Open points for the team
 
-- A salesperson can be created without a salesperson code and has access to no client until one is linked. `PATCH /users/:id` follows the task and does not change the code, so linking a code after creation needs a decision from the project manager.
+- A salesperson must have a salesperson code when created (kickoff answer: "the ideal is to have the code at registration"). `PATCH /users/:id` follows the task and does not change the code, so a user whose role changes to salesperson has no portfolio until a decision is made about linking a code after creation.
+- The first administrator in production: the kickoff mentioned an initial administrator account, but today it only exists through the development seed.

@@ -25,7 +25,7 @@ The system SHALL return every user with `id`, `nome`, `email`, `papel`, `ativo`,
 
 ### Requirement: Create a user
 
-The system SHALL create a user from a name, email, role, initial password, and an optional ERP salesperson code. The password MUST be stored only as a hash, and the response MUST NOT contain it.
+The system SHALL create a user from a name, email, role, initial password, and, for a salesperson, the ERP salesperson code. A salesperson MUST have a salesperson code when created; the other roles MAY be created without one. Administrators MAY create other administrators. The password MUST be stored only as a hash, and the response MUST NOT contain it.
 
 #### Scenario: Valid user
 
@@ -45,12 +45,22 @@ The system SHALL create a user from a name, email, role, initial password, and a
 #### Scenario: Salesperson without salesperson code
 
 - **WHEN** an administrator creates a salesperson without an ERP salesperson code
-- **THEN** the system responds 201, and that salesperson has access to no client until a code is linked
+- **THEN** the system responds 400 and creates nothing
+
+#### Scenario: Other role without salesperson code
+
+- **WHEN** an administrator creates a sales manager, a finance user, or an administrator without an ERP salesperson code
+- **THEN** the system responds 201
 
 #### Scenario: Salesperson code already linked
 
 - **WHEN** an administrator creates a salesperson with an ERP salesperson code already linked to another user
 - **THEN** the system responds 409 and creates nothing
+
+#### Scenario: Administrator creates another administrator
+
+- **WHEN** an administrator creates a user with the Administrator role
+- **THEN** the system responds 201, and the new administrator can manage users
 
 ### Requirement: Update a user
 
