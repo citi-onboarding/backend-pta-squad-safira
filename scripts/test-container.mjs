@@ -89,6 +89,10 @@ try {
     `DATABASE_URL=${databaseUrl}`,
     "--env",
     "CORS_ORIGINS=http://localhost:5173",
+    "--env",
+    "ERP_API_URL=https://erp.invalid",
+    "--env",
+    "ERP_API_KEY=smoke-test-key",
     image,
   ]);
   for (let attempt = 0; attempt < 30; attempt += 1) {

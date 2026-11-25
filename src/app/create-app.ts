@@ -11,13 +11,16 @@ import swaggerUi from "swagger-ui-express";
 
 import type { Environment } from "../shared/config/env.js";
 import type { Database } from "../shared/database/create-database.js";
+import type { ErpClient } from "../shared/erp/erp-client.service.js";
 import { createOpenApiDocument } from "../shared/http/openapi.js";
 import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
 import { createLogger } from "../shared/logging/logger.js";
 
 interface CreateAppOptions {
+  /** Injected for upcoming synchronizers and order submission routes. */
   database: Database;
   environment: Environment;
+  erpClient: ErpClient;
 }
 
 export function createApp({

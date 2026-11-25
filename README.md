@@ -1,8 +1,8 @@
-# Node Boilerplate
+# DistriLux Portal API
 
-A production-oriented foundation for TypeScript REST APIs. It keeps product decisions out of the core while making architecture, validation, tests, API contracts, documentation, and delivery verifiable.
+Backend of the DistriLux order portal. It serves customers, products, receivables, and orders to the portal and is the only component that talks to the DistriLux ERP. The ERP key stays on the server (RN-14), and monetary values travel as integer cents (RN-13).
 
-## Included
+## Stack
 
 - Node.js 22, TypeScript ESM, Express 5, PostgreSQL, and Prisma 7
 - Zod runtime validation and generated OpenAPI 3.1 with Swagger UI
@@ -11,9 +11,8 @@ A production-oriented foundation for TypeScript REST APIs. It keeps product deci
 - Vitest, Supertest, Testcontainers, V8 coverage, and architecture tests
 - OpenSpec workflow, ADRs, Prettier, ESLint, Husky, and a basic GitHub Actions check
 - Non-root Docker image, local Compose stack, liveness, and database readiness
-- Project initializer, module generator, and a removable database-backed example
-
-Authentication, Redis, object storage, email, queues, and vendor-specific deployment are intentionally optional. Add them only when a product defines ownership and requirements.
+- Module generator
+- Typed, resilient ERP client in `src/shared/erp` (see [ERP integration](#erp-integration))
 
 ## Requirements
 
@@ -32,9 +31,15 @@ docker compose up -d postgres
 pnpm dev
 ```
 
-The default `.env.example` values work with the Compose PostgreSQL service. The
-ERP and AI credentials are not in the repository; ask the Project Manager for
-them through a secure channel and keep them only in your local `.env`.
+The default `.env.example` database values work with the Compose PostgreSQL
+service, whose database is named `distrilux_portal`. If you used the Compose
+database before it was renamed from `node_boilerplate`, update `DATABASE_URL` in
+your `.env` and recreate the volume with `docker compose down -v`. A hosted
+PostgreSQL, such as Neon, works too: point `DATABASE_URL` at it.
+
+`ERP_API_URL` and `ERP_API_KEY` are required; the server does not start without
+them. The ERP and AI credentials are not in the repository; ask the Project
+Manager for them through a secure channel and keep them only in your local `.env`.
 
 Before opening a pull request, run `pnpm format:check`, `pnpm verify`,
 `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
@@ -60,6 +65,19 @@ src/shared    Domain-independent infrastructure
 
 ESLint enforces the direction. A module cannot import another module, and shared code cannot import modules or application composition. Import concrete files directly; barrel files are prohibited.
 
+## ERP integration
+
+`src/shared/erp/erp-client.service.ts` is the only code that calls the DistriLux
+ERP. Modules depend on the `ErpClient` interface, injected through `createApp`,
+and never see HTTP. The client sends the key in `X-Api-Key`, bounds every call
+with a 30-second timeout, retries reads on `5xx` and timeouts, honors
+`Retry-After` on `429` and `503`, submits orders exactly once with an
+`Idempotency-Key`, validates every answer with Zod, and reports failures as
+`ErpIndisponivelError`, `ErpLimiteDeUsoError`, or `ErpRecusouError`, which the
+Problem Details handler returns to clients. `src/shared/money.ts` converts and
+formats ERP cents. The behavior is specified in `openspec/` under the
+`erp-integration` and `monetary-values` capabilities.
+
 ## Development workflow directories
 
 ```text
@@ -79,13 +97,12 @@ database tables.
 
 ## API and documentation
 
-| Endpoint                | Meaning                                    |
-| ----------------------- | ------------------------------------------ |
-| `GET /health/live`      | Process liveness; no dependency check      |
-| `GET /health/ready`     | Readiness based on a real PostgreSQL query |
-| `GET /openapi.json`     | Generated OpenAPI 3.1 contract             |
-| `GET /docs`             | Interactive Swagger UI                     |
-| `/api/v1/example-items` | Removable example CRUD                     |
+| Endpoint            | Meaning                                    |
+| ------------------- | ------------------------------------------ |
+| `GET /health/live`  | Process liveness; no dependency check      |
+| `GET /health/ready` | Readiness based on a real PostgreSQL query |
+| `GET /openapi.json` | Generated OpenAPI 3.1 contract             |
+| `GET /docs`         | Interactive Swagger UI                     |
 
 Zod schemas validate inputs and serialized responses and generate OpenAPI. Never maintain a second handwritten API contract. Run `pnpm openapi:generate` after changing a route contract; `pnpm verify` (and CI) fails if `openapi.json` is stale.
 
