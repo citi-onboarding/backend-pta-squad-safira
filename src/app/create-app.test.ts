@@ -12,6 +12,7 @@ const environment: Environment = {
   LOG_LEVEL: "silent",
   CORS_ORIGINS: "http://localhost:5173",
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test",
+  SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
   corsOrigins: ["http://localhost:5173"],
 };
 

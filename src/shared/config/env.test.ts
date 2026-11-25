@@ -6,6 +6,7 @@ const validEnvironment = {
   NODE_ENV: "test",
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test",
   CORS_ORIGINS: "http://localhost:5173, https://example.com ",
+  SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
 };
 
 describe("parseEnvironment", () => {
@@ -32,5 +33,14 @@ describe("parseEnvironment", () => {
     expect(() =>
       parseEnvironment({ ...validEnvironment, CORS_ORIGINS: " , " }),
     ).toThrow("CORS_ORIGINS must contain at least one origin.");
+  });
+
+  it("requires a session secret with at least 32 characters", () => {
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, SESSION_SECRET: undefined }),
+    ).toThrow();
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, SESSION_SECRET: "too-short" }),
+    ).toThrow();
   });
 });
