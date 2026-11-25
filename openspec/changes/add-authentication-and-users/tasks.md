@@ -37,6 +37,6 @@
 ## Consolidation
 
 - [x] Write the ADR for session storage and password hashing in `docs/adr/`, using `docs/templates/adr.md`.
-- [ ] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
 - [x] Run `openspec validate add-authentication-and-users --strict`.
 - [ ] Open the pull request to `develop`, noting the dependency on `feat/prismaSchema`, the new `src/shared/security` folder, and the open points.
