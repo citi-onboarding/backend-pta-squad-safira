@@ -125,6 +125,7 @@ describe("user management with PostgreSQL", () => {
         email: "carla@distrilux.com.br",
         senha: "carla-password",
         papel: "VENDEDOR",
+        codigoVendedor: "V04",
       })
       .expect(201);
 
@@ -174,6 +175,7 @@ describe("user management with PostgreSQL", () => {
         email: "rodrigo@distrilux.com.br",
         senha: "old-password",
         papel: "VENDEDOR",
+        codigoVendedor: "V05",
       })
       .expect(201);
 
@@ -190,5 +192,25 @@ describe("user management with PostgreSQL", () => {
       .post("/auth/login")
       .send({ email: "rodrigo@distrilux.com.br", senha: "new-password" })
       .expect(200);
+  });
+
+  it("lets an administrator create another administrator who can manage users", async () => {
+    const agent = await signInAsAdmin();
+    await agent
+      .post("/users")
+      .send({
+        nome: "Ana",
+        email: "ana@distrilux.com.br",
+        senha: "ana-password",
+        papel: "ADMINISTRADOR",
+      })
+      .expect(201);
+
+    const ana = request.agent(app);
+    await ana
+      .post("/auth/login")
+      .send({ email: "ana@distrilux.com.br", senha: "ana-password" })
+      .expect(200);
+    await ana.get("/users").expect(200);
   });
 });

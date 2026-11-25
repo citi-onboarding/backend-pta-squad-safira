@@ -137,17 +137,50 @@ describe("POST /users", () => {
     expect(JSON.stringify(response.body)).not.toContain("senha");
   });
 
-  it("creates a salesperson without a salesperson code", async () => {
-    const { app } = createTestApp();
+  it("responds 400 for a salesperson without a salesperson code", async () => {
+    const { app, usersService } = createTestApp();
     const withoutCode = { ...newSeller, codigoVendedor: undefined };
+
+    await request(app)
+      .post("/users")
+      .set("Cookie", await sessionCookie())
+      .send(withoutCode)
+      .expect(400);
+    expect(usersService.create).not.toHaveBeenCalled();
+  });
+
+  it("creates a sales manager without a salesperson code", async () => {
+    const { app } = createTestApp();
+    const manager = {
+      ...newSeller,
+      email: "fernanda@distrilux.com.br",
+      papel: "GERENTE",
+      codigoVendedor: undefined,
+    };
 
     const response = await request(app)
       .post("/users")
       .set("Cookie", await sessionCookie())
-      .send(withoutCode)
+      .send(manager)
       .expect(201);
 
     expect(response.body.codigoVendedor).toBeNull();
+  });
+
+  it("creates another administrator", async () => {
+    const { app } = createTestApp();
+    const administrator = {
+      ...newSeller,
+      email: "ana@distrilux.com.br",
+      papel: "ADMINISTRADOR",
+      codigoVendedor: undefined,
+    };
+
+    await request(app)
+      .post("/users")
+      .set("Cookie", await sessionCookie())
+      .send(administrator)
+      .expect(201);
   });
 
   it("responds 409 for an email that is already registered", async () => {

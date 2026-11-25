@@ -105,10 +105,14 @@ describe("create a user", () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it("creates a salesperson without a salesperson code", async () => {
+  it("creates a user who is not a salesperson without a salesperson code", async () => {
     const { service } = createService();
 
-    const user = await service.create({ ...newSeller, codigoVendedor: null });
+    const user = await service.create({
+      ...newSeller,
+      papel: "GERENTE",
+      codigoVendedor: null,
+    });
 
     expect(user.codigoVendedor).toBeNull();
   });

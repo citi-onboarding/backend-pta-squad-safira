@@ -3,13 +3,18 @@ import { z } from "../../shared/http/openapi-zod.js";
 
 export const userIdSchema = z.object({ id: z.uuid() });
 
-export const createUserSchema = z.strictObject({
-  nome: z.string().trim().min(1),
-  email: z.email(),
-  senha: z.string().min(1),
-  papel: z.enum(Papel),
-  codigoVendedor: z.string().trim().min(1).nullable().optional(),
-});
+export const createUserSchema = z
+  .strictObject({
+    nome: z.string().trim().min(1),
+    email: z.email(),
+    senha: z.string().min(1),
+    papel: z.enum(Papel),
+    codigoVendedor: z.string().trim().min(1).nullable().optional(),
+  })
+  .refine((user) => user.papel !== "VENDEDOR" || Boolean(user.codigoVendedor), {
+    message: "A salesperson needs a salesperson code.",
+    path: ["codigoVendedor"],
+  });
 
 export const updateUserSchema = z
   .strictObject({
