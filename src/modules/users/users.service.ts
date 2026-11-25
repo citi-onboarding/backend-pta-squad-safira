@@ -18,9 +18,9 @@ export interface NewUserData {
 }
 
 export interface UserChanges {
-  nome?: string;
-  papel?: Papel;
-  ativo?: boolean;
+  nome?: string | undefined;
+  papel?: Papel | undefined;
+  ativo?: boolean | undefined;
 }
 
 export interface CreateUserInput {
@@ -28,7 +28,7 @@ export interface CreateUserInput {
   email: string;
   senha: string;
   papel: Papel;
-  codigoVendedor?: string | null;
+  codigoVendedor?: string | null | undefined;
 }
 
 export interface UsersRepository {
