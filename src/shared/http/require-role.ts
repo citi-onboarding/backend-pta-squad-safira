@@ -1,4 +1,4 @@
-import type { RequestHandler } from "express";
+import type { RequestHandler, Response } from "express";
 
 import type { Papel } from "../database/generated/enums.js";
 import {
@@ -31,6 +31,29 @@ export interface PortfolioUser {
 }
 
 const rolesWithEveryPortfolio: readonly Papel[] = ["GERENTE", "FINANCEIRO"];
+
+export function setSessionCookie(
+  response: Response,
+  token: string,
+  secure: boolean,
+): void {
+  response.cookie(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    path: "/",
+    maxAge: SESSION_DURATION_MS,
+  });
+}
+
+export function clearSessionCookie(response: Response, secure: boolean): void {
+  response.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure,
+    path: "/",
+  });
+}
 
 function unauthorized(): HttpProblem {
   return new HttpProblem(401, "Unauthorized", "A valid session is required.");
@@ -68,13 +91,7 @@ export function createAuthenticate({
       secret,
       now: requestTime,
     });
-    response.cookie(SESSION_COOKIE_NAME, renewedToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: secureCookie,
-      path: "/",
-      maxAge: SESSION_DURATION_MS,
-    });
+    setSessionCookie(response, renewedToken, secureCookie);
     request.user = user;
     next();
   };
