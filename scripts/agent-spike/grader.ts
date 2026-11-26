@@ -141,23 +141,23 @@ function endOf(proposta: PropostaContrato): string | null {
 
 function deadlineOf(
   end: string | null,
-  proposta: PropostaContrato,
+  avisoPrevioDias: number,
 ): string | null {
-  return end === null
-    ? null
-    : calcularDataLimiteAviso(end, proposta.aviso_previo_dias);
+  return end === null ? null : calcularDataLimiteAviso(end, avisoPrevioDias);
 }
 
 export function gradeContract(
   expected: ExpectedContract,
   proposta: PropostaContrato,
 ): ContractScore {
+  const end = endOf(proposta);
   return {
     cliente: proposta.cliente === expected.cliente ? 1 : 0,
     datas: share([
       proposta.inicio === expected.inicio,
-      endOf(proposta) === expected.fim,
-      deadlineOf(endOf(proposta), proposta) === expected.data_limite_aviso,
+      end === expected.fim,
+      deadlineOf(end, proposta.aviso_previo_dias) ===
+        expected.data_limite_aviso,
     ]),
     termos: share([
       proposta.numero === expected.numero,

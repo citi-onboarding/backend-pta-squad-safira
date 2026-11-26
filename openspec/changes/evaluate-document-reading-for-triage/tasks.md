@@ -23,6 +23,7 @@
 - [x] 3.2 Implement schemas, notice deadline, and request builder in `src/modules/triage/`.
 - [x] 3.3 Implement extraction classification, answer-key loader, grader, pricing, and the dry-run runner in `scripts/agent-spike/`.
 - [x] 3.4 Run the narrow test files and record the passing output as Green evidence.
+- [x] 3.5 Term stated as a duration (CF-2025-019, Ipojuca, option 1): the model reports `vigencia_meses` and `data_base_vigencia` and code computes the end as base + N months − 1 day (`src/modules/triage/term-end.ts`, used by the grader for the end and the notice deadline). Implemented with its tests in the WIP commit `20370bb`, so no separate Red/Green evidence exists for it; on 2026-11-26 `npx vitest run src/modules/triage scripts/agent-spike` passed (9 files, 109 tests). The "− 1 day" reading is an assumption to confirm with the client (see proposal.md and `docs/agent/spike-resultados.md`).
 
 ## 4. Refactor
 

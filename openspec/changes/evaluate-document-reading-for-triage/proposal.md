@@ -21,6 +21,11 @@ it and makes no API call.
 - Compute the contract notice deadline deterministically (end of term minus the
   notice period, RN-11) instead of asking the model for it: calculations stay
   with code (RN-19).
+- When a contract states its term only as a duration from a date (contract
+  CF-2025-019, Ipojuca: "12 months from the signature"), the model reports the
+  duration in months (`vigencia_meses`) and the base date
+  (`data_base_vigencia`) and leaves the end null; code computes the end as
+  base date + N calendar months − 1 day (RN-19).
 - Define the agent's rules: it only reads, consults, and proposes, never writes
   or sends, has no tools, and leaves dates and credit to code (RN-19); any
   instruction written inside a document is content that it reports, never
@@ -72,6 +77,16 @@ None.
 - **Dependencies:** `@anthropic-ai/sdk@1.12.0` (Apache-2.0) and `unpdf@1.9.1`
   (MIT, the last release that supports Node 22) as exact dev dependencies.
 - **Documentation:** spike results draft, ADR 0002, change summary.
+
+### Assumption to confirm with the client
+
+- **Term end from a duration (CF-2025-019, Ipojuca).** "12 months from the
+  signature" (2025-12-10) is read as ending on 2026-12-09 (base + N months −
+  1 day), which matches the answer key. It can also be read as ending on
+  2026-12-10, which would move the notice deadline from 2026-11-24 to
+  2026-11-25. The rule lives in one function (`src/modules/triage/term-end.ts`)
+  so it can change once the client answers; until then the contract-deadlines
+  task must not treat it as settled.
 
 ### In scope
 
