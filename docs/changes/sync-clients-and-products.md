@@ -45,7 +45,7 @@ Keep the portal's clients and products at most one hour behind the DistriLux ERP
 
 Run on 2026-11-27 on branch `feat/clientProductSync`:
 
-- `pnpm exec vitest run src/modules/sync` (unit and route tests): 28 tests passed, plus 2 schedule tests.
+- `pnpm exec vitest run src/modules/sync` (without the integration file): 3 files, 28 tests passed (15 service, 11 route, and 2 schedule tests).
 - `pnpm test:integration`: 4 files, 26 tests passed (9 for the sync with PostgreSQL: full load, second run with the same rows, deactivation, run record, simultaneous runs, abandoned run, failed page, and on-demand deactivation).
 - `pnpm format:check`: passed.
 - `pnpm verify` (typecheck, lint, tests, `openapi:check`, `openspec validate --all --strict`, skills check): passed; 297 tests.
