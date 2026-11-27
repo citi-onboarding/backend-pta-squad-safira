@@ -4,9 +4,9 @@ import type {
   ErpCliente,
   ErpPageQuery,
   ErpProduto,
-} from "../../shared/erp/erp-client.schemas.js";
-import type { ErpClient } from "../../shared/erp/erp-client.service.js";
-import { ErpRecusouError } from "../../shared/erp/erp-client.service.js";
+} from "../../src/shared/erp/erp-client.schemas.js";
+import type { ErpClient } from "../../src/shared/erp/erp-client.service.js";
+import { ErpRecusouError } from "../../src/shared/erp/erp-client.service.js";
 import type {
   ClienteData,
   ProdutoData,
@@ -14,7 +14,7 @@ import type {
   SyncRepository,
   SyncStatusSnapshot,
   SyncType,
-} from "./sync.service.js";
+} from "../../src/modules/sync/sync.service.js";
 
 // Test doubles for the sync service: an in-memory repository (the database is
 // an external dependency) and a simulated ERP. The service itself is real.

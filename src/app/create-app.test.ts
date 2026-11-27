@@ -110,6 +110,21 @@ describe("createApp", () => {
     );
   });
 
+  it("mounts the synchronization routes and documents them", async () => {
+    const app = createApp({
+      database: createDatabaseDouble(),
+      environment,
+      erpClient,
+    });
+
+    await request(app).get("/sync/status").expect(401);
+    await request(app).post("/sync/clientes/C001").expect(401);
+    const contract = await request(app).get("/openapi.json").expect(200);
+    expect(Object.keys(contract.body.paths)).toEqual(
+      expect.arrayContaining(["/sync/status", "/sync/clientes/{codigo}"]),
+    );
+  });
+
   describe("sign-in limit by client address", () => {
     const credentials = { email: "nobody@distrilux.test", senha: "wrong" };
 

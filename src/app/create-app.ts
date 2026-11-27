@@ -13,6 +13,10 @@ import swaggerUi from "swagger-ui-express";
 import { PrismaAuthRepository } from "../modules/auth/auth.repository.js";
 import { createAuthRouter } from "../modules/auth/auth.router.js";
 import { AuthService } from "../modules/auth/auth.service.js";
+import { PrismaSyncRepository } from "../modules/sync/sync.repository.js";
+import { createSyncRouter } from "../modules/sync/sync.router.js";
+import { startSyncSchedule } from "../modules/sync/sync.schedule.js";
+import { SyncService } from "../modules/sync/sync.service.js";
 import { PrismaUsersRepository } from "../modules/users/users.repository.js";
 import { createUsersRouter } from "../modules/users/users.router.js";
 import { UsersService } from "../modules/users/users.service.js";
@@ -31,12 +35,16 @@ interface CreateAppOptions {
   environment: Environment;
   signInAttemptsPerMinute?: number | undefined;
   erpClient: ErpClient;
+  /** Starts the ERP synchronization schedule; left out in tests. */
+  syncSchedule?: { intervalMs: number } | undefined;
 }
 
 export function createApp({
   database,
   environment,
   signInAttemptsPerMinute,
+  erpClient,
+  syncSchedule,
 }: CreateAppOptions): Express {
   const app = express();
   const logger = createLogger(environment);
@@ -132,8 +140,26 @@ export function createApp({
       authenticate,
     }),
   );
+  const syncService = new SyncService({
+    erpClient,
+    repository: new PrismaSyncRepository(database),
+  });
+  app.use("/sync", createSyncRouter({ syncService, authenticate }));
   app.use(notFoundHandler);
   app.use(problemHandler);
+
+  if (syncSchedule) {
+    const schedule = startSyncSchedule({
+      run: () => syncService.runOnce(),
+      intervalMs: syncSchedule.intervalMs,
+      onError: (error) => {
+        logger.error({ err: error }, "ERP synchronization run failed");
+      },
+    });
+    app.locals.stopSyncSchedule = () => {
+      schedule.stop();
+    };
+  }
 
   return app;
 }

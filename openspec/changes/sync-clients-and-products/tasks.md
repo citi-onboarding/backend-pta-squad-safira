@@ -11,22 +11,22 @@
 
 - [x] Developer writes `sync.test.ts` (service with a simulated ERP and an in-memory repository): full load, deactivation of missing items, incremental filter and 50 per page, upsert without duplicates and 0 changed items on a second run, status mapping, ERP down, usage limit, run record, lock taken, on-demand sync (success, 404, lock taken), and status calculation.
 - [x] Developer writes the router tests: `GET /sync/status` (200, 401) and `POST /sync/clientes/:codigo` (200, 401, 403, 404, 409).
-- [ ] Developer writes `sync.integration.test.ts` with PostgreSQL: a full load populates clients and products, a second run keeps the same rows, the lock prevents overlap, and run rows are written.
-- [ ] Run the tests and confirm that they fail for the expected reason.
+- [x] Developer writes `sync.integration.test.ts` with PostgreSQL: a full load populates clients and products, a second run keeps the same rows, the lock prevents overlap, and run rows are written.
+- [x] Run the tests and confirm that they fail for the expected reason.
 
 ## Green
 
-- [ ] Implement `sync.repository.ts`, `sync.service.ts`, `sync.schedule.ts`, `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`.
-- [ ] Wire the routes and the optional schedule in `src/app/create-app.ts`, and start and stop the schedule in `src/server.ts`.
-- [ ] Regenerate `openapi.json`.
-- [ ] Run the tests until they pass.
+- [x] Implement `sync.repository.ts`, `sync.service.ts`, `sync.schedule.ts`, `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`.
+- [x] Wire the routes and the optional schedule in `src/app/create-app.ts`, and start and stop the schedule in `src/server.ts`.
+- [x] Regenerate `openapi.json` (adding the sync routes to `scripts/generate-openapi.ts` and `scripts/check-openapi.ts`), and keep the test doubles in `tests/sync/` so the production build excludes them.
+- [x] Run the tests until they pass.
 
 ## Refactor
 
-- [ ] Review names and duplication, and confirm that logs and run details hold no ERP key or body; run the tests again.
+- [x] Review names and duplication, and confirm that logs and run details hold no ERP key or body; run the tests again.
 
 ## Consolidation
 
-- [ ] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate sync-clients-and-products --strict`.
-- [ ] Write `docs/changes/sync-clients-and-products.md` from the template and evaluate the ADR.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate sync-clients-and-products --strict`.
+- [x] Write `docs/changes/sync-clients-and-products.md` from the template and evaluate the ADR.
 - [ ] Open the pull request to `develop`, noting the base on BACK-01 and the merge of `develop`.

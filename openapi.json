@@ -578,6 +578,121 @@
           }
         }
       }
+    },
+    "/sync/status": {
+      "get": {
+        "tags": [
+          "Sync"
+        ],
+        "summary": "Get the last successful ERP synchronization and the latest result",
+        "responses": {
+          "200": {
+            "description": "Synchronization status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ultimaSincronizacaoOk": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    },
+                    "ultimoResultado": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "enum": [
+                        "EM_ANDAMENTO",
+                        "SUCESSO",
+                        "PARCIAL",
+                        "FALHA",
+                        null
+                      ]
+                    }
+                  },
+                  "required": [
+                    "ultimaSincronizacaoOk",
+                    "ultimoResultado"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session"
+          }
+        }
+      }
+    },
+    "/sync/clientes/{codigo}": {
+      "post": {
+        "tags": [
+          "Sync"
+        ],
+        "summary": "Synchronize one client from the ERP now",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            },
+            "required": true,
+            "name": "codigo",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client synchronized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "codigo": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ATIVO",
+                        "BLOQUEADO",
+                        "INATIVO"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "codigo",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "Only the Administrator role may trigger it"
+          },
+          "404": {
+            "description": "The ERP has no client with this code"
+          },
+          "409": {
+            "description": "A synchronization is already in progress"
+          },
+          "503": {
+            "description": "The ERP is unavailable"
+          }
+        }
+      }
     }
   },
   "webhooks": {}

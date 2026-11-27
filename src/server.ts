@@ -15,7 +15,13 @@ const erpClient = createErpClient({
   apiKey: env.ERP_API_KEY,
   logger,
 });
-const app = createApp({ database, environment: env, erpClient });
+const ONE_HOUR_MS = 60 * 60 * 1000;
+const app = createApp({
+  database,
+  environment: env,
+  erpClient,
+  syncSchedule: { intervalMs: ONE_HOUR_MS },
+});
 const server = createServer(app);
 
 server.listen(env.SERVER_PORT, env.SERVER_HOST, () => {
@@ -27,6 +33,7 @@ server.listen(env.SERVER_PORT, env.SERVER_HOST, () => {
 
 function shutdown(signal: NodeJS.Signals) {
   logger.info({ signal }, "Graceful shutdown started");
+  (app.locals.stopSyncSchedule as (() => void) | undefined)?.();
   server.close(async (error) => {
     await database.$disconnect();
     if (error) {
