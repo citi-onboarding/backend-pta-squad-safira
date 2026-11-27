@@ -41,5 +41,5 @@ The portal has no clients and no product catalog until it copies them from the D
 5. The branch is based on BACK-01 with `develop` merged in, because the routes need the BACK-01 authentication and the sync needs the BACK-02 ERP client.
 6. An on-demand client sync writes no `RegistroSincronizacao` row, so it never moves the incremental start; a client the ERP no longer has becomes inactive.
 7. `ultimaSincronizacaoOk` is the older of the last successful client and product runs; `ultimoResultado` is the worse of their latest results.
-8. An item that cannot be written is skipped and recorded, and the run ends `PARCIAL` and moves the incremental start, so one bad ERP record never stops the synchronization.
+8. An item that cannot be written because of its own data (a repeated unique value, a text too long, or a number out of range) is skipped and recorded, and the run ends `PARCIAL` and moves the incremental start, so one bad ERP record never stops the synchronization. Any other write failure, such as a temporary database failure, ends the run `FALHA` and skips nothing.
 9. File names follow the task tree (`sync.service.ts`); the routes add `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`, like the other modules.

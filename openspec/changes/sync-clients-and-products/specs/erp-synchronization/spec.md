@@ -49,12 +49,17 @@ Clients and products SHALL be written by their ERP code, so that running the syn
 
 ### Requirement: An item that cannot be written does not block the others
 
-When a page cannot be written as a whole (for example, two ERP clients with the same CNPJ), the synchronization SHALL write its items one by one, skip only the items that fail, and go on with the next pages. The run SHALL be recorded as `PARCIAL`, with the number of skipped items in `erros` and `pendencias` and each skipped ERP code with the reason in the report, without personal data. A `PARCIAL` run moves the incremental start like a successful one, so later changes keep arriving; a skipped item is tried again when it changes in the ERP.
+When a page cannot be written as a whole because of an item's own data (a value already used by another row, such as the CNPJ; a text longer than its column; a number out of its column's range), the synchronization SHALL write its items one by one, skip only the items that fail for one of those reasons, and go on with the next pages. The run SHALL be recorded as `PARCIAL`, with the number of skipped items in `erros` and `pendencias` and each skipped ERP code with the reason in the report, without personal data. A `PARCIAL` run moves the incremental start like a successful one, so later changes keep arriving; a skipped item is tried again when it changes in the ERP. Any other write failure, including a temporary database failure (no free connection, transaction timeout, write conflict or deadlock) or an unknown one, SHALL stop the run as `FALHA` without skipping items, so the next run asks for the same changes again.
 
 #### Scenario: Two clients with the same CNPJ
 
 - **WHEN** the first page has two clients with the same CNPJ and the run is repeated on later hours
 - **THEN** every other client of every page is written, the second of the two is skipped and recorded with its ERP code, each run is `PARCIAL`, and the next run asks for changes since the start of the previous one
+
+#### Scenario: Temporary database failure while writing
+
+- **WHEN** writing a page fails because of a temporary database failure, such as a write conflict
+- **THEN** no item is skipped, the run is recorded as `FALHA`, and the next run asks for changes since the same start time as before
 
 ### Requirement: Data stays available when the ERP fails
 

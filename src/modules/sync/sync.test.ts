@@ -12,6 +12,7 @@ import {
   erpProduto,
   InMemorySyncRepository,
   many,
+  prismaError,
   simulatedErp,
 } from "./sync-test-doubles.js";
 
@@ -522,6 +523,87 @@ describe("an item that cannot be written does not block the others", () => {
       tamanho: 50,
       atualizadoDesde: T11.toISOString(),
     });
+  });
+
+  it("skips nothing and ends FALHA on a temporary database failure, so the next run asks for the same changes", async () => {
+    const { service, repository, mock, state, time } = setup(
+      simulatedErp({
+        clientes: many(120, (index) => erpCliente(index)),
+        produtos: [erpProduto(1)],
+      }),
+    );
+    await service.runOnce();
+    // Every client changes in the ERP after the full load.
+    state.clientes = many(120, (index) =>
+      erpCliente(index, {
+        cidade: "Olinda",
+        atualizadoEm: "2026-11-27T13:00:00.000Z",
+      }),
+    );
+    const save = repository.saveClientes.bind(repository);
+    repository.saveClientes = () => Promise.reject(prismaError("P2034"));
+
+    time.set(T11);
+    await service.runOnce();
+
+    expect(runOf(repository, "SINCRONIZACAO_CLIENTES")).toMatchObject({
+      resultado: "FALHA",
+      itensIgnorados: [],
+      detalhe: "PrismaClientKnownRequestError P2034",
+    });
+
+    repository.saveClientes = save;
+    time.set(T12);
+    await service.runOnce();
+
+    expect(mock.listClientes).toHaveBeenLastCalledWith(
+      expect.objectContaining({ atualizadoDesde: T10.toISOString() }),
+    );
+  });
+
+  it("skips a client whose text is too long for its column (P2000)", async () => {
+    const { service, repository } = setup(
+      simulatedErp({ clientes: many(3, (index) => erpCliente(index)) }),
+    );
+    const save = repository.saveClientes.bind(repository);
+    repository.saveClientes = (rows) =>
+      rows.some((row) => row.codigoErp === "C002")
+        ? Promise.reject(prismaError("P2000"))
+        : save(rows);
+
+    await service.runOnce();
+
+    expect(runOf(repository, "SINCRONIZACAO_CLIENTES")).toMatchObject({
+      resultado: "PARCIAL",
+      itensIgnorados: [
+        { codigo: "C002", motivo: "PrismaClientKnownRequestError P2000" },
+      ],
+    });
+    expect([...repository.clientes.keys()].sort()).toEqual(["C001", "C003"]);
+  });
+
+  it("skips a product whose number is out of its column's range (P2020)", async () => {
+    const { service, repository } = setup(
+      simulatedErp({
+        clientes: [erpCliente(1)],
+        produtos: many(3, (index) => erpProduto(index)),
+      }),
+    );
+    const save = repository.saveProdutos.bind(repository);
+    repository.saveProdutos = (rows) =>
+      rows.some((row) => row.codigoErp === "P003")
+        ? Promise.reject(prismaError("P2020"))
+        : save(rows);
+
+    await service.runOnce();
+
+    expect(runOf(repository, "SINCRONIZACAO_PRODUTOS")).toMatchObject({
+      resultado: "PARCIAL",
+      itensIgnorados: [
+        { codigo: "P003", motivo: "PrismaClientKnownRequestError P2020" },
+      ],
+    });
+    expect([...repository.produtos.keys()].sort()).toEqual(["P001", "P002"]);
   });
 
   it("counts the items read even when their page cannot be written", async () => {

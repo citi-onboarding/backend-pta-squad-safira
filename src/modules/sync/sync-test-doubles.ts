@@ -131,6 +131,15 @@ export function uniqueViolation(): Error {
   );
 }
 
+// Mirrors any known Prisma request error by its code, such as P2034 (write
+// conflict or deadlock) or P2000 (value too long for the column).
+export function prismaError(code: string): Error {
+  return Object.assign(new Error(`Prisma request failed with ${code}`), {
+    name: "PrismaClientKnownRequestError",
+    code,
+  });
+}
+
 const SUCCESSFUL = new Set(["SUCESSO", "PARCIAL"]);
 
 export class InMemorySyncRepository implements SyncRepository {

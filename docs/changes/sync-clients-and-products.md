@@ -17,7 +17,7 @@ Keep the portal's clients and products up to date with the DistriLux ERP, normal
 ## Change made
 
 - New `src/modules/sync/`:
-  - `sync.service.ts`: `SyncService` runs clients and then products through the shared ERP client (BACK-02), page by page, 50 items per page; writes only new or changed items; skips and records an item that cannot be written (such as a repeated CNPJ) and ends the run `PARCIAL`; makes items missing from a full load inactive only when the load is complete; synchronizes one client on demand under the lock; logs each finished type; and computes the status.
+  - `sync.service.ts`: `SyncService` runs clients and then products through the shared ERP client (BACK-02), page by page, 50 items per page; writes only new or changed items; skips and records an item whose own data cannot be written (Prisma `P2002`, `P2000`, or `P2020`, such as a repeated CNPJ) and ends the run `PARCIAL`, while any other write failure ends it `FALHA`; makes items missing from a full load inactive only when the load is complete; synchronizes one client on demand under the lock; logs each finished type; and computes the status.
   - `sync.repository.ts`: `PrismaSyncRepository` writes each page in one transaction by upsert on `codigoErp`, takes the lock (a transaction-level Postgres advisory lock around the check of `EM_ANDAMENTO` rows, also used by the on-demand sync), closes runs left in progress for more than 30 minutes, and records each run in `RegistroSincronizacao` (changed and skipped items in `relatorio`).
   - `sync.schedule.ts`: runs at once and then every interval; a failed run is logged and the next interval retries; `stop` waits for the run in progress.
   - `sync.router.ts`, `sync.schemas.ts`, `sync.openapi.ts`: `GET /sync/status` and `POST /sync/clientes/:codigo`.
@@ -33,7 +33,7 @@ Keep the portal's clients and products up to date with the DistriLux ERP, normal
 - On start and then every hour, the portal reads clients and products from the ERP: everything on the first run, and only what changed since the start of the last successful or partial run afterwards. A change made in the ERP normally appears within the next hourly run (about one hour plus the run's duration); after an ERP failure it appears in the first run after the ERP is back; a large clock difference between the portal and the ERP could skip a change.
 - Running twice keeps the same rows; unchanged rows are not rewritten. A client or product missing from a full load becomes inactive and is never deleted. Client status and product active flag follow the ERP.
 - When the ERP is down or its usage limit persists, the run of that type is recorded as `FALHA` with a safe detail, the data already in the portal stays, and the next hourly run starts from the same point. On a `429`, the ERP client waits and the run completes without losing or duplicating rows.
-- An item that cannot be written (for example, two ERP clients with the same CNPJ) is skipped and recorded with its ERP code; every other item is written, the run is `PARCIAL`, and later changes keep arriving.
+- An item that cannot be written (for example, two ERP clients with the same CNPJ) is skipped and recorded with its ERP code; every other item is written, the run is `PARCIAL`, and later changes keep arriving. A temporary database failure (no free connection, transaction timeout, write conflict) skips nothing: the run is `FALHA` and the next one asks for the same changes again.
 - A full load that reads nothing, or whose total changes between pages, makes nothing inactive and is recorded as `FALHA`.
 - A failure in one type never stops the other, and each finished type is logged with its result, counts, and duration.
 - Two runs never overlap, even across processes.
@@ -50,10 +50,10 @@ Keep the portal's clients and products up to date with the DistriLux ERP, normal
 
 Run on 2026-11-27 on branch `feat/clientProductSync`, after the review fixes:
 
-- `pnpm exec vitest run src/modules/sync` (without the integration file): 3 files, 41 tests passed (service, routes, and schedule).
+- `pnpm exec vitest run src/modules/sync` (without the integration file): 3 files, 44 tests passed (service, routes, and schedule).
 - `pnpm test:integration`: 4 files, 27 tests passed; 10 of them cover the sync with PostgreSQL (full load, second run with the same rows, deactivation, run record, simultaneous runs, recent and abandoned runs, a client with a repeated CNPJ skipped run after run, an on-demand write refused during a run, and on-demand deactivation).
 - `pnpm format:check`: passed.
-- `pnpm verify` (typecheck, lint, tests, `openapi:check`, `openspec validate --all --strict`, skills check): passed; 27 files, 310 tests; OpenSpec 6 passed, 0 failed.
+- `pnpm verify` (typecheck, lint, tests, `openapi:check`, `openspec validate --all --strict`, skills check): passed; 27 files, 313 tests; OpenSpec 6 passed, 0 failed.
 - `pnpm test:coverage`: passed (threshold on `src/shared`: 99.57% statements, 94.35% branches).
 - `pnpm build`: passed; `dist/` holds no test file or test double.
 - `pnpm test:container`: passed ("Production container smoke test passed.") after adding `SESSION_SECRET` to the script.

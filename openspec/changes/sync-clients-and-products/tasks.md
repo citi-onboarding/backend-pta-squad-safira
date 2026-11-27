@@ -37,3 +37,10 @@
 - [x] Red: developer writes the failing tests (duplicated CNPJ in unit and integration, full-load guard, items read, on-demand race, product failure, usage limit exhausted, `finishRun` failure, schedule stop waiting, logs without the key, routes 400 and 422).
 - [x] Green: implement, use tagged `$executeRaw`, expose the schedule through `syncScheduleOf(app)` instead of an untyped `app.locals`, keep the test doubles in `src/` excluded from the build, document the new statuses, add `SESSION_SECRET` to `scripts/test-container.mjs`, and write ADR-0003.
 - [x] Refactor and run all gates, including `pnpm test:container`.
+
+## Second review fixes
+
+- [x] Specify that only data errors (`P2002`, `P2000`, `P2020`) skip an item and that a temporary database failure ends the run `FALHA`.
+- [x] Red: developer writes the failing tests (a write conflict `P2034` does not skip items and ends `FALHA`; `P2000` and `P2020` skip the item).
+- [x] Green: list the data-error codes in `sync.service.ts`, and add the error code to the safe detail of a failed run.
+- [x] Refactor and run all gates.

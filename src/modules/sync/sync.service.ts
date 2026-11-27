@@ -187,11 +187,16 @@ function errorCode(error: unknown): string | null {
     : null;
 }
 
-// Prisma's P2xxx codes describe a problem with the data itself (such as a
-// unique column already holding the value); the next item can still be
-// written. Any other failure (connection, timeout) stops the run instead.
+// The only Prisma codes an ERP item's own data can cause in these tables:
+// a unique value already used (CNPJ), a text longer than its column (uf), and
+// a number out of its column's range. The item is skipped and the next one can
+// still be written. Every other failure, including temporary ones such as
+// P2024, P2028 and P2034, stops the run so that no item is lost.
+const DATA_ERROR_CODES = new Set(["P2002", "P2000", "P2020"]);
+
 function isDataError(error: unknown): boolean {
-  return errorCode(error)?.startsWith("P2") ?? false;
+  const code = errorCode(error);
+  return code !== null && DATA_ERROR_CODES.has(code);
 }
 
 function safeReason(error: unknown): string {
@@ -207,7 +212,8 @@ function safeDetail(error: unknown): string {
     "status" in error && typeof error.status === "number"
       ? ` (status ${String(error.status)})`
       : "";
-  return `${error.name}${status}`;
+  const code = errorCode(error);
+  return `${error.name}${code === null ? "" : ` ${code}`}${status}`;
 }
 
 const RESULT_SEVERITY: Record<ResultadoRegistro, number> = {

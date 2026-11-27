@@ -38,7 +38,8 @@ See `proposal.md` for the motivation and the decisions taken with the developer,
 ### Writing
 
 - For each page, the service loads the existing rows for the page's codes, compares every mapped field, and writes only new or changed items, by upsert on `codigoErp`, in one transaction per page. Unchanged rows are not rewritten, so the second run of the same data reports 0 changed items and keeps `atualizadoEm`.
-- When a page's transaction fails, the service writes its items one by one; an item that still fails (for example, a CNPJ already used by another client) is skipped and recorded as `{ codigo, motivo }` in the report, where the reason is the error name and, for Prisma, its code. The run ends `PARCIAL`, which moves the incremental start like `SUCESSO`; otherwise one bad item would block every later change forever.
+- When a page's transaction fails because of an item's data, the service writes its items one by one; an item that still fails for that reason (for example, a CNPJ already used by another client) is skipped and recorded as `{ codigo, motivo }` in the report, where the reason is the error name and, for Prisma, its code. The run ends `PARCIAL`, which moves the incremental start like `SUCESSO`; otherwise one bad item would block every later change forever.
+- Only the Prisma codes an ERP item can cause in these tables count as the item's data: `P2002` (unique value, such as the CNPJ), `P2000` (text longer than the column, such as `uf`), and `P2020` (number out of range, such as the credit limit). It is a list of what may be skipped, not of what may not: temporary codes such as `P2024` (no free connection), `P2028` (transaction API error or timeout) and `P2034` (write conflict or deadlock), and any unknown error, make the run `FALHA`, so the incremental start does not move and no item is lost.
 - A full load (no successful run of the type yet) collects every code it read; at the end it sets `INATIVO` (clients) or `ativo = false` (products) on rows whose code was not read, but only when it read at least one item, the number of distinct codes equals the ERP's `total`, and that total did not change between pages. The ERP's ordering is not documented, so items moving between pages, or an empty answer, must never make existing items inactive; in those cases the run is `FALHA` and the next one repeats the full load. Nothing is deleted.
 
 ### Incremental start
@@ -80,7 +81,8 @@ The start of the last `SUCESSO` row of the same type (`iniciouEm`) is the `atual
 ## Risks
 
 - [Portal and ERP clocks differ] → the incremental start comes from the portal clock; a large difference could skip changes. Reported to the squad manager with decision 1.
-- [Two ERP clients share a CNPJ] → the unique CNPJ makes that page's transaction fail; the run is recorded as `FALHA` with the reason, and the data stays as it was.
+- [Two ERP clients share a CNPJ] → the unique CNPJ makes that page's transaction fail; the items are written one by one, the second client is skipped and recorded, and the run is `PARCIAL`.
+- [A temporary database failure looks like an item's data] → only `P2002`, `P2000` and `P2020` skip an item; any other failure ends the run `FALHA` and the same changes are asked for again next hour. A new data error not in that list also ends `FALHA` until the list is reviewed.
 - [BACK-01 changes before merge] → this branch merges `develop` and BACK-01; it is rebased when BACK-01 merges.
 
 ## ADR
