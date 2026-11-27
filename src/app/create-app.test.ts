@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import type { Environment } from "../shared/config/env.js";
 import type { Database } from "../shared/database/create-database.js";
+import type { ErpClient } from "../shared/erp/erp-client.service.js";
 import { createApp } from "./create-app.js";
 
 const environment: Environment = {
@@ -14,8 +15,12 @@ const environment: Environment = {
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test",
   SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
   TRUST_PROXY: 0,
+  ERP_API_URL: "https://erp.example.com",
+  ERP_API_KEY: "erp-test-key",
   corsOrigins: ["http://localhost:5173"],
 };
+
+const erpClient = {} as ErpClient;
 
 function createDatabaseDouble() {
   return {
@@ -25,7 +30,11 @@ function createDatabaseDouble() {
 
 describe("createApp", () => {
   it("serves liveness, readiness, and OpenAPI", async () => {
-    const app = createApp({ database: createDatabaseDouble(), environment });
+    const app = createApp({
+      database: createDatabaseDouble(),
+      environment,
+      erpClient,
+    });
     await request(app).get("/health/live").expect(200, { status: "ok" });
     await request(app).get("/health/ready").expect(200, { status: "ready" });
     const contract = await request(app).get("/openapi.json").expect(200);
@@ -37,20 +46,24 @@ describe("createApp", () => {
     vi.mocked(database.$queryRaw).mockRejectedValueOnce(
       new Error("unavailable"),
     );
-    await request(createApp({ database, environment }))
+    await request(createApp({ database, environment, erpClient }))
       .get("/health/ready")
       .expect(503, { status: "not-ready" });
   });
 
   it("uses Problem Details for unknown requests", async () => {
-    const app = createApp({ database: createDatabaseDouble(), environment });
+    const app = createApp({
+      database: createDatabaseDouble(),
+      environment,
+      erpClient,
+    });
     const missing = await request(app).get("/unknown").expect(404);
     expect(missing.body).toMatchObject({ title: "Not Found", status: 404 });
   });
 
   it("applies security and CORS headers", async () => {
     const response = await request(
-      createApp({ database: createDatabaseDouble(), environment }),
+      createApp({ database: createDatabaseDouble(), environment, erpClient }),
     )
       .get("/health/live")
       .set("x-request-id", "known-request-id")
@@ -65,7 +78,11 @@ describe("createApp", () => {
   });
 
   it("mounts the authentication routes and documents them", async () => {
-    const app = createApp({ database: createDatabaseDouble(), environment });
+    const app = createApp({
+      database: createDatabaseDouble(),
+      environment,
+      erpClient,
+    });
 
     await request(app).get("/auth/me").expect(401);
     await request(app).post("/auth/login").send({}).expect(400);
@@ -76,7 +93,11 @@ describe("createApp", () => {
   });
 
   it("mounts the user management routes and documents them", async () => {
-    const app = createApp({ database: createDatabaseDouble(), environment });
+    const app = createApp({
+      database: createDatabaseDouble(),
+      environment,
+      erpClient,
+    });
 
     await request(app).get("/users").expect(401);
     const contract = await request(app).get("/openapi.json").expect(200);
@@ -100,6 +121,7 @@ describe("createApp", () => {
       return createApp({
         database,
         environment: { ...environment, TRUST_PROXY: trustedProxies },
+        erpClient,
         signInAttemptsPerMinute: 1,
       });
     }

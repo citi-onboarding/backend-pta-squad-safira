@@ -7,6 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import type { Environment } from "../../shared/config/env.js";
 import type { Database } from "../../shared/database/create-database.js";
+import type { ErpClient } from "../../shared/erp/erp-client.service.js";
 
 let container: StartedTestContainer;
 let databaseUrl: string;
@@ -64,10 +65,12 @@ describe("development seed", () => {
       CORS_ORIGINS: "http://localhost:5173",
       DATABASE_URL: databaseUrl,
       SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
+      ERP_API_URL: "https://erp.example.com",
+      ERP_API_KEY: "erp-test-key",
       TRUST_PROXY: 0,
       corsOrigins: ["http://localhost:5173"],
     };
-    app = createApp({ database, environment });
+    app = createApp({ database, environment, erpClient: {} as ErpClient });
   });
 
   afterAll(async () => {

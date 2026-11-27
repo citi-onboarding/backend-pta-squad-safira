@@ -16,7 +16,7 @@ concurrency:
 
 env:
   NODE_ENV: test
-  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/node_boilerplate_test
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/distrilux_portal_test
   CORS_ORIGINS: http://localhost:5173
   LOG_LEVEL: silent
   OPENSPEC_TELEMETRY: 0

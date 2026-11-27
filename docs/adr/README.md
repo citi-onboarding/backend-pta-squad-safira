@@ -21,9 +21,10 @@ Skip it for routine implementation details, formatting choices, or a local and r
 
 ## Index
 
-| Number | Title                                                                                                       | Status   | Superseded by |
-| ------ | ----------------------------------------------------------------------------------------------------------- | -------- | ------------- |
-| 0002   | [Signed session token in a cookie and argon2id password hashing](0002-signed-session-token-and-argon2id.md) | Accepted | —             |
+| Number                                                    | Title                                                          | Status   | Superseded by |
+| --------------------------------------------------------- | -------------------------------------------------------------- | -------- | ------------- |
+| [0002](0002-signed-session-token-and-argon2id.md)         | Signed session token in a cookie and argon2id password hashing | Accepted | —             |
+| [0001](0001-erp-access-through-a-single-shared-client.md) | ERP access through a single shared client                      | Accepted | —             |
 
 <!--
 Add one row per ADR, newest first.
