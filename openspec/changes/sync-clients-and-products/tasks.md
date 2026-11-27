@@ -9,7 +9,7 @@
 
 ## Red
 
-- [ ] Developer writes `sync.test.ts` (service with a simulated ERP and an in-memory repository): full load, deactivation of missing items, incremental filter and 50 per page, upsert without duplicates and 0 changed items on a second run, status mapping, ERP down, usage limit, run record, lock taken, on-demand sync (success, 404, lock taken), and status calculation.
+- [x] Developer writes `sync.test.ts` (service with a simulated ERP and an in-memory repository): full load, deactivation of missing items, incremental filter and 50 per page, upsert without duplicates and 0 changed items on a second run, status mapping, ERP down, usage limit, run record, lock taken, on-demand sync (success, 404, lock taken), and status calculation.
 - [ ] Developer writes the router tests: `GET /sync/status` (200, 401) and `POST /sync/clientes/:codigo` (200, 401, 403, 404, 409).
 - [ ] Developer writes `sync.integration.test.ts` with PostgreSQL: a full load populates clients and products, a second run keeps the same rows, the lock prevents overlap, and run rows are written.
 - [ ] Run the tests and confirm that they fail for the expected reason.
