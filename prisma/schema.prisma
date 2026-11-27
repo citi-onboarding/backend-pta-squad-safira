@@ -7,3 +7,365 @@ datasource db {
   provider = "postgresql"
 }
 
+// Conventions (DATA-01, PRD 7.1):
+// - every id is a uuid String; ERP codes live in codigoErp
+// - money is always Int in cents with the Centavos suffix (RN-13); the only
+//   exception is the AI cost, in micro-dollars because it is below one cent
+// - day-only dates use @db.Date; the only Float is the churn probability
+// - every foreign key uses onDelete: Restrict (5-year retention, PRD 7.3)
+
+// Enums
+
+enum Papel {
+  VENDEDOR
+  GERENTE
+  FINANCEIRO
+  ADMINISTRADOR
+}
+
+enum StatusCliente {
+  ATIVO
+  BLOQUEADO
+  INATIVO
+}
+
+enum StatusPedido {
+  RASCUNHO
+  ENVIANDO
+  ENVIADO_AO_ERP
+  ERRO_DE_ENVIO
+  BLOQUEADO_POR_CREDITO
+  AGUARDANDO_FINANCEIRO
+  APROVADO
+  RECUSADO
+}
+
+enum OrigemTitulo {
+  ERP
+  PLANILHA
+}
+
+// Mirrors the status values returned by the ERP API (GET /v1/titulos).
+enum StatusTitulo {
+  EM_ABERTO
+  VENCIDO
+  PAGO
+}
+
+enum TipoDocumento {
+  PEDIDO
+  CONTRATO
+  OUTRO
+}
+
+enum SituacaoDocumento {
+  ENVIADO
+  EM_TRIAGEM
+  AGUARDANDO_CONFIRMACAO
+  CONFIRMADO
+  DESCARTADO
+  ERRO
+}
+
+enum FaixaRisco {
+  BAIXO
+  MEDIO
+  ALTO
+}
+
+enum TipoRegistro {
+  SINCRONIZACAO_CLIENTES
+  SINCRONIZACAO_PRODUTOS
+  SINCRONIZACAO_TITULOS
+  CARGA_HISTORICO
+}
+
+enum ResultadoRegistro {
+  EM_ANDAMENTO
+  SUCESSO
+  PARCIAL
+  FALHA
+}
+
+// Models
+
+model Usuario {
+  id             String   @id @default(uuid())
+  nome           String
+  email          String   @unique
+  senhaHash      String
+  papel          Papel
+  ativo          Boolean  @default(true)
+  // Links the user to the ERP salesperson portfolio (RN-08). No foreign key:
+  // the ERP may have salespeople without a portal user.
+  codigoVendedor String?  @unique
+  criadoEm       DateTime @default(now())
+  atualizadoEm   DateTime @updatedAt
+
+  pedidos               Pedido[]
+  mudancasDeStatus      HistoricoStatus[]
+  documentosEnviados    Documento[]       @relation("DocumentoEnviadoPor")
+  documentosConfirmados Documento[]       @relation("DocumentoConfirmadoPor")
+  avisosTratados        Contrato[]
+  contatosRegistrados   RiscoChurn[]
+}
+
+model Cliente {
+  id                    String        @id @default(uuid())
+  codigoErp             String        @unique
+  razaoSocial           String
+  cnpj                  String        @unique
+  cidade                String
+  uf                    String        @db.Char(2)
+  segmento              String
+  // ERP salesperson code. Required: the ERP always sends it and it defines
+  // the portfolio (RN-08).
+  codigoVendedor        String
+  limiteCreditoCentavos Int
+  status                StatusCliente
+  // ERP atualizadoEm. Its max is the atualizadoDesde of the next sync (RN-15).
+  atualizadoNoErpEm     DateTime
+  atualizadoEm          DateTime      @updatedAt
+
+  titulos          Titulo[]
+  pedidos          Pedido[]
+  contratos        Contrato[]
+  pedidosHistorico PedidoHistorico[]
+  riscos           RiscoChurn[]
+  documentos       Documento[]
+
+  @@index([codigoVendedor])
+  @@index([status])
+}
+
+model Produto {
+  id                  String   @id @default(uuid())
+  codigoErp           String   @unique
+  descricao           String
+  categoria           String
+  unidade             String
+  precoTabelaCentavos Int
+  ativo               Boolean
+  atualizadoNoErpEm   DateTime
+  atualizadoEm        DateTime @updatedAt
+
+  itens            ItemPedido[]
+  pedidosHistorico PedidoHistorico[]
+}
+
+model Titulo {
+  id                String       @id @default(uuid())
+  numero            String
+  parcela           Int
+  clienteId         String
+  pedidoErp         String
+  valorCentavos     Int
+  emissao           DateTime     @db.Date
+  vencimento        DateTime     @db.Date
+  pagamento         DateTime?    @db.Date
+  status            StatusTitulo
+  origem            OrigemTitulo
+  // Empty for receivables loaded from the spreadsheet.
+  atualizadoNoErpEm DateTime?
+  atualizadoEm      DateTime     @updatedAt
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+
+  @@unique([numero, parcela])
+  @@index([clienteId, vencimento])
+  @@index([status, vencimento])
+}
+
+model Contrato {
+  id                   String    @id @default(uuid())
+  numero               String    @unique
+  clienteId            String
+  inicio               DateTime  @db.Date
+  fim                  DateTime  @db.Date
+  avisoPrevioDias      Int
+  renovacaoAutomatica  Boolean
+  prazoPagamentoDias   Int?
+  // Minimum monthly purchase in reais, as written in the contracts.
+  volumeMinimoCentavos Int?
+  temAditivo           Boolean   @default(false)
+  // fim - avisoPrevioDias (RN-11), computed by the service and stored.
+  dataLimiteAviso      DateTime  @db.Date
+  arquivo              String
+  documentoId          String?
+  // Who handled the notice and when (US-022).
+  avisoTratadoPorId    String?
+  avisoTratadoEm       DateTime?
+  criadoEm             DateTime  @default(now())
+
+  cliente         Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  documento       Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  avisoTratadoPor Usuario?   @relation(fields: [avisoTratadoPorId], references: [id], onDelete: Restrict)
+
+  @@index([clienteId])
+  @@index([dataLimiteAviso])
+}
+
+model Pedido {
+  id            String       @id @default(uuid())
+  clienteId     String
+  vendedorId    String
+  status        StatusPedido @default(RASCUNHO)
+  totalCentavos Int
+  numeroErp     String?      @unique
+  // Idempotency key sent to the ERP: one portal order, at most one ERP order (RN-07).
+  chaveEnvio    String       @unique @default(uuid())
+  justificativa String?
+  motivoRecusa  String?
+  documentoId   String?
+  criadoEm      DateTime     @default(now())
+  atualizadoEm  DateTime     @updatedAt
+
+  cliente   Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  vendedor  Usuario    @relation(fields: [vendedorId], references: [id], onDelete: Restrict)
+  documento Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  itens     ItemPedido[]
+  historico HistoricoStatus[]
+
+  @@index([clienteId])
+  @@index([vendedorId, status])
+  @@index([status])
+}
+
+model ItemPedido {
+  id                    String @id @default(uuid())
+  pedidoId              String
+  produtoId             String
+  quantidade            Int
+  precoUnitarioCentavos Int
+  subtotalCentavos      Int
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  // One line per product per order (RN-06). The 50-item limit lives in the service.
+  @@unique([pedidoId, produtoId])
+}
+
+model HistoricoStatus {
+  id        String        @id @default(uuid())
+  pedidoId  String
+  de        StatusPedido?
+  para      StatusPedido
+  usuarioId String
+  motivo    String?
+  em        DateTime      @default(now())
+
+  pedido  Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Restrict)
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Restrict)
+
+  @@index([pedidoId, em])
+}
+
+model PedidoHistorico {
+  id                    String   @id @default(uuid())
+  numero                String
+  linha                 Int
+  data                  DateTime @db.Date
+  // Lines without a safe match go to the pending list, not here (US-011).
+  clienteId             String
+  clienteNomeOriginal   String?
+  produtoId             String
+  // Name as typed in the spreadsheet (nicknames such as "Paty"). The portfolio
+  // comes from Cliente.codigoVendedor, because the ERP wins (RN-09).
+  vendedorNome          String?
+  quantidade            Int
+  precoUnitarioCentavos Int
+  // The spreadsheet only has Faturado and Cancelado. Cancelled lines stay in the
+  // history but never count as sales (US-011).
+  cancelado             Boolean
+
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+
+  // Lets the history load run again with the same result (RN-16).
+  @@unique([numero, linha])
+  @@index([clienteId, data])
+}
+
+model Documento {
+  id              String            @id @default(uuid())
+  arquivo         String
+  tipo            TipoDocumento
+  clienteId       String?
+  enviadoPorId    String
+  enviadoEm       DateTime          @default(now())
+  situacao        SituacaoDocumento @default(ENVIADO)
+  confirmadoPorId String?
+  confirmadoEm    DateTime?
+  // Documents classified as OUTRO: summary and the role they go to (US-024).
+  resumo          String?
+  encaminhadoPara Papel?
+
+  cliente       Cliente? @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  enviadoPor    Usuario  @relation("DocumentoEnviadoPor", fields: [enviadoPorId], references: [id], onDelete: Restrict)
+  confirmadoPor Usuario? @relation("DocumentoConfirmadoPor", fields: [confirmadoPorId], references: [id], onDelete: Restrict)
+
+  execucoes ExecucaoAgente[]
+  pedidos   Pedido[]
+  contratos Contrato[]
+
+  @@index([situacao])
+  @@index([clienteId])
+}
+
+model ExecucaoAgente {
+  id                        String   @id @default(uuid())
+  documentoId               String
+  passos                    Json
+  ferramentasChamadas       Json
+  resultado                 Json?
+  erro                      String?
+  duracaoMs                 Int
+  // AI cost in millionths of a US dollar: one call costs fractions of a cent,
+  // so cents would round it to 0. Still an Int, never a Float.
+  custoEstimadoMicrodolares Int?
+  criadoEm                  DateTime @default(now())
+
+  documento Documento @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+
+  @@index([documentoId])
+}
+
+model RiscoChurn {
+  id                     String     @id @default(uuid())
+  clienteId              String
+  calculadoEm            DateTime
+  // 0 to 1. The only Float in the schema: it is not money.
+  probabilidade          Float
+  faixa                  FaixaRisco
+  motivoPrincipal        String
+  versaoModelo           String
+  contatoRegistradoEm    DateTime?
+  contatoRegistradoPorId String?
+
+  cliente              Cliente  @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  contatoRegistradoPor Usuario? @relation(fields: [contatoRegistradoPorId], references: [id], onDelete: Restrict)
+
+  @@unique([clienteId, calculadoEm])
+  @@index([calculadoEm, faixa])
+}
+
+// Each ERP sync run and each history load. Intentionally has no relations.
+model RegistroSincronizacao {
+  id         String            @id @default(uuid())
+  tipo       TipoRegistro
+  iniciouEm  DateTime          @default(now())
+  terminouEm DateTime?
+  resultado  ResultadoRegistro
+  itensLidos Int               @default(0)
+  erros      Int               @default(0)
+  pendencias Int               @default(0)
+  detalhe    String?
+  // History load report (US-012, RN-16): per file, the lines read, fixed,
+  // discarded and pending by problem type, and each pending line with its
+  // original content and reason.
+  relatorio  Json?
+
+  @@index([tipo, iniciouEm])
+}
