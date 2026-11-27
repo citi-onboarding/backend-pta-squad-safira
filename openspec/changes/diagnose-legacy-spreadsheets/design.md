@@ -57,12 +57,21 @@ Exactly as listed in the spec requirement "Detection of data problems". Supporti
 - Date formats are classified as `Excel date`, `dd/mm/yyyy`, `yyyy-mm-dd`, or `other text`.
 - The quantity-times-price check works in integer cents, to avoid floating-point noise (RN-13).
 - "Outdated status" compares only the receivable's own fields, never the current date, so the result does not change from one day to the next.
+- Duplicates are found by record key, not only by identical text: in the real orders file only 5 of the 27 repeated items are identical, and the other 22 differ only in date format, salesperson nickname, or status letter case. Clients are keyed by normalized CNPJ and by code, which finds 6 repeated clients (two repeated codes and four rows without a code).
+- A dot is read by the digits after it. The same shape means a thousands separator in the clients' `Limite` (`12.000`) and a decimal point in the receivables' `valor` (`1234.56`), so one fixed reading would turn 491 receivables a hundred times too large. Money in these files never has three decimals.
+- A quantity 20 times or more above the product's median (products with at least 10 rows) is reported as typed wrong. On the real file this finds exactly 5 rows, all about 100 times the usual quantity; a factor of 10 would also catch plausible large orders.
+- Client codes are compared with one capital letter and the most common number of digits found across the three files, so the pattern comes from the data and not from a fixed length.
 
 ### Column match with the ERP
 
-Each row also states the conversion the column needs (the receivable installment, for instance, is written `1/2` or `1 de 2`, and only the number before `/` or `de` is kept) (for example, salesperson name to ERP code, reais to integer cents, or client code to `Cliente.id`), so DATA-03 does not read a name-to-code link as a direct copy.
+Each row also states the conversion the column needs (the receivable installment, for instance, is written `1/2` or `1 de 2`, and only the number before `/` or `de` is kept; money goes from reais to integer cents; a client code goes to `Cliente.id`).
 
-A fixed table in `diagnose-spreadsheets.ts` maps each spreadsheet column to the DATA-01 Prisma field (`Cliente`, `PedidoHistorico`, `Titulo`) and to the BACK-02 ERP field (`erpClienteSchema`, `erpPedidoSchema`, `erpTituloSchema`). It is written by hand, because BACK-02 (PR #12) is not merged into this branch's base and scripts must not depend on unmerged code. A test checks that every expected column of the three files appears in the table.
+A fixed table in `diagnose-spreadsheets.ts` maps each spreadsheet column to the DATA-01 Prisma field (`Cliente`, `PedidoHistorico`, `Titulo`) and to the BACK-02 ERP field (`erpClienteSchema`, `erpPedidoSchema`, `erpTituloSchema`), both merged in `develop`. Scripts do not import from `src/`, so the names are copied, and a test checks that every expected column of the three files appears in the table.
+
+- The clients file is only used to find the ERP client (PRD 7.7: "the valid register is the ERP's"). `Cód.` and `CNPJ` are lookup keys; the other columns are not loaded, so `Limite` written with words and `Situação` values such as `ok` need no rule.
+- The order `Status` maps to `PedidoHistorico.cancelado` (DATA-01 decision), and `Últ. atualização` has no match: it is the spreadsheet's edit date, while `Cliente.atualizadoNoErpEm` comes from the ERP.
+- `Estornado` receivables are discarded with their reason, as the DATA-01 design decided.
+- `PedidoHistorico.linha` has no column: it is the item's position in its order after duplicates are removed, so `numero + linha` is stable across runs (RN-16).
 
 ### Repeatable and private output
 
@@ -82,7 +91,7 @@ The tests build small invented spreadsheets with `exceljs` in a temporary folder
 
 ## Risks
 
-- [The ERP field names in the match table drift from BACK-02 when it merges] → DATA-03 rechecks the table against the merged schemas; the table is one place to change.
+- [The ERP field names in the match table drift from the BACK-02 schemas] → the table is one place to change; DATA-03 rechecks it.
 - [Cleaning rules are proposals] → DATA-03 and the squad manager confirm them before applying.
 
 ## ADR

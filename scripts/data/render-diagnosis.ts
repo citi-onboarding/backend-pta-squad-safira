@@ -27,6 +27,8 @@ const PROBLEM_TITLES: Record<ProblemId, string> = {
   "missing-required-values": "missing required values",
   "cnpj-different-formats": "CNPJ in different formats",
   "unknown-status-values": "status outside the portal values",
+  "dot-separated-values": "values written with a dot",
+  "client-codes-out-of-pattern": "client codes out of pattern",
 };
 
 // Proposed rules for DATA-03. They follow RN-09 (the ERP wins) and RN-16 (a
@@ -40,28 +42,32 @@ export const CLEANING_RULES: Record<ProblemId, string> = {
   "mixed-date-formats":
     "Convert every date to one format from the recognized ones (`dd/mm/yy` means the year 20yy; an Excel serial number means 1899-12-30 plus that many days). A date that matches no recognized format goes to the pending list.",
   "decimal-comma-values":
-    "Read Brazilian numbers (dot for thousands, comma for decimals) and store integer cents (RN-13). A value written with words (for example, shape `999 aaa`) goes to the pending list; never guess it.",
+    "Remove `R$`, keep the minus sign, read the comma as the decimal separator and any dot before it as a thousands separator, and store integer cents (RN-13). A value written with words (for example, shape `999 aaa`) goes to the pending list; never guess it. The clients' `Limite` is not loaded (PRD 7.7), so its values need no conversion.",
   duplicates:
-    "Keep the first of identical rows. For receivables with the same `id_titulo` and `parcela` but different values, keep the ERP version when it exists (RN-09); otherwise send them to the pending list. Record every discard with its reason (RN-16).",
+    "Compare records by key, after the other cleaning rules, not by the text as written: a client by normalized CNPJ or code, an order item by `Nº Pedido` and `Produto`, and a receivable by `id_titulo` and installment number. Keep one row per key. When the repeated rows differ in a loaded value (quantity, price, or receivable value), keep the ERP version when it exists (RN-09); otherwise send them to the pending list. Record every discard with its reason (RN-16).",
   "orders-without-client":
     "Send the row to the pending list with the reason 'order without a client'; never guess the client.",
   "clients-identified-by-name":
     "Link the order to the ERP client only when exactly one ERP client has the same normalized name; otherwise send the row to the pending list.",
   "wrong-quantities":
-    "For a quantity written with a unit (for example, shape `99 aa`), use the number only when the unit is the product's unit in the ERP; otherwise, and for zero or fractional quantities, send the row to the pending list.",
+    "For a quantity written with a unit (for example, shape `99 aa`), use the number only when the unit is the product's unit in the ERP; otherwise, and for zero or fractional quantities, send the row to the pending list. A quantity 20 times or more above the product's median (products with at least 10 rows) goes to the pending list with the reason 'quantity far above the usual'; never divide it to guess the intended value.",
   "total-lines": "Discard the row, recording the reason 'total line' (RN-16).",
   "outdated-status":
     "When the receivable exists in the ERP, use the ERP status (RN-09). Otherwise, a receivable with a payment date is paid, and a paid status without a payment date goes to the pending list.",
   "status-written-differently":
     "Trim spaces and ignore letter case and accents, then map each spelling to a portal status; a spelling that maps to no known status goes to the pending list. A receivable that exists in the ERP takes the ERP status (RN-09).",
   "salespeople-identified-by-name":
-    "Link each spelling to an ERP salesperson code through a correspondence table confirmed by the squad manager; never guess. A spelling with no correspondence goes to the pending list. Without this link, the salesperson portfolio (RN-08) does not work for historical clients.",
+    "Do not convert names to codes: the portfolio comes from the ERP client's salesperson (`Cliente.codigoVendedor`, RN-08 and RN-09), and the clients' `Vendedor` is not loaded (PRD 7.7). Keep the order's name as typed in `PedidoHistorico.vendedorNome`, as DATA-01 decided.",
   "missing-required-values":
     "A client without a code is linked to the ERP by CNPJ; a client with neither a code nor a CNPJ goes to the pending list. A receivable without a client takes the ERP receivable with the same number when it exists; otherwise it goes to the pending list. An order item without a product goes to the pending list.",
   "cnpj-different-formats":
     "Normalize every CNPJ to 14 digits (remove the mask and add the leading zeros an Excel number loses) before comparing it with the ERP.",
   "unknown-status-values":
-    "Do not guess a status: send the row to the pending list until the squad manager confirms what each value (for example, `ok` or `Prospect` in the clients' `Situação`, or `Estornado` in the receivables' `status`) means in the portal. A client or receivable that exists in the ERP takes the ERP status (RN-09).",
+    "The clients' `Situação` is not loaded (PRD 7.7): the ERP status is used, so `ok` and `Prospect` need no mapping. A receivable `Estornado` (a reversal, written with a negative value) is discarded with the reason 'reversed receivable' (RN-16), as DATA-01 decided, so it never counts as revenue (RN-17). Any other unknown status goes to the pending list; a receivable that exists in the ERP takes the ERP status (RN-09).",
+  "dot-separated-values":
+    "Read a dot by the digits after it: a dot followed by groups of exactly three digits separates thousands (`12.000` is 12000), and a dot followed by one or two digits is the decimal point (`1234.56`). Never apply one fixed meaning to the whole file. Store integer cents (RN-13).",
+  "client-codes-out-of-pattern":
+    "Trim spaces, write the letter in capitals, and pad the digits with zeros to the common length (`c0012`, `C012`, and ` C0012` become `C0012`). Use the result only when it is a client code in the ERP; otherwise send the row to the pending list.",
 };
 
 const SHEET_ORDER: SpreadsheetName[] = ["clientes", "pedidos", "titulos"];
@@ -150,10 +156,14 @@ function notes(diagnosis: Diagnosis): string[] {
     diagnosis.profiles.pedidos.columns.find((column) => column.name === "Total")
       ?.formulas ?? 0;
   const { clientes, pedidos, titulos } = diagnosis.profiles;
+  const repeatedClients =
+    diagnosis.problems
+      .find((problem) => problem.id === "duplicates")
+      ?.byFile.find((entry) => entry.file === clientes.file)?.rows ?? 0;
   const lines = [
     "## Notes for DATA-03",
     "",
-    `- Volumes: the task expects 135 clients, about 9,700 orders, and about 6,500 receivables. The files have ${formatNumber(clientes.contentRows)} client rows (plus ${formatNumber(clientes.blankRows)} blank rows and ${formatNumber(clientes.totalLines)} total lines), ${formatNumber(pedidos.contentRows)} order item rows (the orders file has one row per item) for ${formatNumber(pedidos.distinctOrders ?? 0)} distinct orders, and ${formatNumber(titulos.contentRows)} receivable rows. These counts do not explain the differences from the task, so the volumes must be confirmed with the squad manager.`,
+    `- Volumes: the task expects 135 clients, about 9,700 orders, and about 6,500 receivables. The files have ${formatNumber(clientes.contentRows)} client rows, ${formatNumber(clientes.contentRows - repeatedClients)} of them distinct after removing duplicates (plus ${formatNumber(clientes.blankRows)} blank rows and ${formatNumber(clientes.totalLines)} total ${clientes.totalLines === 1 ? "line" : "lines"}; the ERP has about 120 clients, PRD 7.3), ${formatNumber(pedidos.contentRows)} order item rows (the orders file has one row per item) for ${formatNumber(pedidos.distinctOrders ?? 0)} distinct orders, and ${formatNumber(titulos.contentRows)} receivable rows. For orders and receivables, these counts do not explain the differences from the task, so the volumes must be confirmed with the squad manager.`,
   ];
   if (totalFormulas > 0) {
     lines.push(
@@ -175,7 +185,7 @@ function columnMatch(diagnosis: Diagnosis): string[] {
   return [
     "## Column match with the ERP",
     "",
-    "Portal fields come from the DATA-01 Prisma schema; ERP fields come from the BACK-02 ERP client schemas.",
+    "Portal fields come from the DATA-01 Prisma schema; ERP fields come from the BACK-02 ERP client schemas. The clients file is only used to find the ERP client (PRD 7.7). Fields with no spreadsheet column: `PedidoHistorico.linha` is the item's position in its order after duplicates are removed, so `numero + linha` stays the same on every run (RN-16), and `Titulo.origem` is `PLANILHA`.",
     "",
     ...SHEET_ORDER.flatMap((name) => [
       `### ${diagnosis.profiles[name].file}`,

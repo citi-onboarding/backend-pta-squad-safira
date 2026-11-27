@@ -98,8 +98,9 @@ describe("renderDiagnosis", () => {
     const document = await sampleDocument();
 
     expect(document).toContain(
-      "| CNPJ | Cliente.cnpj | cliente.cnpj | normalize to 14 digits |",
+      "| CNPJ | Cliente.cnpj | cliente.cnpj | lookup only (PRD 7.7): normalize to 14 digits to find the ERP client |",
     );
+    expect(document).toMatch(/PedidoHistorico\.linha/);
     expect(document).toContain("| Telefone | no match | no match | — |");
   });
 
@@ -142,6 +143,30 @@ describe("renderDiagnosis", () => {
   it("sends a client with neither a code nor a CNPJ to the pending list", () => {
     expect(CLEANING_RULES["missing-required-values"]).toMatch(
       /neither a code nor a CNPJ.*pending list/,
+    );
+  });
+
+  it("discards reversed receivables, as DATA-01 decided", () => {
+    expect(CLEANING_RULES["unknown-status-values"]).toMatch(
+      /Estornado.*discarded.*reason/,
+    );
+  });
+
+  it("reads a dot by the digits after it, never as one fixed meaning", () => {
+    expect(CLEANING_RULES["dot-separated-values"]).toMatch(
+      /three digits.*thousands.*two digits.*decimal/,
+    );
+  });
+
+  it("never divides a quantity far above the usual", () => {
+    expect(CLEANING_RULES["wrong-quantities"]).toMatch(
+      /20 times.*pending list/,
+    );
+  });
+
+  it("states the distinct clients after removing duplicates", async () => {
+    expect(await sampleDocument()).toMatch(
+      /distinct after removing duplicates/,
     );
   });
 });

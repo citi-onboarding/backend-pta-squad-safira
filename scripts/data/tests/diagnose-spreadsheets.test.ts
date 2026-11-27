@@ -205,7 +205,7 @@ describe("detection of data problems", () => {
     expect(
       diagnose(spreadsheets({})).problems.map((entry) => entry.id),
     ).toEqual(PROBLEM_IDS);
-    expect(PROBLEM_IDS).toHaveLength(15);
+    expect(PROBLEM_IDS).toHaveLength(17);
   });
 
   it("reports nothing found for clean sample files", () => {
@@ -595,6 +595,158 @@ describe("receivables that will come from the ERP", () => {
   });
 });
 
+describe("problems found in the third review", () => {
+  it("finds order items repeated with the same order and product, even when written differently", () => {
+    const result = problem(
+      spreadsheets({
+        pedidos: [
+          validOrder,
+          {
+            ...validOrder,
+            Data: "03.02.2025",
+            Vendedor: "Vend. Exemplo",
+            Status: "FATURADO",
+          },
+          { ...validOrder, Produto: "P11" },
+        ],
+      }),
+      "duplicates",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 1,
+      byFile: [{ file: SPREADSHEETS.pedidos.file, rows: 1, exampleRows: [6] }],
+    });
+  });
+
+  it("finds clients repeated with the same CNPJ or the same code", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [
+          validClient,
+          {
+            ...validClient,
+            "Cód.": null,
+            "Razão Social": "Construtora Exemplo",
+            CNPJ: "11222333000181",
+          },
+          { ...validClient, "Cód.": "C002", CNPJ: "45.723.174/0001-10" },
+          {
+            ...validClient,
+            "Cód.": "C002",
+            "Razão Social": "Eletrica Modelo",
+            CNPJ: 45723174000110,
+          },
+          { ...validClient, "Cód.": "C003", CNPJ: "61.198.164/0001-60" },
+        ],
+      }),
+      "duplicates",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 2,
+      byFile: [
+        { file: SPREADSHEETS.clientes.file, rows: 2, exampleRows: [5, 7] },
+      ],
+    });
+  });
+
+  it("finds quantities 20 times or more above the product's median", () => {
+    const usual = Array.from({ length: 10 }, () => validOrder);
+    const result = problem(
+      spreadsheets({
+        pedidos: [
+          ...usual,
+          { ...validOrder, Qtd: 200, Total: 500 },
+          { ...validOrder, Qtd: 190, Total: 475 },
+          { ...validOrder, Produto: "P11", Qtd: 500, Total: 1250 },
+        ],
+      }),
+      "wrong-quantities",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 1,
+      byFile: [{ file: SPREADSHEETS.pedidos.file, rows: 1, exampleRows: [15] }],
+    });
+  });
+
+  it("names a dot as thousands or decimal by the digits after it", () => {
+    const sheets = spreadsheets({
+      clientes: [
+        { ...validClient, Limite: "20.000" },
+        { ...validClient, "Cód.": "C002", Limite: "R$ 509.000,00" },
+      ],
+      titulos: [{ ...validReceivable, valor: "9346.14" }],
+    });
+
+    const { clientes, titulos } = diagnose(sheets).profiles;
+
+    expect(
+      clientes.columns.find((column) => column.name === "Limite")?.formats,
+    ).toEqual(["text with R$", "text with thousands dot"]);
+    expect(
+      titulos.columns.find((column) => column.name === "valor")?.formats,
+    ).toEqual(["text with decimal point"]);
+  });
+
+  it("finds values written with a dot in a column that also uses a decimal comma", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [
+          { ...validClient, Limite: "12.500,00" },
+          { ...validClient, "Cód.": "C002", Limite: "20.000" },
+        ],
+        titulos: [
+          { ...validReceivable, valor: "1.234,56" },
+          { ...validReceivable, id_titulo: "T2", valor: "9346.14" },
+        ],
+      }),
+      "dot-separated-values",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 2,
+      byFile: [
+        { file: SPREADSHEETS.clientes.file, rows: 1, exampleRows: [5] },
+        { file: SPREADSHEETS.titulos.file, rows: 1, exampleRows: [3] },
+      ],
+    });
+  });
+
+  it("does not report a dot when the column uses no decimal comma", () => {
+    const result = problem(spreadsheets({}), "dot-separated-values");
+
+    expect(result.found).toBe(false);
+  });
+
+  it("finds client codes out of the common pattern", () => {
+    const result = problem(
+      spreadsheets({
+        titulos: [
+          validReceivable,
+          { ...validReceivable, id_titulo: "T2", id_cliente: "c001" },
+          { ...validReceivable, id_titulo: "T3", id_cliente: "C01" },
+          { ...validReceivable, id_titulo: "T4", id_cliente: " C001" },
+        ],
+      }),
+      "client-codes-out-of-pattern",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 3,
+      byFile: [
+        { file: SPREADSHEETS.titulos.file, rows: 3, exampleRows: [3, 4, 5] },
+      ],
+    });
+  });
+});
+
 describe("column match with the ERP", () => {
   it("lists every expected column of the three files", () => {
     for (const name of Object.keys(SPREADSHEETS) as SpreadsheetName[]) {
@@ -616,7 +768,8 @@ describe("column match with the ERP", () => {
       column: "CNPJ",
       portalField: "Cliente.cnpj",
       erpField: "cliente.cnpj",
-      conversion: "normalize to 14 digits",
+      conversion:
+        "lookup only (PRD 7.7): normalize to 14 digits to find the ERP client",
     });
     expect(phone).toEqual({
       column: "Telefone",
@@ -625,12 +778,37 @@ describe("column match with the ERP", () => {
       conversion: null,
     });
     expect(
-      COLUMN_MATCHES.clientes.find((match) => match.column === "Vendedor")
-        ?.conversion,
-    ).toMatch(/name.*ERP salesperson code/);
-    expect(
       COLUMN_MATCHES.titulos.find((match) => match.column === "parcela")
         ?.conversion,
     ).toMatch(/before .\/. or .de./);
+  });
+
+  it("uses the clients file only to find the ERP client (PRD 7.7)", () => {
+    for (const column of [
+      "Cidade/UF",
+      "Segmento",
+      "Vendedor",
+      "Limite",
+      "Situação",
+    ]) {
+      expect(
+        COLUMN_MATCHES.clientes.find((match) => match.column === column)
+          ?.conversion,
+      ).toMatch(/not loaded.*ERP value/);
+    }
+    expect(
+      COLUMN_MATCHES.clientes.find(
+        (match) => match.column === "Últ. atualização",
+      ),
+    ).toMatchObject({ portalField: null, erpField: null });
+  });
+
+  it("follows the DATA-01 schema for the order status", () => {
+    expect(
+      COLUMN_MATCHES.pedidos.find((match) => match.column === "Status"),
+    ).toMatchObject({
+      portalField: "PedidoHistorico.cancelado",
+      erpField: null,
+    });
   });
 });

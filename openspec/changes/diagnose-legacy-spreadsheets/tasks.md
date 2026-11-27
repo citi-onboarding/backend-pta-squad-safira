@@ -30,7 +30,7 @@
 - [x] Check the generated document for personal data before committing it.
 - [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`, and `openspec validate diagnose-legacy-spreadsheets --strict`.
 - [x] Write `docs/changes/diagnose-legacy-spreadsheets.md` from the template and evaluate the ADR.
-- [ ] Open the pull request to `develop`, noting the base on `feat/prismaSchema`, the dependency review, and the provisional decisions.
+- [x] Open the pull request to `develop`, noting the dependency review and the provisional decisions.
 
 ## Review of the first diagnosis
 
@@ -43,5 +43,13 @@
 
 - [x] Specify the clients' `Situação` in the status check, status values outside the portal, the honest volume comparison, and the installment conversion.
 - [x] Red: developer writes the failing tests, including privacy and volume checks on the generated document.
+- [x] Green: implement, regenerate the document twice, and check it for personal data.
+- [x] Refactor and run all gates again.
+
+## Third review of the diagnosis
+
+- [x] Rebase onto `develop`, where DATA-01 (#11) and BACK-02 (#12) are merged.
+- [x] Specify duplicates by record key, quantities far above the product's median, values written with a dot, client codes out of pattern, the clients file as lookup only (PRD 7.7), and the column match with the merged DATA-01 schema.
+- [x] Red: developer writes the failing tests (16 failed for the expected reason).
 - [x] Green: implement, regenerate the document twice, and check it for personal data.
 - [x] Refactor and run all gates again.

@@ -25,6 +25,8 @@ export const PROBLEM_IDS = [
   "missing-required-values",
   "cnpj-different-formats",
   "unknown-status-values",
+  "dot-separated-values",
+  "client-codes-out-of-pattern",
 ] as const;
 
 export type ProblemId = (typeof PROBLEM_IDS)[number];
@@ -94,43 +96,61 @@ const VALUE_COLUMNS: Record<SpreadsheetName, string[]> = {
 };
 
 // Portal field (DATA-01 Prisma schema) and ERP field (BACK-02 client schemas)
-// for every column. Written by hand: BACK-02 is not merged into this branch.
+// for every column. The clients file is only used to find the ERP client
+// (PRD 7.7), so its other columns are not loaded.
+const NOT_LOADED = "not loaded: the ERP value is used (PRD 7.7)";
+
 export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
   clientes: [
-    match("Cód.", "Cliente.codigoErp", "cliente.codigo"),
-    match("Razão Social", "Cliente.razaoSocial", "cliente.razaoSocial"),
-    match("CNPJ", "Cliente.cnpj", "cliente.cnpj", "normalize to 14 digits"),
+    match(
+      "Cód.",
+      "Cliente.codigoErp",
+      "cliente.codigo",
+      "lookup only (PRD 7.7): normalize the code to find the ERP client",
+    ),
+    match(
+      "Razão Social",
+      "Cliente.razaoSocial",
+      "cliente.razaoSocial",
+      NOT_LOADED,
+    ),
+    match(
+      "CNPJ",
+      "Cliente.cnpj",
+      "cliente.cnpj",
+      "lookup only (PRD 7.7): normalize to 14 digits to find the ERP client",
+    ),
     match(
       "Cidade/UF",
       "Cliente.cidade + Cliente.uf",
       "cliente.cidade + cliente.uf",
-      "split into city and UF",
+      NOT_LOADED,
     ),
-    match("Segmento", "Cliente.segmento", "cliente.segmento"),
-    match(
-      "Vendedor",
-      "Cliente.codigoVendedor",
-      "cliente.vendedor",
-      "salesperson name to ERP salesperson code",
-    ),
+    match("Segmento", "Cliente.segmento", "cliente.segmento", NOT_LOADED),
+    match("Vendedor", "Cliente.codigoVendedor", "cliente.vendedor", NOT_LOADED),
     match(
       "Limite",
       "Cliente.limiteCreditoCentavos",
       "cliente.limiteCreditoCentavos",
-      "reais to integer cents",
+      NOT_LOADED,
     ),
-    match(
-      "Situação",
-      "Cliente.status",
-      "cliente.status",
-      "text to ATIVO, BLOQUEADO, or INATIVO",
-    ),
+    match("Situação", "Cliente.status", "cliente.status", NOT_LOADED),
     match("Contato", null, null),
     match("Telefone", null, null),
-    match("Últ. atualização", "Cliente.atualizadoEm", "cliente.atualizadoEm"),
+    match(
+      "Últ. atualização",
+      null,
+      null,
+      "not loaded: it is the spreadsheet's edit date; Cliente.atualizadoNoErpEm comes from the ERP",
+    ),
   ],
   pedidos: [
-    match("Nº Pedido", "PedidoHistorico.numero", "pedido.numero"),
+    match(
+      "Nº Pedido",
+      "PedidoHistorico.numero",
+      "pedido.numero",
+      "number to text",
+    ),
     match(
       "Data",
       "PedidoHistorico.data",
@@ -139,25 +159,35 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
     ),
     match(
       "Cliente",
-      "PedidoHistorico.clienteId",
+      "PedidoHistorico.clienteId + PedidoHistorico.clienteNomeOriginal",
       "pedido.cliente",
-      "client code or name to Cliente.id",
+      "client code or name to Cliente.id; a name is also kept in clienteNomeOriginal",
     ),
-    match("Vendedor", "PedidoHistorico.vendedorNome", null),
+    match("Vendedor", "PedidoHistorico.vendedorNome", null, "kept as typed"),
     match(
       "Produto",
       "PedidoHistorico.produtoId",
       "pedido.itens.produto",
       "product code to Produto.id",
     ),
-    match("Descrição", "Produto.descricao", "pedido.itens.descricao"),
+    match(
+      "Descrição",
+      "Produto.descricao",
+      "pedido.itens.descricao",
+      "not loaded: the ERP product description is used (RN-09)",
+    ),
     match(
       "Qtd",
       "PedidoHistorico.quantidade",
       "pedido.itens.quantidade",
       "positive whole number",
     ),
-    match("Un", "Produto.unidade", "produto.unidade"),
+    match(
+      "Un",
+      "Produto.unidade",
+      "produto.unidade",
+      "not loaded: only checks quantities written with a unit",
+    ),
     match(
       "Preço Unit.",
       "PedidoHistorico.precoUnitarioCentavos",
@@ -172,20 +202,30 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
     ),
     match(
       "Status",
-      "PedidoHistorico.status",
-      "pedido.status",
-      "one spelling per status",
+      "PedidoHistorico.cancelado",
+      null,
+      "true for Cancelado, false for Faturado, after trimming and ignoring letter case (the ERP order status only has RECEBIDO)",
     ),
   ],
   titulos: [
-    match("id_titulo", "Titulo.numero", "titulo.numero"),
+    match(
+      "id_titulo",
+      "Titulo.numero",
+      "titulo.numero",
+      "kept as text (the ERP sends a number)",
+    ),
     match(
       "id_cliente",
       "Titulo.clienteId",
       "titulo.cliente",
-      "client code to Cliente.id",
+      "normalize the code, then client code to Cliente.id",
     ),
-    match("num_pedido", "Titulo.pedidoErp", "titulo.pedidoErp"),
+    match(
+      "num_pedido",
+      "Titulo.pedidoErp",
+      "titulo.pedidoErp",
+      "kept as text (the ERP sends a number)",
+    ),
     match(
       "parcela",
       "Titulo.parcela",
@@ -196,7 +236,7 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
       "valor",
       "Titulo.valorCentavos",
       "titulo.valorCentavos",
-      "reais to integer cents",
+      "reais to integer cents, reading a dot by the digits after it",
     ),
     match(
       "data_emissao",
@@ -220,7 +260,7 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
       "status",
       "Titulo.status",
       "titulo.status",
-      "text to EM_ABERTO, VENCIDO, or PAGO",
+      "text to EM_ABERTO, VENCIDO, or PAGO; Estornado is discarded",
     ),
   ],
 };
@@ -294,21 +334,32 @@ function dateFormat(cell: Cell): string {
   );
 }
 
+// A dot followed by groups of exactly three digits separates thousands
+// (`12.000`); followed by one or two digits it is a decimal point (`1234.56`).
+// Money in these files never has three decimals.
+const THOUSANDS_DOT = /^-?\d{1,3}(\.\d{3})+$/;
+const DECIMAL_POINT = /^-?\d+\.\d{1,2}$/;
+const CURRENCY = /^R\$\s*/;
+
 function valueFormat(cell: Cell): string {
   if (cell.kind === "number") return "number";
   const value = text(cell);
+  if (CURRENCY.test(value)) return "text with R$";
   if (value.includes(",")) return "text with decimal comma";
-  if (/^-?\d+(\.\d+)?$/.test(value)) return "text with decimal point";
+  if (THOUSANDS_DOT.test(value)) return "text with thousands dot";
+  if (DECIMAL_POINT.test(value)) return "text with decimal point";
+  if (/^-?\d+$/.test(value)) return "text with digits only";
   return shapeOf(value);
 }
 
 function toNumber(cell: Cell | undefined): number | null {
   if (cell?.kind === "number") return cell.value;
   if (cell?.kind !== "text") return null;
-  const value = cell.value.trim();
-  const normalized = value.includes(",")
-    ? value.replace(/\./g, "").replace(",", ".")
-    : value;
+  const value = cell.value.trim().replace(CURRENCY, "");
+  const normalized =
+    value.includes(",") || THOUSANDS_DOT.test(value)
+      ? value.replace(/\./g, "").replace(",", ".")
+      : value;
   const parsed = Number(normalized);
   return normalized === "" || Number.isNaN(parsed) ? null : parsed;
 }
@@ -515,29 +566,52 @@ function decimalCommaValues(sheets: Spreadsheets): RowsByFile {
   return found;
 }
 
+function cnpjDigits(cell: Cell | undefined): string {
+  const digits = text(cell).replace(/\D/g, "");
+  return digits === "" ? "" : digits.padStart(14, "0");
+}
+
+function installmentNumber(cell: Cell | undefined): string {
+  const [first = ""] = text(cell).split(/\/|\s+de\s+/);
+  return first === "" ? "" : String(Number(first));
+}
+
+// Keys that identify the same record even when it is written differently.
+// A row repeats a record when any of its keys was already seen.
+const RECORD_KEYS: Record<SpreadsheetName, (row: SheetRow) => string[]> = {
+  clientes: (row) => [
+    cnpjDigits(row.cells.CNPJ),
+    text(row.cells["Cód."]).toUpperCase(),
+  ],
+  pedidos: (row) => {
+    const product = text(row.cells.Produto).toUpperCase();
+    return [product === "" ? "" : `${text(row.cells["Nº Pedido"])}|${product}`];
+  },
+  titulos: (row) => {
+    const id = text(row.cells.id_titulo);
+    const installment = installmentNumber(row.cells.parcela);
+    return [id === "" || installment === "" ? "" : `${id}|${installment}`];
+  },
+};
+
 function duplicates(sheets: Spreadsheets): RowsByFile {
   const found: RowsByFile = {};
   for (const name of SHEET_ORDER) {
     const sheet = sheets[name];
-    const seenRows = new Set<string>();
-    const seenReceivables = new Set<string>();
+    const seen = new Set<string>();
     const rows: number[] = [];
     for (const row of contentRows(sheet)) {
       const whole = JSON.stringify(
         sheet.columns.map((column) => text(row.cells[column])),
       );
-      let duplicated = seenRows.has(whole);
-      seenRows.add(whole);
-      if (name === "titulos") {
-        const id = text(row.cells.id_titulo);
-        const installment = text(row.cells.parcela);
-        if (id !== "" && installment !== "") {
-          const key = `${id}|${installment}`;
-          duplicated ||= seenReceivables.has(key);
-          seenReceivables.add(key);
-        }
-      }
-      if (duplicated) rows.push(row.rowNumber);
+      const keys = [
+        `row|${whole}`,
+        ...RECORD_KEYS[name](row)
+          .map((key, index) => (key === "" ? "" : `${String(index)}|${key}`))
+          .filter((key) => key !== ""),
+      ];
+      if (keys.some((key) => seen.has(key))) rows.push(row.rowNumber);
+      for (const key of keys) seen.add(key);
     }
     found[name] = rows;
   }
@@ -568,22 +642,65 @@ function clientsIdentifiedByName(sheets: Spreadsheets): RowsByFile {
   };
 }
 
+// A quantity at least this many times the product's median is taken as typed
+// wrong (for example, 3500 where the product usually sells 12). Products with
+// fewer rows have no reliable median.
+const QUANTITY_OUTLIER_FACTOR = 20;
+const QUANTITY_OUTLIER_MIN_ROWS = 10;
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1
+    ? (sorted[middle] ?? 0)
+    : ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+}
+
+function quantityOutliers(rows: SheetRow[]): number[] {
+  const byProduct = new Map<string, { row: number; quantity: number }[]>();
+  for (const row of rows) {
+    const product = text(row.cells.Produto).toUpperCase();
+    const quantity = toNumber(row.cells.Qtd);
+    if (product === "" || quantity === null) continue;
+    byProduct.set(product, [
+      ...(byProduct.get(product) ?? []),
+      { row: row.rowNumber, quantity },
+    ]);
+  }
+  return [...byProduct.values()]
+    .filter((entries) => entries.length >= QUANTITY_OUTLIER_MIN_ROWS)
+    .flatMap((entries) => {
+      const usual = median(entries.map((entry) => entry.quantity));
+      return entries
+        .filter((entry) => entry.quantity >= QUANTITY_OUTLIER_FACTOR * usual)
+        .map((entry) => entry.row);
+    });
+}
+
 function wrongQuantities(sheets: Spreadsheets): RowsByFile {
+  const rows = contentRows(sheets.pedidos);
   return {
-    pedidos: contentRows(sheets.pedidos)
-      .filter((row) => {
-        const quantity = toNumber(row.cells.Qtd);
-        if (quantity === null || !Number.isInteger(quantity) || quantity <= 0) {
-          return true;
-        }
-        const price = toNumber(row.cells["Preço Unit."]);
-        const total = toNumber(row.cells.Total);
-        if (price === null || total === null) return false;
-        // Compare in integer cents to avoid floating-point noise (RN-13).
-        const expected = Math.round(quantity * price * 100);
-        return Math.abs(expected - Math.round(total * 100)) > 1;
-      })
-      .map((row) => row.rowNumber),
+    pedidos: [
+      ...rows
+        .filter((row) => {
+          const quantity = toNumber(row.cells.Qtd);
+          if (
+            quantity === null ||
+            !Number.isInteger(quantity) ||
+            quantity <= 0
+          ) {
+            return true;
+          }
+          const price = toNumber(row.cells["Preço Unit."]);
+          const total = toNumber(row.cells.Total);
+          if (price === null || total === null) return false;
+          // Compare in integer cents to avoid floating-point noise (RN-13).
+          const expected = Math.round(quantity * price * 100);
+          return Math.abs(expected - Math.round(total * 100)) > 1;
+        })
+        .map((row) => row.rowNumber),
+      ...quantityOutliers(rows),
+    ],
   };
 }
 
@@ -732,6 +849,66 @@ function unknownStatusValues(sheets: Spreadsheets): RowsByFile {
   return found;
 }
 
+function dotSeparatedValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    const rows = new Set<number>();
+    for (const column of VALUE_COLUMNS[name]) {
+      const cells = contentRows(sheets[name]).flatMap((row) => {
+        const cell = row.cells[column];
+        return cell?.kind === "text"
+          ? [{ row: row.rowNumber, value: cell.value.trim() }]
+          : [];
+      });
+      if (!cells.some(({ value }) => value.includes(","))) continue;
+      for (const { row, value } of cells) {
+        if (THOUSANDS_DOT.test(value) || DECIMAL_POINT.test(value)) {
+          rows.add(row);
+        }
+      }
+    }
+    found[name] = [...rows];
+  }
+  return found;
+}
+
+const CLIENT_CODE_COLUMNS: Record<SpreadsheetName, string> = {
+  clientes: "Cód.",
+  pedidos: "Cliente",
+  titulos: "id_cliente",
+};
+
+// A letter followed by digits, with any letter case or spaces around it.
+const CLIENT_CODE = /^\s*(\p{L})\s*(\d+)\s*$/u;
+
+// Client codes that differ from the common pattern: one capital letter and
+// the most common number of digits (for example, `c0012`, `C012`, or ` C0012`
+// when most codes are written `C0012`).
+function clientCodesOutOfPattern(sheets: Spreadsheets): RowsByFile {
+  const codes = SHEET_ORDER.flatMap((name) =>
+    contentRows(sheets[name]).flatMap((row) => {
+      const raw = rawText(row.cells[CLIENT_CODE_COLUMNS[name]]);
+      const [, letter = "", digits = ""] = CLIENT_CODE.exec(raw) ?? [];
+      return digits === ""
+        ? []
+        : [{ name, row: row.rowNumber, raw, letter, digits }];
+    }),
+  );
+  const lengths = new Map<number, number>();
+  for (const { digits } of codes) {
+    lengths.set(digits.length, (lengths.get(digits.length) ?? 0) + 1);
+  }
+  const common =
+    [...lengths.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ??
+    0;
+  const found: RowsByFile = {};
+  for (const { name, row, raw, letter, digits } of codes) {
+    const canonical = `${letter.toUpperCase()}${digits.padStart(common, "0")}`;
+    if (raw !== canonical) found[name] = [...(found[name] ?? []), row];
+  }
+  return found;
+}
+
 const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "clients-written-differently": clientsWrittenDifferently,
   "invalid-cnpj": invalidCnpj,
@@ -748,6 +925,8 @@ const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "missing-required-values": missingRequiredValues,
   "cnpj-different-formats": cnpjDifferentFormats,
   "unknown-status-values": unknownStatusValues,
+  "dot-separated-values": dotSeparatedValues,
+  "client-codes-out-of-pattern": clientCodesOutOfPattern,
 };
 
 export function diagnose(sheets: Spreadsheets): Diagnosis {
