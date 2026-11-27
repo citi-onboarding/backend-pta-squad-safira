@@ -35,6 +35,9 @@ The project manager chose the token approach and argon2id for this project.
 ### Negative
 
 - Sign-out only removes the cookie from the browser. A cookie copied before sign-out stays valid until it expires, at most 8 hours after its last use.
+- Resetting a password does not end the sessions that are already open. If a password leaks, the administrator must deactivate the user, reset the password, and keep the user inactive for 8 hours before reactivating them, so every copied cookie expires.
+- SameSite=Lax means the browser sends the cookie only when the web app and the API are on the same site (the same registrable domain, such as `portal.distrilux.com.br` and `api.distrilux.com.br`). The deployment must follow this; two different `*.vercel.app` or `*.onrender.com` names would break sign-in.
+- Behind a reverse proxy, `TRUST_PROXY` must be set to the number of proxies. Otherwise every user shares the proxy's address, and with it the limit of 10 sign-in attempts per minute.
 - Every protected request makes one database lookup by primary key.
 - `argon2` ships native code. Prebuilt binaries exist for Windows x64, Linux x64, and macOS arm64, so its build script is not approved; a machine without a prebuilt binary, such as an Intel Mac, would need the bcrypt fallback.
 

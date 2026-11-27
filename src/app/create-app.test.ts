@@ -13,6 +13,7 @@ const environment: Environment = {
   CORS_ORIGINS: "http://localhost:5173",
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test",
   SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
+  TRUST_PROXY: 0,
   corsOrigins: ["http://localhost:5173"],
 };
 
@@ -86,5 +87,43 @@ describe("createApp", () => {
         "/users/{id}/redefinir-senha",
       ]),
     );
+  });
+
+  describe("sign-in limit by client address", () => {
+    const credentials = { email: "nobody@distrilux.test", senha: "wrong" };
+
+    function createLimitedApp(trustedProxies: number) {
+      const database = {
+        ...createDatabaseDouble(),
+        usuario: { findUnique: vi.fn().mockResolvedValue(null) },
+      } as unknown as Database;
+      return createApp({
+        database,
+        environment: { ...environment, TRUST_PROXY: trustedProxies },
+        signInAttemptsPerMinute: 1,
+      });
+    }
+
+    function signIn(app: ReturnType<typeof createApp>, forwardedFor: string) {
+      return request(app)
+        .post("/auth/login")
+        .set("x-forwarded-for", forwardedFor)
+        .send(credentials);
+    }
+
+    it("gives each client behind a trusted proxy its own limit", async () => {
+      const app = createLimitedApp(1);
+
+      await signIn(app, "203.0.113.1").expect(401);
+      await signIn(app, "203.0.113.1").expect(429);
+      await signIn(app, "203.0.113.2").expect(401);
+    });
+
+    it("ignores the forwarded address when no proxy is trusted", async () => {
+      const app = createLimitedApp(0);
+
+      await signIn(app, "203.0.113.1").expect(401);
+      await signIn(app, "203.0.113.2").expect(429);
+    });
   });
 });

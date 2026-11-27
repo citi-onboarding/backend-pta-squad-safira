@@ -30,6 +30,10 @@ export interface PortfolioUser {
   codigoVendedor: string | null;
 }
 
+// Client filter for lists and searches: {} for every portfolio, a salesperson
+// code for one portfolio, or null when the user sees no client at all.
+export type ClientPortfolioFilter = { codigoVendedor?: string } | null;
+
 const rolesWithEveryPortfolio: readonly Papel[] = ["GERENTE", "FINANCEIRO"];
 
 export function setSessionCookie(
@@ -132,4 +136,18 @@ export function canAccessClient(
   }
 
   return user.codigoVendedor === clientSalespersonCode;
+}
+
+export function clientPortfolioFilter(
+  user: PortfolioUser,
+): ClientPortfolioFilter {
+  if (rolesWithEveryPortfolio.includes(user.papel)) {
+    return {};
+  }
+
+  if (user.papel !== "VENDEDOR" || user.codigoVendedor === null) {
+    return null;
+  }
+
+  return { codigoVendedor: user.codigoVendedor };
 }

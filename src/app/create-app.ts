@@ -40,6 +40,9 @@ export function createApp({
   const openApiDocument = createOpenApiDocument();
 
   app.disable("x-powered-by");
+  // Number of reverse proxies in front of the API. The sign-in limit counts
+  // the client address, which is read from X-Forwarded-For only behind them.
+  app.set("trust proxy", environment.TRUST_PROXY);
   app.use(helmet());
   app.use(
     pinoHttp({

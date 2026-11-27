@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 
-import type { NewUserData, UserRecord } from "./users.service.js";
+import type {
+  NewUserData,
+  UpdateOptions,
+  UserRecord,
+} from "./users.service.js";
 import {
   LastAdministratorError,
   SalespersonCodeRequiredError,
@@ -36,17 +40,25 @@ function createService(existingUsers: UserRecord[] = [patricia]) {
     findById: vi.fn((id: string) =>
       Promise.resolve(existingUsers.find((user) => user.id === id) ?? null),
     ),
-    countActiveAdministrators: vi.fn(() =>
-      Promise.resolve(
-        existingUsers.filter(
-          (user) => user.papel === "ADMINISTRADOR" && user.ativo,
-        ).length,
-      ),
+    update: vi.fn(
+      (
+        id: string,
+        changes: Partial<UserRecord>,
+        { keepAnActiveAdministrator }: UpdateOptions,
+      ) => {
+        const user = existingUsers.find((candidate) => candidate.id === id);
+        const anotherActiveAdministrator = existingUsers.some(
+          (candidate) =>
+            candidate.id !== id &&
+            candidate.papel === "ADMINISTRADOR" &&
+            candidate.ativo,
+        );
+        if (keepAnActiveAdministrator && !anotherActiveAdministrator) {
+          return Promise.reject(new LastAdministratorError());
+        }
+        return Promise.resolve(user ? { ...user, ...changes } : null);
+      },
     ),
-    update: vi.fn((id: string, changes: Partial<UserRecord>) => {
-      const user = existingUsers.find((candidate) => candidate.id === id);
-      return Promise.resolve(user ? { ...user, ...changes } : null);
-    }),
     updatePasswordHash: vi.fn((id: string) =>
       Promise.resolve(id === patricia.id),
     ),
@@ -186,10 +198,11 @@ describe("update the salesperson code", () => {
     await expect(
       service.update(fernanda.id, { papel: "VENDEDOR", codigoVendedor: "V09" }),
     ).resolves.toMatchObject({ papel: "VENDEDOR", codigoVendedor: "V09" });
-    expect(repository.update).toHaveBeenCalledWith(fernanda.id, {
-      papel: "VENDEDOR",
-      codigoVendedor: "V09",
-    });
+    expect(repository.update).toHaveBeenCalledWith(
+      fernanda.id,
+      { papel: "VENDEDOR", codigoVendedor: "V09" },
+      { keepAnActiveAdministrator: false },
+    );
   });
 
   it("rejects a code linked to another user and changes nothing", async () => {
@@ -232,9 +245,11 @@ describe("update the salesperson code", () => {
     await expect(
       service.update(patricia.id, { papel: "GERENTE" }),
     ).resolves.toMatchObject({ papel: "GERENTE", codigoVendedor: "V01" });
-    expect(repository.update).toHaveBeenCalledWith(patricia.id, {
-      papel: "GERENTE",
-    });
+    expect(repository.update).toHaveBeenCalledWith(
+      patricia.id,
+      { papel: "GERENTE" },
+      { keepAnActiveAdministrator: false },
+    );
   });
 });
 
@@ -250,7 +265,11 @@ describe("keep an active administrator", () => {
       await expect(service.update(lucas.id, changes)).rejects.toBeInstanceOf(
         LastAdministratorError,
       );
-      expect(repository.update).not.toHaveBeenCalled();
+      // The repository checks the administrators and applies the change in
+      // one transaction, so two simultaneous changes cannot both pass.
+      expect(repository.update).toHaveBeenCalledWith(lucas.id, changes, {
+        keepAnActiveAdministrator: true,
+      });
     },
   );
 
@@ -264,11 +283,16 @@ describe("keep an active administrator", () => {
   });
 
   it("changes the name of the only active administrator", async () => {
-    const { service } = createService([lucas]);
+    const { service, repository } = createService([lucas]);
 
     await expect(
       service.update(lucas.id, { nome: "Lucas Moura" }),
     ).resolves.toMatchObject({ nome: "Lucas Moura" });
+    expect(repository.update).toHaveBeenCalledWith(
+      lucas.id,
+      { nome: "Lucas Moura" },
+      { keepAnActiveAdministrator: false },
+    );
   });
 });
 

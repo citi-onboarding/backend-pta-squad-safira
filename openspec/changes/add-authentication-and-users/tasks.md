@@ -49,3 +49,13 @@
 - [x] Refactor: keep every test green.
 - [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate add-authentication-and-users --strict`.
 - [x] Rename the ADR to 0002 to avoid the clash with the BACK-02 ADR 0001.
+
+## Second review of pull request #13
+
+- [x] Rebase the branch on `develop`, after DATA-01 was merged.
+- [x] Update the specs and the design: trusted proxies for the sign-in limit, portfolio filter for listings, last administrator under concurrency, and the known limitations of password reset and SameSite.
+- [x] Red: developer writes the failing tests for each new scenario and runs them.
+- [x] Green: implement the minimal code and regenerate `openapi.json`.
+- [x] Refactor: keep every test green.
+- [x] Record the known limitations in the ADR.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate add-authentication-and-users --strict`.

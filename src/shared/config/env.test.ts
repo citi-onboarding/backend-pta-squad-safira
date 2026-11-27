@@ -43,4 +43,23 @@ describe("parseEnvironment", () => {
       parseEnvironment({ ...validEnvironment, SESSION_SECRET: "too-short" }),
     ).toThrow();
   });
+
+  it("trusts no proxy by default", () => {
+    expect(parseEnvironment(validEnvironment).TRUST_PROXY).toBe(0);
+  });
+
+  it("reads the number of trusted proxies", () => {
+    expect(
+      parseEnvironment({ ...validEnvironment, TRUST_PROXY: "1" }).TRUST_PROXY,
+    ).toBe(1);
+  });
+
+  it("rejects a number of trusted proxies that is not a whole number", () => {
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, TRUST_PROXY: "-1" }),
+    ).toThrow();
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, TRUST_PROXY: "true" }),
+    ).toThrow();
+  });
 });

@@ -44,6 +44,13 @@ The project manager asked for the salesperson-code validation on update and for 
 - Sign-in limit: a dedicated `express-rate-limit` instance on `POST /auth/login` allows 10 attempts per minute per IP address and answers 429. Unlike the global limit, it also runs in tests, so the limit itself is tested; tests that sign in many times receive a higher limit through the application options.
 - The ADR already records that a copied cookie stays valid until it expires (Consequences, Negative), so it does not change.
 
+### Adjustments from the second review of pull request #13
+
+- Trusted proxies: `TRUST_PROXY` (a whole number, default `0`) is passed to Express's `trust proxy` setting. With `0`, the sign-in limit counts the address of the connection and ignores `X-Forwarded-For`, so a client cannot dodge the limit by sending the header. Behind a reverse proxy in production, it must be set to the number of proxies; otherwise every user shares the proxy's address and the same 10 attempts per minute.
+- Portfolio filter for listings: `clientPortfolioFilter(user)` in `src/shared/http/require-role.ts` returns the client filter for a user: `{}` for the sales manager and the finance role, `{ codigoVendedor }` for a salesperson, and `null` (no client) for a salesperson without a code and for the administrator. It applies the same rule as `canAccessClient` to lists and searches (BACK-05).
+- Last administrator under concurrency: the check and the update run in one database transaction that first locks the rows of the active administrators (`SELECT ... FOR UPDATE`). Two administrators who deactivate each other at the same time are serialized, and the second change sees only one active administrator left and answers 409.
+- The OpenAPI summary of `PATCH /users/{id}` mentions the salesperson code.
+
 ## Rejected alternatives
 
 - Session table in the database: it gives a real server-side sign-out, but it needs a new migration and an extra schema review that would delay FRONT-01 and BACK-05. Rejected by the project manager.
@@ -54,6 +61,8 @@ The project manager asked for the salesperson-code validation on update and for 
 ## Known limitations
 
 - A cookie copied before sign-out stays valid until it expires, at most 8 hours after its last use. The database check on every request limits the impact, because deactivating the user blocks it immediately.
+- Resetting a password does not end the sessions that are already open. If a password leaks, the administrator must deactivate the user, reset the password, and keep the user inactive for 8 hours before reactivating them, so every copied cookie expires.
+- The cookie is SameSite=Lax, so the browser sends it only when the web app and the API are on the same site (the same registrable domain, such as `portal.distrilux.com.br` and `api.distrilux.com.br`). Hosting them on different sites, such as two different `*.vercel.app` or `*.onrender.com` names, breaks sign-in.
 
 ## Open points for the team
 

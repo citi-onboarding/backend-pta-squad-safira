@@ -1,8 +1,9 @@
 import type { Database } from "../../shared/database/create-database.js";
 import type { Papel } from "../../shared/database/generated/enums.js";
-import { UserConflictError } from "./users.service.js";
+import { LastAdministratorError, UserConflictError } from "./users.service.js";
 import type {
   NewUserData,
+  UpdateOptions,
   UserChanges,
   UserRecord,
   UsersRepository,
@@ -79,12 +80,6 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  countActiveAdministrators(): Promise<number> {
-    return this.database.usuario.count({
-      where: { papel: "ADMINISTRADOR", ativo: true },
-    });
-  }
-
   findByEmail(email: string): Promise<UserRecord | null> {
     return this.database.usuario.findUnique({
       where: { email },
@@ -107,23 +102,42 @@ export class PrismaUsersRepository implements UsersRepository {
     }
   }
 
-  async update(id: string, changes: UserChanges): Promise<UserRecord | null> {
-    let count: number;
+  async update(
+    id: string,
+    changes: UserChanges,
+    { keepAnActiveAdministrator }: UpdateOptions,
+  ): Promise<UserRecord | null> {
     try {
-      ({ count } = await this.database.usuario.updateMany({
-        where: { id },
-        data: toUpdateData(changes),
-      }));
+      return await this.database.$transaction(async (transaction) => {
+        if (keepAnActiveAdministrator) {
+          // Locks the active administrators: a simultaneous change waits for
+          // this transaction and then sees the administrators it left active.
+          const administrators = await transaction.$queryRaw<{ id: string }[]>`
+            SELECT "id" FROM "Usuario"
+            WHERE "papel" = 'ADMINISTRADOR' AND "ativo"
+            FOR UPDATE`;
+          if (
+            !administrators.some((administrator) => administrator.id !== id)
+          ) {
+            throw new LastAdministratorError();
+          }
+        }
+
+        const { count } = await transaction.usuario.updateMany({
+          where: { id },
+          data: toUpdateData(changes),
+        });
+        if (count === 0) {
+          return null;
+        }
+        return transaction.usuario.findUnique({
+          where: { id },
+          select: userFields,
+        });
+      });
     } catch (error) {
       throw toConflict(error);
     }
-    if (count === 0) {
-      return null;
-    }
-    return this.database.usuario.findUnique({
-      where: { id },
-      select: userFields,
-    });
   }
 
   async updatePasswordHash(id: string, senhaHash: string): Promise<boolean> {

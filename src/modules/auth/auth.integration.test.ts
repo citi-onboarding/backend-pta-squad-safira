@@ -60,6 +60,7 @@ describe("authentication with PostgreSQL", () => {
       CORS_ORIGINS: "http://localhost:5173",
       DATABASE_URL: databaseUrl,
       SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
+      TRUST_PROXY: 0,
       corsOrigins: ["http://localhost:5173"],
     };
     app = createApp({ database, environment });

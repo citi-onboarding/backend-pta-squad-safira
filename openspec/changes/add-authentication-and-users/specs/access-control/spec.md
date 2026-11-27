@@ -31,7 +31,7 @@ The system SHALL start a session when an active user signs in with a registered 
 
 ### Requirement: Sign-in attempt limit
 
-The system SHALL accept at most 10 sign-in attempts per minute from the same IP address, counting successful and failed attempts.
+The system SHALL accept at most 10 sign-in attempts per minute from the same IP address, counting successful and failed attempts. The IP address MUST be the address of the connection, unless a number of trusted proxies is configured; only then SHALL the address forwarded by those proxies be used.
 
 #### Scenario: Too many attempts
 
@@ -42,6 +42,16 @@ The system SHALL accept at most 10 sign-in attempts per minute from the same IP 
 
 - **WHEN** the same IP address sends 10 sign-in attempts within one minute
 - **THEN** every attempt is answered normally (200 or 401)
+
+#### Scenario: Clients behind a trusted proxy
+
+- **WHEN** one trusted proxy is configured and two clients behind it, with different forwarded addresses, sign in
+- **THEN** each client has its own limit
+
+#### Scenario: Forwarded address without a trusted proxy
+
+- **WHEN** no trusted proxy is configured and a request sends a forwarded address
+- **THEN** the forwarded address is ignored and the attempt counts against the address of the connection
 
 ### Requirement: Current user
 
@@ -146,3 +156,18 @@ A salesperson MUST only access clients whose ERP salesperson code matches the sa
 
 - **WHEN** an administrator tries to access any client
 - **THEN** access is denied, because PRD section 4.2 does not give this role access to clients
+
+#### Scenario: Salesperson lists clients
+
+- **WHEN** a salesperson lists or searches clients
+- **THEN** only clients whose salesperson code matches the salesperson's own code are included
+
+#### Scenario: Manager or finance lists clients
+
+- **WHEN** a sales manager or a finance user lists or searches clients
+- **THEN** clients of every portfolio are included
+
+#### Scenario: Listing without a portfolio
+
+- **WHEN** a salesperson without a salesperson code, or an administrator, lists or searches clients
+- **THEN** no client is included

@@ -126,6 +126,11 @@ The system SHALL let an administrator change a user's name, role, active flag, a
 - **WHEN** an administrator deactivates the only active administrator, or changes its role, including their own account
 - **THEN** the system responds 409 and changes nothing
 
+#### Scenario: Two administrators deactivate each other at the same time
+
+- **WHEN** the only two active administrators deactivate each other at the same time
+- **THEN** one change is applied, the other is refused, and one active administrator remains
+
 ### Requirement: Reset a password
 
 The system SHALL let an administrator set a new password for a user. The new password MUST have at least 8 characters. After the reset, only the new password MUST work.

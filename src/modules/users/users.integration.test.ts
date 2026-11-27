@@ -64,6 +64,7 @@ describe("user management with PostgreSQL", () => {
       CORS_ORIGINS: "http://localhost:5173",
       DATABASE_URL: databaseUrl,
       SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
+      TRUST_PROXY: 0,
       corsOrigins: ["http://localhost:5173"],
     };
     // These tests sign in more than 10 times a minute; the 10-attempt limit
@@ -323,6 +324,68 @@ describe("user management with PostgreSQL", () => {
       .send({ papel: "GERENTE" })
       .expect(200);
     expect(left.body.codigoVendedor).toBe("V20");
+  });
+
+  it("keeps one active administrator when the last two deactivate each other at the same time", async () => {
+    const senha = "admin-password";
+    const senhaHash = await hashPassword(senha);
+
+    // A few rounds, so the two requests really overlap at least once.
+    for (const round of [1, 2, 3]) {
+      const [first, second] = await Promise.all(
+        ["a", "b"].map((suffix) =>
+          database.usuario.create({
+            data: {
+              nome: `Admin ${suffix}${String(round)}`,
+              email: `admin-${suffix}${String(round)}@distrilux.com.br`,
+              senhaHash,
+              papel: "ADMINISTRADOR",
+            },
+          }),
+        ),
+      );
+      if (first === undefined || second === undefined) {
+        throw new Error("Both administrators must be created.");
+      }
+      await database.usuario.updateMany({
+        where: {
+          papel: "ADMINISTRADOR",
+          id: { notIn: [first.id, second.id] },
+        },
+        data: { ativo: false },
+      });
+      const firstAgent = request.agent(app);
+      const secondAgent = request.agent(app);
+      await firstAgent
+        .post("/auth/login")
+        .send({ email: first.email, senha })
+        .expect(200);
+      await secondAgent
+        .post("/auth/login")
+        .send({ email: second.email, senha })
+        .expect(200);
+
+      const responses = await Promise.all([
+        firstAgent.patch(`/users/${second.id}`).send({ ativo: false }),
+        secondAgent.patch(`/users/${first.id}`).send({ ativo: false }),
+      ]);
+
+      const statuses = responses.map((response) => response.status).sort();
+      expect(statuses[0]).toBe(200);
+      // The refused request answers 409, or 401 when its author was already
+      // deactivated by the other request.
+      expect([401, 409]).toContain(statuses[1]);
+      await expect(
+        database.usuario.count({
+          where: { papel: "ADMINISTRADOR", ativo: true },
+        }),
+      ).resolves.toBe(1);
+    }
+
+    await database.usuario.update({
+      where: { email: admin.email },
+      data: { ativo: true },
+    });
   });
 
   // Runs last: it leaves Lucas as the only active administrator.

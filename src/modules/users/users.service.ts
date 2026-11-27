@@ -32,14 +32,23 @@ export interface CreateUserInput {
   codigoVendedor?: string | null | undefined;
 }
 
+export interface UpdateOptions {
+  // Refuse the change with LastAdministratorError when no other active
+  // administrator would remain. Checked in the same transaction as the update.
+  keepAnActiveAdministrator: boolean;
+}
+
 export interface UsersRepository {
   list(): Promise<UserRecord[]>;
   findById(id: string): Promise<UserRecord | null>;
   findByEmail(email: string): Promise<UserRecord | null>;
-  countActiveAdministrators(): Promise<number>;
   findBySalespersonCode(code: string): Promise<UserRecord | null>;
   create(data: NewUserData): Promise<UserRecord>;
-  update(id: string, changes: UserChanges): Promise<UserRecord | null>;
+  update(
+    id: string,
+    changes: UserChanges,
+    options: UpdateOptions,
+  ): Promise<UserRecord | null>;
   updatePasswordHash(id: string, senhaHash: string): Promise<boolean>;
 }
 
@@ -125,14 +134,10 @@ export class UsersService {
       current.papel === "ADMINISTRADOR" &&
       current.ativo &&
       (papel !== "ADMINISTRADOR" || !ativo);
-    if (
-      losesAnAdministrator &&
-      (await this.repository.countActiveAdministrators()) <= 1
-    ) {
-      throw new LastAdministratorError();
-    }
 
-    return this.repository.update(id, changes);
+    return this.repository.update(id, changes, {
+      keepAnActiveAdministrator: losesAnAdministrator,
+    });
   }
 
   async resetPassword(id: string, senha: string): Promise<boolean> {

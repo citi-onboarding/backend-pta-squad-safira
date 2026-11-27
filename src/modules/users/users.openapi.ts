@@ -55,7 +55,7 @@ openApiRegistry.registerPath({
   method: "patch",
   path: "/users/{id}",
   tags: ["Users"],
-  summary: "Change a user's name, role, or active flag",
+  summary: "Change a user's name, role, active flag, or salesperson code",
   request: {
     params: userIdSchema,
     body: {

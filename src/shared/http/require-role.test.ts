@@ -8,6 +8,7 @@ import { problemHandler } from "./problem.js";
 import type { SessionUser } from "./require-role.js";
 import {
   canAccessClient,
+  clientPortfolioFilter,
   createAuthenticate,
   requireRole,
   SESSION_COOKIE_NAME,
@@ -193,5 +194,34 @@ describe("salesperson portfolio", () => {
     expect(
       canAccessClient({ papel: "ADMINISTRADOR", codigoVendedor: null }, "V01"),
     ).toBe(false);
+  });
+});
+
+describe("salesperson portfolio filter for client lists", () => {
+  it("limits a salesperson to the clients with their own code", () => {
+    expect(
+      clientPortfolioFilter({ papel: "VENDEDOR", codigoVendedor: "V01" }),
+    ).toEqual({ codigoVendedor: "V01" });
+  });
+
+  it.each(["GERENTE", "FINANCEIRO"] as const)(
+    "includes the clients of every portfolio for %s",
+    (papel) => {
+      expect(clientPortfolioFilter({ papel, codigoVendedor: null })).toEqual(
+        {},
+      );
+    },
+  );
+
+  it("includes no client for a salesperson without a code", () => {
+    expect(
+      clientPortfolioFilter({ papel: "VENDEDOR", codigoVendedor: null }),
+    ).toBeNull();
+  });
+
+  it("includes no client for the administrator", () => {
+    expect(
+      clientPortfolioFilter({ papel: "ADMINISTRADOR", codigoVendedor: "V01" }),
+    ).toBeNull();
   });
 });
