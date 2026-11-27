@@ -16,6 +16,7 @@ import { AuthService } from "../modules/auth/auth.service.js";
 import { PrismaSyncRepository } from "../modules/sync/sync.repository.js";
 import { createSyncRouter } from "../modules/sync/sync.router.js";
 import { startSyncSchedule } from "../modules/sync/sync.schedule.js";
+import type { SyncSchedule } from "../modules/sync/sync.schedule.js";
 import { SyncService } from "../modules/sync/sync.service.js";
 import { PrismaUsersRepository } from "../modules/users/users.repository.js";
 import { createUsersRouter } from "../modules/users/users.router.js";
@@ -28,6 +29,13 @@ import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
 import { createAuthenticate } from "../shared/http/require-role.js";
 import { createLogger } from "../shared/logging/logger.js";
 import { hashPassword, verifyPassword } from "../shared/security/password.js";
+
+// The schedule each app started, so the server can stop it on shutdown.
+const syncSchedules = new WeakMap<Express, SyncSchedule>();
+
+export function syncScheduleOf(app: Express): SyncSchedule | undefined {
+  return syncSchedules.get(app);
+}
 
 interface CreateAppOptions {
   /** Injected for upcoming synchronizers and order submission routes. */
@@ -143,6 +151,7 @@ export function createApp({
   const syncService = new SyncService({
     erpClient,
     repository: new PrismaSyncRepository(database),
+    logger,
   });
   app.use("/sync", createSyncRouter({ syncService, authenticate }));
   app.use(notFoundHandler);
@@ -156,9 +165,7 @@ export function createApp({
         logger.error({ err: error }, "ERP synchronization run failed");
       },
     });
-    app.locals.stopSyncSchedule = () => {
-      schedule.stop();
-    };
+    syncSchedules.set(app, schedule);
   }
 
   return app;

@@ -8,7 +8,8 @@ interface SyncScheduleOptions {
 }
 
 export interface SyncSchedule {
-  stop(): void;
+  /** Stops the timers and settles when the run in progress has finished. */
+  stop(): Promise<void>;
 }
 
 export function startSyncSchedule({
@@ -16,18 +17,27 @@ export function startSyncSchedule({
   intervalMs,
   onError,
 }: SyncScheduleOptions): SyncSchedule {
+  const inFlight = new Set<Promise<void>>();
+
   const tick = () => {
-    run().catch((error: unknown) => {
-      onError?.(error);
-    });
+    const current = run()
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        onError?.(error);
+      })
+      .finally(() => {
+        inFlight.delete(current);
+      });
+    inFlight.add(current);
   };
   const first = setTimeout(tick, 0);
   const every = setInterval(tick, intervalMs);
 
   return {
-    stop() {
+    async stop() {
       clearTimeout(first);
       clearInterval(every);
+      await Promise.all(inFlight);
     },
   };
 }

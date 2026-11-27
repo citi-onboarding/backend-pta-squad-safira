@@ -6,13 +6,13 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import type { Database } from "../../shared/database/create-database.js";
 import { PrismaSyncRepository } from "./sync.repository.js";
-import { SyncService } from "./sync.service.js";
+import { SyncService, toClienteData } from "./sync.service.js";
 import {
   erpCliente,
   erpProduto,
   many,
   simulatedErp,
-} from "../../../tests/sync/sync-test-doubles.js";
+} from "./sync-test-doubles.js";
 
 const T10 = new Date("2026-11-27T10:00:00.000Z");
 const T11 = new Date("2026-11-27T11:00:00.000Z");
@@ -165,13 +165,13 @@ describe("client and product sync with PostgreSQL", () => {
         itensLidos: 120,
         erros: 0,
         detalhe: null,
-        relatorio: { itensAlterados: 120 },
+        relatorio: { itensAlterados: 120, itensIgnorados: [] },
       }),
       expect.objectContaining({
         tipo: "SINCRONIZACAO_PRODUTOS",
         resultado: "SUCESSO",
         itensLidos: 60,
-        relatorio: { itensAlterados: 60 },
+        relatorio: { itensAlterados: 60, itensIgnorados: [] },
       }),
     ]);
     await expect(service(fullErp()).status()).resolves.toEqual({
@@ -230,28 +230,59 @@ describe("client and product sync with PostgreSQL", () => {
     await expect(database.cliente.count()).resolves.toBe(120);
   });
 
-  it("writes nothing of a page that fails, and records the failure", async () => {
-    const erp = simulatedErp({
-      clientes: [erpCliente(1), erpCliente(2, { cnpj: erpCliente(1).cnpj })],
-      produtos: [erpProduto(1)],
+  it("skips a client with a CNPJ already in use and keeps every other one, run after run", async () => {
+    // Changed after every run below, so the ERP sends them again each time.
+    const later = { atualizadoEm: "2026-11-27T13:00:00.000Z" };
+    const clientes = many(120, (index) => erpCliente(index, later));
+    clientes[1] = erpCliente(2, { ...later, cnpj: erpCliente(1).cnpj });
+    const erp = simulatedErp({ clientes, produtos: [erpProduto(1)] });
+
+    for (const moment of [T10, T11]) {
+      await service(erp, () => moment).runOnce();
+    }
+
+    await expect(database.cliente.count()).resolves.toBe(119);
+    const runs = await database.registroSincronizacao.findMany({
+      where: { tipo: "SINCRONIZACAO_CLIENTES" },
+      orderBy: { iniciouEm: "asc" },
     });
-
-    await service(erp).runOnce();
-
-    await expect(database.cliente.count()).resolves.toBe(0);
-    await expect(
-      database.registroSincronizacao.findFirstOrThrow({
-        where: { tipo: "SINCRONIZACAO_CLIENTES" },
+    expect(runs).toEqual([
+      expect.objectContaining({
+        resultado: "PARCIAL",
+        itensLidos: 120,
+        erros: 1,
+        pendencias: 1,
+        relatorio: expect.objectContaining({
+          itensIgnorados: [
+            { codigo: "C002", motivo: "PrismaClientKnownRequestError P2002" },
+          ],
+        }) as unknown,
       }),
-    ).resolves.toMatchObject({ resultado: "FALHA", erros: 1 });
-    await expect(database.produto.count()).resolves.toBe(1);
+      expect.objectContaining({ resultado: "PARCIAL" }),
+    ]);
+  });
+
+  it("refuses an on-demand write while a run is in progress", async () => {
+    await database.registroSincronizacao.create({
+      data: {
+        tipo: "SINCRONIZACAO_CLIENTES",
+        iniciouEm: T10,
+        resultado: "EM_ANDAMENTO",
+      },
+    });
+    const repository = new PrismaSyncRepository(database);
+
+    await expect(
+      repository.saveClienteOnDemand(toClienteData(erpCliente(1)), T10),
+    ).resolves.toBe(false);
+    await expect(database.cliente.count()).resolves.toBe(0);
   });
 
   it("makes one client inactive", async () => {
     await service(fullErp()).runOnce();
 
     await expect(
-      new PrismaSyncRepository(database).deactivateCliente("C001"),
+      new PrismaSyncRepository(database).deactivateClienteOnDemand("C001", T10),
     ).resolves.toBe(true);
     await expect(
       database.cliente.findUniqueOrThrow({ where: { codigoErp: "C001" } }),

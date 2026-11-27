@@ -30,10 +30,17 @@ openApiRegistry.registerPath({
       description: "Client synchronized",
       content: { "application/json": { schema: clienteSyncResultSchema } },
     },
+    400: { description: "Invalid client code" },
     401: { description: "No valid session" },
     403: { description: "Only the Administrator role may trigger it" },
     404: { description: "The ERP has no client with this code" },
-    409: { description: "A synchronization is already in progress" },
-    503: { description: "The ERP is unavailable" },
+    409: {
+      description:
+        "A synchronization is already in progress, or the ERP reported a conflict",
+    },
+    422: { description: "The ERP refused the request" },
+    503: {
+      description: "The ERP is unavailable or its usage limit was reached",
+    },
   },
 });

@@ -4,7 +4,10 @@ import request from "supertest";
 import { describe, expect, it, vi } from "vitest";
 
 import type { Papel } from "../../shared/database/generated/enums.js";
-import { ErpIndisponivelError } from "../../shared/erp/erp-client.service.js";
+import {
+  ErpIndisponivelError,
+  ErpRecusouError,
+} from "../../shared/erp/erp-client.service.js";
 import { problemHandler } from "../../shared/http/problem.js";
 import {
   createAuthenticate,
@@ -155,5 +158,27 @@ describe("POST /sync/clientes/:codigo", () => {
     expect(response.headers["content-type"]).toContain(
       "application/problem+json",
     );
+  });
+
+  it("responds 400 for a code longer than 40 characters", async () => {
+    const { app, syncService } = createTestApp();
+
+    await request(app)
+      .post(`/sync/clientes/${"C".repeat(41)}`)
+      .set("Cookie", await sessionCookie())
+      .expect(400);
+    expect(syncService.syncCliente).not.toHaveBeenCalled();
+  });
+
+  it("responds 422 when the ERP refuses the request for another reason", async () => {
+    const { app, syncService } = createTestApp();
+    syncService.syncCliente.mockRejectedValueOnce(
+      new ErpRecusouError(400, "Código inválido."),
+    );
+
+    await request(app)
+      .post("/sync/clientes/C001")
+      .set("Cookie", await sessionCookie())
+      .expect(422);
   });
 });

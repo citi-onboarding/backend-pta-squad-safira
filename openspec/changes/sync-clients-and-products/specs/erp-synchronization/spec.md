@@ -2,7 +2,7 @@
 
 ### Requirement: Full load on the first run
 
-When there is no successful run of a type yet, the synchronization SHALL read every page of clients (or products) from the ERP without a change filter and write them all. A client or product that exists in the portal but is not in that full load SHALL become inactive (client status `INATIVO`, product `ativo = false`) and MUST NOT be deleted.
+When there is no successful run of a type yet, the synchronization SHALL read every page of clients (or products) from the ERP without a change filter and write them all. A client or product that exists in the portal but is not in that full load SHALL become inactive (client status `INATIVO`, product `ativo = false`) and MUST NOT be deleted. Items SHALL be made inactive only when the full load read at least one item and exactly as many distinct items as the ERP's total, and that total did not change between pages; otherwise nothing is made inactive and the run is recorded as `FALHA`, so the next run repeats the full load.
 
 #### Scenario: Empty portal
 
@@ -13,6 +13,11 @@ When there is no successful run of a type yet, the synchronization SHALL read ev
 
 - **WHEN** the portal has a product that the full load does not bring
 - **THEN** that product stays in the portal with `ativo = false`
+
+#### Scenario: Incomplete full load
+
+- **WHEN** a full load reads no item, or the ERP's total changes between pages
+- **THEN** no client or product is made inactive, and the run is recorded as `FALHA`
 
 ### Requirement: Incremental runs
 
@@ -42,6 +47,15 @@ Clients and products SHALL be written by their ERP code, so that running the syn
 - **WHEN** the ERP sends a client with status `BLOQUEADO`
 - **THEN** the portal stores that client with status `BLOQUEADO`
 
+### Requirement: An item that cannot be written does not block the others
+
+When a page cannot be written as a whole (for example, two ERP clients with the same CNPJ), the synchronization SHALL write its items one by one, skip only the items that fail, and go on with the next pages. The run SHALL be recorded as `PARCIAL`, with the number of skipped items in `erros` and `pendencias` and each skipped ERP code with the reason in the report, without personal data. A `PARCIAL` run moves the incremental start like a successful one, so later changes keep arriving; a skipped item is tried again when it changes in the ERP.
+
+#### Scenario: Two clients with the same CNPJ
+
+- **WHEN** the first page has two clients with the same CNPJ and the run is repeated on later hours
+- **THEN** every other client of every page is written, the second of the two is skipped and recorded with its ERP code, each run is `PARCIAL`, and the next run asks for changes since the start of the previous one
+
 ### Requirement: Data stays available when the ERP fails
 
 Each page SHALL be written in its own transaction. When the ERP is unavailable or its usage limit persists after the ERP client's waits, the run SHALL stop, keep the pages already written and the data the portal had before, record the failure, and leave the next run to start from the same point.
@@ -56,9 +70,14 @@ Each page SHALL be written in its own transaction. When the ERP is unavailable o
 - **WHEN** the ERP answers a page with `429` and `Retry-After`, and then with the page
 - **THEN** the run waits, completes with result `SUCESSO`, and every item of that page is written exactly once
 
+#### Scenario: Usage limit exhausted in the middle of a run
+
+- **WHEN** the ERP keeps answering `429` on the second page until the ERP client gives up, and a later run finds the limit released
+- **THEN** the first run is recorded as `FALHA` with the first page kept, and the later run completes with the same number of rows as an uninterrupted run, without duplicates
+
 ### Requirement: Run record
 
-Every scheduled run SHALL write one `RegistroSincronizacao` row for clients and one for products, with the type, start, end, result (`SUCESSO` or `FALHA`), items read, number of errors, a safe error detail when it fails, and the number of changed items in the row's report. The detail MUST NOT contain the ERP key or response bodies.
+Every scheduled run SHALL write one `RegistroSincronizacao` row for clients and one for products. The row is created as `EM_ANDAMENTO` when the run starts and ends with the type, start, end, result (`SUCESSO`, `PARCIAL`, or `FALHA`), the items read from the ERP (counted even when their page could not be written), the number of errors, a safe error detail when it fails, and the number of changed items in the row's report. The detail MUST NOT contain the ERP key or response bodies. Each finished type SHALL also be logged with its result, counts, duration, and safe detail.
 
 #### Scenario: Successful run
 
@@ -68,16 +87,26 @@ Every scheduled run SHALL write one `RegistroSincronizacao` row for clients and 
 #### Scenario: Failed run
 
 - **WHEN** a product run fails because the ERP is unavailable
-- **THEN** its row has type `SINCRONIZACAO_PRODUTOS`, result `FALHA`, 1 error, and a detail naming the failure without the ERP key
+- **THEN** its row has type `SINCRONIZACAO_PRODUTOS`, result `FALHA`, 1 error, and a detail naming the failure without the ERP key, and the client run of the same execution is not affected
 
 ### Requirement: Hourly schedule without overlap
 
-The synchronization SHALL run when the application starts and then at most every hour. Two runs MUST NOT overlap, even across application processes: a run that finds another one in progress SHALL not start.
+The synchronization SHALL run when the application starts and then at least every hour. Two runs MUST NOT overlap, even across application processes: a run that finds another one in progress SHALL not start. A run still `EM_ANDAMENTO` 30 minutes after its start is considered abandoned by a stopped process: the next run records it as `FALHA` and proceeds. When the application stops, it SHALL wait for the run in progress to finish before closing the database, so that no run is left behind by a normal shutdown.
 
 #### Scenario: Run in progress
 
 - **WHEN** a run is triggered while another one is still in progress
 - **THEN** the second trigger does not read the ERP nor write any row
+
+#### Scenario: Abandoned run
+
+- **WHEN** a run is still `EM_ANDAMENTO` 31 minutes after its start
+- **THEN** the next run records it as `FALHA` and runs
+
+#### Scenario: Shutdown during a run
+
+- **WHEN** the application is asked to stop while a run is in progress
+- **THEN** the run finishes and records its result before the database is closed
 
 #### Scenario: Retry after a failure
 
@@ -86,7 +115,7 @@ The synchronization SHALL run when the application starts and then at most every
 
 ### Requirement: Synchronization status
 
-`GET /sync/status` SHALL return `{ ultimaSincronizacaoOk, ultimoResultado }` to any signed-in user. `ultimaSincronizacaoOk` is the end time of the older of the last successful client and product runs, or `null` when either type has never succeeded; `ultimoResultado` is the worse of the latest client and product results (`FALHA` worse than `EM_ANDAMENTO`, worse than `SUCESSO`), or `null` when nothing ran yet.
+`GET /sync/status` SHALL return `{ ultimaSincronizacaoOk, ultimoResultado }` to any signed-in user. `ultimaSincronizacaoOk` is the end time of the older of the last successful (`SUCESSO` or `PARCIAL`) client and product runs, or `null` when either type has never succeeded; `ultimoResultado` is the worse of the latest client and product results (`FALHA` worse than `EM_ANDAMENTO`, worse than `PARCIAL`, worse than `SUCESSO`), or `null` when nothing ran yet.
 
 #### Scenario: Both types succeeded
 
@@ -105,7 +134,7 @@ The synchronization SHALL run when the application starts and then at most every
 
 ### Requirement: On-demand client synchronization
 
-`POST /sync/clientes/:codigo` SHALL let an administrator synchronize one client from the ERP at once, writing it by its ERP code. It MUST NOT write a `RegistroSincronizacao` row. When the ERP no longer has that client, the portal client SHALL become inactive and the route SHALL answer 404. When a scheduled run is in progress, the route SHALL answer 409.
+`POST /sync/clientes/:codigo` SHALL let an administrator synchronize one client from the ERP at once, writing it by its ERP code. It MUST NOT write a `RegistroSincronizacao` row. When the ERP no longer has that client, the portal client SHALL become inactive and the route SHALL answer 404. When a scheduled run is in progress, either before reading the ERP or when writing, the route SHALL answer 409 and write nothing. An invalid code answers 400, and an ERP refusal other than 404 answers 422.
 
 #### Scenario: Administrator synchronizes a client
 
@@ -126,3 +155,8 @@ The synchronization SHALL run when the application starts and then at most every
 
 - **WHEN** an administrator calls the route while a scheduled run is in progress
 - **THEN** the route answers 409
+
+#### Scenario: Scheduled run starts while the ERP is being read
+
+- **WHEN** a scheduled run starts after the on-demand sync checked for runs but before it writes the client
+- **THEN** the on-demand sync writes nothing and answers 409

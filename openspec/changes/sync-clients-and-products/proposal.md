@@ -15,11 +15,11 @@ The portal has no clients and no product catalog until it copies them from the D
 
 ## Impact
 
-- Business: clients and products reach the portal and stay at most one hour behind the ERP.
+- Business: clients and products reach the portal. A change made in the ERP normally appears within the next hourly run (at most about one hour plus the run's duration). After an ERP failure, it appears in the first run after the ERP is back (the next hour), and a large clock difference between the portal and the ERP could skip a change (design, Risks).
 - API: two new routes, published in `openapi.json`. `GET /sync/status` requires a session; `POST /sync/clientes/:codigo` requires the Administrator role. Both rely on the BACK-01 authentication (pull request #13, not merged yet).
 - Database and migrations: none; the change uses `Cliente`, `Produto`, and `RegistroSincronizacao` as merged in DATA-01.
 - Security: the ERP key stays in the shared ERP client; error details recorded or returned never contain it. Only administrators trigger an on-demand sync.
-- Observability: every scheduled run leaves a `RegistroSincronizacao` row per type; logs carry counts and durations only.
+- Observability: every scheduled run leaves a `RegistroSincronizacao` row per type and one log line per type with the result, counts, duration, and a safe detail.
 - Documentation: change summary in `docs/changes/`.
 
 ## In scope
@@ -34,11 +34,12 @@ The portal has no clients and no product catalog until it copies them from the D
 
 ## Decisions taken with the developer
 
-1. The incremental filter starts at the start time of the last successful run of the same type, as the task note says. The DATA-01 schema comment suggests the largest `atualizadoNoErpEm` instead; this difference is reported to the squad manager.
+1. The incremental filter starts at the start time of the last successful (or partial) run of the same type, as the task note says. The DATA-01 schema comment suggests the largest `atualizadoNoErpEm` instead; this difference is reported to the squad manager, and the schema comment (a DATA-01 file) is left as it is until then.
 2. No migration: changed items go in the run's `relatorio`, errors in `erros` and `detalhe`; BACK-04 completes the report.
 3. Missing items are detected only in a full load (the first run).
 4. `GET /sync/status` for any signed-in user; `POST /sync/clientes/:codigo` for administrators only.
 5. The branch is based on BACK-01 with `develop` merged in, because the routes need the BACK-01 authentication and the sync needs the BACK-02 ERP client.
 6. An on-demand client sync writes no `RegistroSincronizacao` row, so it never moves the incremental start; a client the ERP no longer has becomes inactive.
 7. `ultimaSincronizacaoOk` is the older of the last successful client and product runs; `ultimoResultado` is the worse of their latest results.
-8. File names follow the task tree (`sync.service.ts`); the routes add `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`, like the other modules.
+8. An item that cannot be written is skipped and recorded, and the run ends `PARCIAL` and moves the incremental start, so one bad ERP record never stops the synchronization.
+9. File names follow the task tree (`sync.service.ts`); the routes add `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`, like the other modules.

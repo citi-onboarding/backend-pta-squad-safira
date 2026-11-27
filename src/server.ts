@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import { createServer } from "node:http";
 
-import { createApp } from "./app/create-app.js";
+import { createApp, syncScheduleOf } from "./app/create-app.js";
 import { env } from "./shared/config/env.js";
 import { createDatabase } from "./shared/database/create-database.js";
 import { createErpClient } from "./shared/erp/erp-client.service.js";
@@ -33,8 +33,10 @@ server.listen(env.SERVER_PORT, env.SERVER_HOST, () => {
 
 function shutdown(signal: NodeJS.Signals) {
   logger.info({ signal }, "Graceful shutdown started");
-  (app.locals.stopSyncSchedule as (() => void) | undefined)?.();
   server.close(async (error) => {
+    // Let the run in progress finish and record its result before closing
+    // the database, so no run is left EM_ANDAMENTO by a normal shutdown.
+    await syncScheduleOf(app)?.stop();
     await database.$disconnect();
     if (error) {
       logger.error({ err: error }, "Server shutdown failed");

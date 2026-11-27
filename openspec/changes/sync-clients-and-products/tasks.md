@@ -30,3 +30,10 @@
 - [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate sync-clients-and-products --strict`.
 - [x] Write `docs/changes/sync-clients-and-products.md` from the template and evaluate the ADR.
 - [ ] Open the pull request to `develop`, noting the base on BACK-01 and the merge of `develop`.
+
+## Review fixes
+
+- [x] Specify skipped items (`PARCIAL`), the full-load guard, items read counted before writing, the on-demand sync under the lock, shutdown waiting for the run, logs, the abandoned run, the usage limit exhausted mid-run, 400 and 422 on the on-demand route, and the real freshness bound.
+- [x] Red: developer writes the failing tests (duplicated CNPJ in unit and integration, full-load guard, items read, on-demand race, product failure, usage limit exhausted, `finishRun` failure, schedule stop waiting, logs without the key, routes 400 and 422).
+- [x] Green: implement, use tagged `$executeRaw`, expose the schedule through `syncScheduleOf(app)` instead of an untyped `app.locals`, keep the test doubles in `src/` excluded from the build, document the new statuses, add `SESSION_SECRET` to `scripts/test-container.mjs`, and write ADR-0003.
+- [x] Refactor and run all gates, including `pnpm test:container`.

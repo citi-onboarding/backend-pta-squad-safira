@@ -4,9 +4,9 @@ import type {
   ErpCliente,
   ErpPageQuery,
   ErpProduto,
-} from "../../src/shared/erp/erp-client.schemas.js";
-import type { ErpClient } from "../../src/shared/erp/erp-client.service.js";
-import { ErpRecusouError } from "../../src/shared/erp/erp-client.service.js";
+} from "../../shared/erp/erp-client.schemas.js";
+import type { ErpClient } from "../../shared/erp/erp-client.service.js";
+import { ErpRecusouError } from "../../shared/erp/erp-client.service.js";
 import type {
   ClienteData,
   ProdutoData,
@@ -14,7 +14,7 @@ import type {
   SyncRepository,
   SyncStatusSnapshot,
   SyncType,
-} from "../../src/modules/sync/sync.service.js";
+} from "./sync.service.js";
 
 // Test doubles for the sync service: an in-memory repository (the database is
 // an external dependency) and a simulated ERP. The service itself is real.
@@ -119,6 +119,20 @@ interface StoredRun extends RunOutcome {
   terminouEm: Date | null;
 }
 
+// Mirrors the error Prisma throws when a unique column (such as CNPJ)
+// already holds the value.
+export function uniqueViolation(): Error {
+  return Object.assign(
+    new Error("Unique constraint failed on the fields: (`cnpj`)"),
+    {
+      name: "PrismaClientKnownRequestError",
+      code: "P2002",
+    },
+  );
+}
+
+const SUCCESSFUL = new Set(["SUCESSO", "PARCIAL"]);
+
 export class InMemorySyncRepository implements SyncRepository {
   readonly clientes = new Map<string, ClienteData>();
   readonly produtos = new Map<string, ProdutoData>();
@@ -143,6 +157,17 @@ export class InMemorySyncRepository implements SyncRepository {
   }
 
   saveClientes(rows: ClienteData[]): Promise<void> {
+    // Like the unique CNPJ column, and like one transaction: all or nothing.
+    const owners = new Map(
+      [...this.clientes.values()].map((row) => [row.cnpj, row.codigoErp]),
+    );
+    for (const row of rows) {
+      const owner = owners.get(row.cnpj);
+      if (owner !== undefined && owner !== row.codigoErp) {
+        return Promise.reject(uniqueViolation());
+      }
+      owners.set(row.cnpj, row.codigoErp);
+    }
     for (const row of rows) this.clientes.set(row.codigoErp, { ...row });
     this.savedPages.push({
       tipo: "SINCRONIZACAO_CLIENTES",
@@ -182,16 +207,22 @@ export class InMemorySyncRepository implements SyncRepository {
     return Promise.resolve(count);
   }
 
-  deactivateCliente(codigo: string): Promise<boolean> {
+  async saveClienteOnDemand(row: ClienteData): Promise<boolean> {
+    if (await this.isRunInProgress()) return false;
+    await this.saveClientes([row]);
+    return true;
+  }
+
+  async deactivateClienteOnDemand(codigo: string): Promise<boolean> {
+    if (await this.isRunInProgress()) return false;
     const row = this.clientes.get(codigo);
-    if (!row) return Promise.resolve(false);
-    this.clientes.set(codigo, { ...row, status: "INATIVO" });
-    return Promise.resolve(true);
+    if (row) this.clientes.set(codigo, { ...row, status: "INATIVO" });
+    return true;
   }
 
   lastSuccessfulStart(tipo: SyncType): Promise<Date | null> {
     const success = this.runs
-      .filter((run) => run.tipo === tipo && run.resultado === "SUCESSO")
+      .filter((run) => run.tipo === tipo && SUCCESSFUL.has(run.resultado))
       .at(-1);
     return Promise.resolve(success?.iniciouEm ?? null);
   }
@@ -214,7 +245,9 @@ export class InMemorySyncRepository implements SyncRepository {
         resultado: "EM_ANDAMENTO",
         itensLidos: 0,
         itensAlterados: 0,
+        itensIgnorados: [],
         erros: 0,
+        pendencias: 0,
         detalhe: null,
       });
     }
@@ -241,7 +274,7 @@ export class InMemorySyncRepository implements SyncRepository {
     const of = (tipo: SyncType) => {
       const ofType = this.runs.filter((run) => run.tipo === tipo);
       const lastSuccess = ofType
-        .filter((run) => run.resultado === "SUCESSO")
+        .filter((run) => SUCCESSFUL.has(run.resultado))
         .at(-1);
       return {
         latestResult: ofType.at(-1)?.resultado ?? null,

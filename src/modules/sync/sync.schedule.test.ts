@@ -20,7 +20,7 @@ describe("startSyncSchedule", () => {
     await vi.advanceTimersByTimeAsync(HOUR);
     expect(run).toHaveBeenCalledTimes(2);
 
-    schedule.stop();
+    await schedule.stop();
     await vi.advanceTimersByTimeAsync(3 * HOUR);
     expect(run).toHaveBeenCalledTimes(2);
   });
@@ -38,6 +38,30 @@ describe("startSyncSchedule", () => {
 
     expect(onError).toHaveBeenCalledTimes(1);
     expect(run).toHaveBeenCalledTimes(2);
-    schedule.stop();
+    await schedule.stop();
+  });
+
+  it("waits for the run in progress when stopped", async () => {
+    vi.useFakeTimers();
+    let finish: () => void = () => undefined;
+    const run = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const schedule = startSyncSchedule({ run, intervalMs: HOUR });
+    await vi.advanceTimersByTimeAsync(0);
+
+    let stopped = false;
+    const stopping = schedule.stop().then(() => {
+      stopped = true;
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(stopped).toBe(false);
+
+    finish();
+    await stopping;
+    expect(stopped).toBe(true);
   });
 });

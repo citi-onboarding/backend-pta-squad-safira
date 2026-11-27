@@ -1,4 +1,5 @@
 import type { Database } from "../../shared/database/create-database.js";
+import type { ResultadoRegistro } from "../../shared/database/generated/enums.js";
 import type {
   ClienteData,
   ProdutoData,
@@ -16,6 +17,9 @@ const SYNC_TYPES: SyncType[] = [
   "SINCRONIZACAO_CLIENTES",
   "SINCRONIZACAO_PRODUTOS",
 ];
+// Runs that end like this move the incremental start (an item that could not
+// be written is recorded and skipped, see PARCIAL in the design).
+const SUCCESSFUL: ResultadoRegistro[] = ["SUCESSO", "PARCIAL"];
 // A run still in progress after this long was left behind by a crashed process.
 export const ABANDONED_AFTER_MS = 30 * 60 * 1000;
 
@@ -41,6 +45,8 @@ const produtoFields = {
   ativo: true,
   atualizadoNoErpEm: true,
 } as const;
+
+type Transaction = Parameters<Parameters<Database["$transaction"]>[0]>[0];
 
 export class PrismaSyncRepository implements SyncRepository {
   constructor(private readonly database: Database) {}
@@ -99,17 +105,49 @@ export class PrismaSyncRepository implements SyncRepository {
     return count;
   }
 
-  async deactivateCliente(codigo: string): Promise<boolean> {
-    const { count } = await this.database.cliente.updateMany({
-      where: { codigoErp: codigo },
-      data: { status: "INATIVO" },
+  saveClienteOnDemand(row: ClienteData, now: Date): Promise<boolean> {
+    return this.database.$transaction(async (transaction) => {
+      if (await this.lockedAndBusy(transaction, now)) return false;
+      await transaction.cliente.upsert({
+        where: { codigoErp: row.codigoErp },
+        create: row,
+        update: row,
+      });
+      return true;
     });
-    return count > 0;
+  }
+
+  deactivateClienteOnDemand(codigo: string, now: Date): Promise<boolean> {
+    return this.database.$transaction(async (transaction) => {
+      if (await this.lockedAndBusy(transaction, now)) return false;
+      await transaction.cliente.updateMany({
+        where: { codigoErp: codigo },
+        data: { status: "INATIVO" },
+      });
+      return true;
+    });
+  }
+
+  // Takes the same advisory lock as startRun, so a scheduled run cannot start
+  // between this check and the caller's write.
+  private async lockedAndBusy(
+    transaction: Transaction,
+    now: Date,
+  ): Promise<boolean> {
+    await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${SYNC_LOCK_KEY})`;
+    const inProgress = await transaction.registroSincronizacao.count({
+      where: {
+        tipo: { in: SYNC_TYPES },
+        resultado: "EM_ANDAMENTO",
+        iniciouEm: { gte: new Date(now.getTime() - ABANDONED_AFTER_MS) },
+      },
+    });
+    return inProgress > 0;
   }
 
   async lastSuccessfulStart(tipo: SyncType): Promise<Date | null> {
     const run = await this.database.registroSincronizacao.findFirst({
-      where: { tipo, resultado: "SUCESSO" },
+      where: { tipo, resultado: { in: SUCCESSFUL } },
       orderBy: { iniciouEm: "desc" },
       select: { iniciouEm: true },
     });
@@ -120,9 +158,7 @@ export class PrismaSyncRepository implements SyncRepository {
     return this.database.$transaction(async (transaction) => {
       // Serializes the check-and-insert across every API process; the lock is
       // released when this short transaction ends.
-      await transaction.$executeRawUnsafe(
-        `SELECT pg_advisory_xact_lock(${String(SYNC_LOCK_KEY)})`,
-      );
+      await transaction.$executeRaw`SELECT pg_advisory_xact_lock(${SYNC_LOCK_KEY})`;
       await transaction.registroSincronizacao.updateMany({
         where: {
           tipo: { in: SYNC_TYPES },
@@ -173,8 +209,15 @@ export class PrismaSyncRepository implements SyncRepository {
         resultado: outcome.resultado,
         itensLidos: outcome.itensLidos,
         erros: outcome.erros,
+        pendencias: outcome.pendencias,
         detalhe: outcome.detalhe,
-        relatorio: { itensAlterados: outcome.itensAlterados },
+        relatorio: {
+          itensAlterados: outcome.itensAlterados,
+          itensIgnorados: outcome.itensIgnorados.map((item) => ({
+            codigo: item.codigo,
+            motivo: item.motivo,
+          })),
+        },
       },
     });
   }
@@ -208,7 +251,7 @@ export class PrismaSyncRepository implements SyncRepository {
         select: { resultado: true },
       }),
       this.database.registroSincronizacao.findFirst({
-        where: { tipo, resultado: "SUCESSO" },
+        where: { tipo, resultado: { in: SUCCESSFUL } },
         orderBy: { iniciouEm: "desc" },
         select: { terminouEm: true },
       }),

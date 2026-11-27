@@ -1,7 +1,7 @@
 import type {
+  ResultadoRegistro,
   StatusCliente,
   TipoRegistro,
-  ResultadoRegistro,
 } from "../../shared/database/generated/enums.js";
 import type {
   ErpCliente,
@@ -44,11 +44,19 @@ export interface ProdutoData {
   atualizadoNoErpEm: Date;
 }
 
+/** An item that could not be written: its ERP code and a safe reason. */
+export interface SkippedItem {
+  codigo: string;
+  motivo: string;
+}
+
 export interface RunOutcome {
   resultado: ResultadoRegistro;
   itensLidos: number;
   itensAlterados: number;
+  itensIgnorados: SkippedItem[];
   erros: number;
+  pendencias: number;
   /** Safe failure detail: an error name and status, never a key or body. */
   detalhe: string | null;
 }
@@ -76,7 +84,11 @@ export interface SyncRepository {
   saveProdutos(rows: ProdutoData[]): Promise<void>;
   deactivateClientesExcept(codes: string[]): Promise<number>;
   deactivateProdutosExcept(codes: string[]): Promise<number>;
-  deactivateCliente(codigo: string): Promise<boolean>;
+  /** Writes one client under the lock; false when a run is in progress. */
+  saveClienteOnDemand(row: ClienteData, now: Date): Promise<boolean>;
+  /** Makes one client inactive under the lock; false when a run is in progress. */
+  deactivateClienteOnDemand(codigo: string, now: Date): Promise<boolean>;
+  /** Start of the last SUCESSO or PARCIAL run of the type. */
   lastSuccessfulStart(tipo: SyncType): Promise<Date | null>;
   /** Takes the lock and opens the two run rows, or returns null when busy. */
   startRun(now: Date): Promise<RunIds | null>;
@@ -86,6 +98,13 @@ export interface SyncRepository {
   ): Promise<void>;
   isRunInProgress(now: Date): Promise<boolean>;
   statusSnapshot(): Promise<SyncStatusSnapshot>;
+}
+
+/** The part of the application logger the sync uses. */
+export interface SyncLogger {
+  info(object: object, message: string): void;
+  warn(object: object, message: string): void;
+  error(object: object, message: string): void;
 }
 
 export interface SyncStatus {
@@ -107,10 +126,20 @@ export class ClienteNotFoundInErpError extends Error {
   }
 }
 
+class FullLoadIncompleteError extends Error {
+  constructor(read: number, total: number, totalChanged: boolean) {
+    super(
+      `Full load incomplete: read ${String(read)} items, the ERP reported ${String(total)}${totalChanged ? " and its total changed between pages" : ""}; nothing was made inactive.`,
+    );
+    this.name = "FullLoadIncompleteError";
+  }
+}
+
 interface SyncServiceOptions {
   erpClient: ErpClient;
   repository: SyncRepository;
   now?: () => Date;
+  logger?: SyncLogger;
 }
 
 export function toClienteData(cliente: ErpCliente): ClienteData {
@@ -150,7 +179,29 @@ function sameValues<T extends object>(stored: T, incoming: T): boolean {
   });
 }
 
+function errorCode(error: unknown): string | null {
+  return error instanceof Error &&
+    "code" in error &&
+    typeof error.code === "string"
+    ? error.code
+    : null;
+}
+
+// Prisma's P2xxx codes describe a problem with the data itself (such as a
+// unique column already holding the value); the next item can still be
+// written. Any other failure (connection, timeout) stops the run instead.
+function isDataError(error: unknown): boolean {
+  return errorCode(error)?.startsWith("P2") ?? false;
+}
+
+function safeReason(error: unknown): string {
+  if (!(error instanceof Error)) return "Unknown failure.";
+  const code = errorCode(error);
+  return code === null ? error.name : `${error.name} ${code}`;
+}
+
 function safeDetail(error: unknown): string {
+  if (error instanceof FullLoadIncompleteError) return error.message;
   if (!(error instanceof Error)) return "Unknown failure.";
   const status =
     "status" in error && typeof error.status === "number"
@@ -166,6 +217,12 @@ const RESULT_SEVERITY: Record<ResultadoRegistro, number> = {
   FALHA: 3,
 };
 
+const silentLogger: SyncLogger = {
+  info: () => undefined,
+  warn: () => undefined,
+  error: () => undefined,
+};
+
 interface TypeHandler<TErp, TData extends { codigoErp: string }> {
   tipo: SyncType;
   list(query: ErpPageQuery): Promise<ErpPage<TErp>>;
@@ -175,15 +232,22 @@ interface TypeHandler<TErp, TData extends { codigoErp: string }> {
   deactivateExcept(codes: string[]): Promise<number>;
 }
 
+interface PageWrite {
+  saved: number;
+  skipped: SkippedItem[];
+}
+
 export class SyncService {
   private readonly erpClient: ErpClient;
   private readonly repository: SyncRepository;
   private readonly now: () => Date;
+  private readonly logger: SyncLogger;
 
-  constructor({ erpClient, repository, now }: SyncServiceOptions) {
+  constructor({ erpClient, repository, now, logger }: SyncServiceOptions) {
     this.erpClient = erpClient;
     this.repository = repository;
     this.now = now ?? (() => new Date());
+    this.logger = logger ?? silentLogger;
   }
 
   async runOnce(): Promise<{ skipped: boolean }> {
@@ -213,64 +277,146 @@ export class SyncService {
     return { skipped: false };
   }
 
+  // Never throws: whatever happens, the other type still runs.
   private async runType<TErp, TData extends { codigoErp: string }>(
     runId: string,
     handler: TypeHandler<TErp, TData>,
   ): Promise<void> {
-    let itensLidos = 0;
-    let itensAlterados = 0;
+    const startedAt = this.now();
+    const outcome: RunOutcome = {
+      resultado: "SUCESSO",
+      itensLidos: 0,
+      itensAlterados: 0,
+      itensIgnorados: [],
+      erros: 0,
+      pendencias: 0,
+      detalhe: null,
+    };
+
     try {
-      const since = await this.repository.lastSuccessfulStart(handler.tipo);
-      const fullLoad = since === null;
-      const readCodes: string[] = [];
-      let pagina = 1;
-      let totalPaginas = 1;
-
-      do {
-        const query: ErpPageQuery = { pagina, tamanho: PAGE_SIZE };
-        if (since !== null) query.atualizadoDesde = since.toISOString();
-        const page = await handler.list(query);
-        totalPaginas = page.totalPaginas;
-
-        const incoming = page.dados.map((item) => handler.toData(item));
-        const stored = new Map(
-          (await handler.find(incoming.map((row) => row.codigoErp))).map(
-            (row) => [row.codigoErp, row],
-          ),
-        );
-        const changed = incoming.filter((row) => {
-          const current = stored.get(row.codigoErp);
-          return current === undefined || !sameValues(current, row);
-        });
-        if (changed.length > 0) {
-          await handler.save(changed);
-        }
-        itensLidos += incoming.length;
-        itensAlterados += changed.length;
-        readCodes.push(...incoming.map((row) => row.codigoErp));
-        pagina += 1;
-      } while (pagina <= totalPaginas);
-
-      if (fullLoad) {
-        itensAlterados += await handler.deactivateExcept(readCodes);
+      await this.readAndWrite(handler, outcome);
+      const skipped = outcome.itensIgnorados.length;
+      if (skipped > 0) {
+        outcome.resultado = "PARCIAL";
+        outcome.erros = skipped;
+        outcome.pendencias = skipped;
+        outcome.detalhe = `${String(skipped)} item(s) skipped; see the report.`;
       }
-      await this.repository.finishRun(runId, {
-        terminouEm: this.now(),
-        resultado: "SUCESSO",
-        itensLidos,
-        itensAlterados,
-        erros: 0,
-        detalhe: null,
-      });
     } catch (error) {
-      await this.repository.finishRun(runId, {
-        terminouEm: this.now(),
-        resultado: "FALHA",
-        itensLidos,
-        itensAlterados,
-        erros: 1,
-        detalhe: safeDetail(error),
+      outcome.resultado = "FALHA";
+      outcome.erros = outcome.itensIgnorados.length + 1;
+      outcome.pendencias = outcome.itensIgnorados.length;
+      outcome.detalhe = safeDetail(error);
+    }
+
+    const terminouEm = this.now();
+    try {
+      await this.repository.finishRun(runId, { ...outcome, terminouEm });
+    } catch (error) {
+      this.logger.error(
+        { sync: { tipo: handler.tipo, detalhe: safeDetail(error) } },
+        "Could not record the ERP synchronization result",
+      );
+    }
+    this.log(handler.tipo, outcome, terminouEm.getTime() - startedAt.getTime());
+  }
+
+  private async readAndWrite<TErp, TData extends { codigoErp: string }>(
+    handler: TypeHandler<TErp, TData>,
+    outcome: RunOutcome,
+  ): Promise<void> {
+    const since = await this.repository.lastSuccessfulStart(handler.tipo);
+    const fullLoad = since === null;
+    const readCodes = new Set<string>();
+    let firstTotal: number | null = null;
+    let totalChanged = false;
+    let pagina = 1;
+    let totalPaginas = 1;
+
+    do {
+      const query: ErpPageQuery = { pagina, tamanho: PAGE_SIZE };
+      if (since !== null) query.atualizadoDesde = since.toISOString();
+      const page = await handler.list(query);
+      totalPaginas = page.totalPaginas;
+      firstTotal ??= page.total;
+      totalChanged ||= page.total !== firstTotal;
+
+      const incoming = page.dados.map((item) => handler.toData(item));
+      outcome.itensLidos += incoming.length;
+      for (const row of incoming) readCodes.add(row.codigoErp);
+
+      const stored = new Map(
+        (await handler.find(incoming.map((row) => row.codigoErp))).map(
+          (row) => [row.codigoErp, row],
+        ),
+      );
+      const changed = incoming.filter((row) => {
+        const current = stored.get(row.codigoErp);
+        return current === undefined || !sameValues(current, row);
       });
+      const written = await this.writePage(handler, changed);
+      outcome.itensAlterados += written.saved;
+      outcome.itensIgnorados.push(...written.skipped);
+      pagina += 1;
+    } while (pagina <= totalPaginas);
+
+    if (fullLoad) {
+      const total = firstTotal;
+      // The ERP's ordering is not documented: if items moved between pages,
+      // or nothing came back, "missing" items may still exist in the ERP.
+      if (readCodes.size === 0 || totalChanged || readCodes.size !== total) {
+        throw new FullLoadIncompleteError(readCodes.size, total, totalChanged);
+      }
+      outcome.itensAlterados += await handler.deactivateExcept([...readCodes]);
+    }
+  }
+
+  // One transaction per page; when it fails because of an item's data, the
+  // items are written one by one and only the failing ones are skipped.
+  private async writePage<TData extends { codigoErp: string }>(
+    handler: { save(rows: TData[]): Promise<void> },
+    rows: TData[],
+  ): Promise<PageWrite> {
+    if (rows.length === 0) return { saved: 0, skipped: [] };
+    try {
+      await handler.save(rows);
+      return { saved: rows.length, skipped: [] };
+    } catch (error) {
+      if (!isDataError(error)) throw error;
+    }
+
+    const result: PageWrite = { saved: 0, skipped: [] };
+    for (const row of rows) {
+      try {
+        await handler.save([row]);
+        result.saved += 1;
+      } catch (error) {
+        if (!isDataError(error)) throw error;
+        result.skipped.push({
+          codigo: row.codigoErp,
+          motivo: safeReason(error),
+        });
+      }
+    }
+    return result;
+  }
+
+  private log(tipo: SyncType, outcome: RunOutcome, duracaoMs: number): void {
+    const entry = {
+      sync: {
+        tipo,
+        resultado: outcome.resultado,
+        itensLidos: outcome.itensLidos,
+        itensAlterados: outcome.itensAlterados,
+        itensIgnorados: outcome.itensIgnorados.length,
+        duracaoMs,
+        detalhe: outcome.detalhe,
+      },
+    };
+    if (outcome.resultado === "SUCESSO") {
+      this.logger.info(entry, "ERP synchronization finished");
+    } else {
+      this.logger.warn(entry, "ERP synchronization did not fully succeed");
     }
   }
 
@@ -286,14 +432,22 @@ export class SyncService {
       cliente = await this.erpClient.getCliente(codigo);
     } catch (error) {
       if (error instanceof ErpRecusouError && error.erpStatus === 404) {
-        await this.repository.deactivateCliente(codigo);
+        if (
+          !(await this.repository.deactivateClienteOnDemand(codigo, this.now()))
+        ) {
+          throw new SyncInProgressError();
+        }
         throw new ClienteNotFoundInErpError(codigo);
       }
       throw error;
     }
 
     const data = toClienteData(cliente);
-    await this.repository.saveClientes([data]);
+    // Checked again under the lock: a scheduled run may have started while
+    // the ERP was being read.
+    if (!(await this.repository.saveClienteOnDemand(data, this.now()))) {
+      throw new SyncInProgressError();
+    }
     return { codigo: data.codigoErp, status: data.status };
   }
 
