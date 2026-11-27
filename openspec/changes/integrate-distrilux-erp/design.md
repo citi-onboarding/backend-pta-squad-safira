@@ -59,8 +59,11 @@ point of view a dependency is temporarily unavailable; `429` would suggest the
 user is being throttled. Rejected: a fourth error for malformed responses —
 the requester bounded the set to three, and callers react the same way.
 
-Error `detail` strings are fixed English text plus, for refusals, the ERP
-`detail`; they never interpolate headers, URLs with credentials, or the key.
+Error `detail` strings are fixed English text; they never interpolate the ERP
+answer, headers, URLs with credentials, or the key. A refusal keeps the ERP
+`detail` and field errors on the error object (`erpDetail`, `erros`) for server
+code, but neither reaches the Problem Details response (PR #12 review): ERP
+text may carry customer data and is not the portal's message to give.
 Unknown 4xx statuses are treated as refusals with client status `422`.
 
 ### Retry policy
@@ -70,7 +73,9 @@ Unknown 4xx statuses are treated as refusals with client status `422`.
   `retryBaseDelayMs × 2^(attempt-1)` (500 ms, 1 000 ms). A `503` with
   `Retry-After` uses that delay but still counts as an attempt. A `Retry-After`
   above 60 s fails immediately — as a usage limit on `429` and as an
-  unavailability on `503`, both carrying `retryAfterSeconds`.
+  unavailability on `503`, both carrying `retryAfterSeconds`. `Retry-After` is
+  read only on `429` and `503`; on other 5xx (`500`, `502`, `504`) it is
+  ignored and the backoff applies (PR #12 review).
 - Structure: each attempt is `send` (HTTP exchange with timeout, body included)
   followed by classification into success, transient, rate-limited, or failure;
   a single `nextDelay` policy turns a retryable result plus the counters into a
@@ -79,7 +84,8 @@ Unknown 4xx statuses are treated as refusals with client status `422`.
 - `Retry-After` accepts delta-seconds or an HTTP date; invalid values fall back
   to backoff.
 - Submission: single request, no loop. The caller passes `chaveDeEnvio`, sent
-  as `Idempotency-Key`; generating and persisting it is BACK-08.
+  as `Idempotency-Key`, and an empty key is rejected with a `ZodError` before
+  any request; generating and persisting it is BACK-08.
 
 ### Timeout
 
@@ -100,7 +106,9 @@ are validated with Zod before any request. Responses are parsed with Zod
 ### Logging and redaction
 
 The client logs `{ method, path, status, attempt }` at `warn` for retries and
-failures. Headers and bodies are never logged. `createLogger` redact paths gain
+failures. Headers and bodies are never logged. A refusal adds only the names
+of the fields in error (`erros[].campo`), never the ERP `detail` or field
+messages, which may carry customer data. `createLogger` redact paths gain
 `apiKey`, `ERP_API_KEY`, and `headers["x-api-key"]` as defense in depth.
 
 ### Naming

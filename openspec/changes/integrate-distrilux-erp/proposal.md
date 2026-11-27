@@ -15,14 +15,14 @@ duplicate work (RN-15).
   `criarPedido(payload, chaveDeEnvio)`, and `consultarPedido`.
 - Every ERP call has a timeout. Reads retry with growing backoff on 5xx,
   timeouts, and network failures (3 attempts) and honor `Retry-After` on `429`
-  and `503`, resuming the same request.
+  and `503`, resuming the same request; on other 5xx it is ignored.
 - Order submission is attempted exactly once, always with an `Idempotency-Key`;
   retry policy for submission belongs to BACK-08 (RN-07).
 - Every ERP response is validated; a malformed response becomes an error, never
   data.
 - Three typed failures — `ErpIndisponivelError`, `ErpLimiteDeUsoError`, and
   `ErpRecusouError` — reach clients as RFC 9457 Problem Details through the
-  existing error handler.
+  existing error handler; a refusal never returns the ERP text to clients.
 - Add money helpers that convert ERP integer cents to reais and format them in
   Brazilian Real (RN-13).
 - Require `ERP_API_URL` and `ERP_API_KEY` in the validated environment; the

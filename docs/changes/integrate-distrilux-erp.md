@@ -56,16 +56,22 @@ classification into success, transient, rate-limited, or failure; a single
 - Every request is aborted after 30 seconds by default; slower cold starts up
   to that limit are kept.
 - Reads retry on `5xx`, timeouts, and network errors up to 3 attempts with
-  500 ms and 1 000 ms backoff, using `Retry-After` of a `503` when present; after
-  3 failures they throw `ErpIndisponivelError`.
+  500 ms and 1 000 ms backoff, using `Retry-After` of a `503` when present and
+  ignoring it on other 5xx (`500`, `502`, `504`); after 3 failures they throw
+  `ErpIndisponivelError`.
 - On `429`, reads wait `Retry-After` (seconds or HTTP date) and repeat the same
   request, up to 3 waits; then, or when the delay exceeds 60 seconds, they throw
   `ErpLimiteDeUsoError`. A `503` delay above 60 seconds throws
-  `ErpIndisponivelError` immediately.
+  `ErpIndisponivelError` immediately. Rate-limit waits do not spend the 5xx
+  attempts.
 - `criarPedido` sends exactly one `POST /v1/pedidos` with `Idempotency-Key` and
-  never retries; invalid payloads fail before any request.
-- ERP `400`/`404`/`409`/`422` become `ErpRecusouError` with the ERP status,
-  detail, and field errors; `401`/`403` become `ErpIndisponivelError`.
+  never retries; invalid payloads and an empty submission key fail with a
+  `ZodError` before any request.
+- ERP `400`/`404`/`409`/`422` become `ErpRecusouError` carrying the ERP status,
+  detail (`erpDetail`), and field errors (`erros`) for server code only; the
+  log records the status and field names, and the client response has the
+  fixed detail `The ERP refused the request.` without ERP text.
+  `401`/`403` become `ErpIndisponivelError`.
 - Malformed or non-JSON successful answers become `ErpIndisponivelError`;
   bad data is never returned.
 - Clients receive Problem Details `503` (with `retryAfterSeconds` when known)
@@ -130,6 +136,27 @@ Consolidation:
 - `pnpm test:container` → `Production container smoke test passed.`
 - `openspec validate integrate-distrilux-erp --strict` →
   `Change 'integrate-distrilux-erp' is valid`.
+
+PR #12 review fixes (2026-11-27), one cycle per point after updating the spec:
+
+- `Retry-After` only on `429`/`503` — Red:
+  `vitest run src/shared/erp/erp-client.test.ts -t "ignores Retry-After on a 502"`
+  → `expected "vi.fn()" to be called 2 times, but got 1 times`. Green and
+  Refactor: `Tests 42 passed (42)`.
+- Refusal without ERP text — Red: 3 failed (error `message`/`extensions`, log
+  without `itens.0.produto`, `409` response `detail`). Green and Refactor:
+  `Tests 43 passed (43)`.
+- Rate-limit waits not spending 5xx attempts — spec scenario only; the existing
+  test "does not spend 5xx attempts while waiting for a rate limit" covers it.
+- Empty submission key — Red: `expected error to be instance of ZodError`
+  (received `ErpIndisponivelError`). Green and Refactor: `Tests 44 passed (44)`.
+- `pnpm verify` → exit code 0: `Test Files 13 passed (13)` /
+  `Tests 97 passed (97)`, architecture `Tests 3 passed (3)`,
+  `Totals: 2 passed, 0 failed`, `openapi:check` and `skills:check` passed.
+- `pnpm test:coverage` → `Tests 97 passed (97)`; all files 99.44 % statements,
+  93.75 % branches, 100 % functions, 100 % lines (`shared/erp` 92.2 % branches).
+- `pnpm build` → exit code 0. `pnpm test:container` not re-run: runtime
+  delivery did not change.
 
 ## Related artifacts
 

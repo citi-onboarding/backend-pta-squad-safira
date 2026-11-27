@@ -392,6 +392,15 @@ describe("ERP client", () => {
         expect(fetch).not.toHaveBeenCalled();
       },
     );
+
+    it("rejects an empty submission key without calling the ERP", async () => {
+      const { client, fetch } = setup();
+
+      await expect(client.criarPedido(novoPedido, "")).rejects.toThrow(
+        ZodError,
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    });
   });
 
   describe("timeouts", () => {
@@ -502,6 +511,30 @@ describe("ERP client", () => {
       expect(fetch).toHaveBeenCalledTimes(1);
     });
 
+    it("ignores Retry-After on a 502 and retries with backoff", async () => {
+      const { client, fetch } = setup();
+      fetch.mockImplementation(() =>
+        Promise.resolve(problemResponse(502, { "retry-after": "120" })),
+      );
+
+      const failure = client.listClientes().then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      await vi.advanceTimersByTimeAsync(499);
+      expect(fetch).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fetch).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(999);
+      expect(fetch).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(fetch).toHaveBeenCalledTimes(3);
+
+      const error = await failure;
+      expect(error).toBeInstanceOf(ErpIndisponivelError);
+      expect(error).toMatchObject({ retryAfterSeconds: undefined });
+    });
+
     it("fails as unavailable when the ERP cannot be reached", async () => {
       const { client, fetch } = setup();
       fetch.mockRejectedValue(new TypeError("fetch failed"));
@@ -596,7 +629,7 @@ describe("ERP client", () => {
   });
 
   describe("refusals and misconfiguration", () => {
-    it("exposes the ERP status, detail, and field errors of a 422", async () => {
+    it("keeps the ERP status, detail, and field errors of a 422 on the error only", async () => {
       const { client, fetch } = setup();
       const erros = [{ campo: "itens.0.produto", mensagem: "Produto inativo" }];
       fetch.mockResolvedValueOnce(
@@ -608,8 +641,35 @@ describe("ERP client", () => {
       );
 
       expect(error).toBeInstanceOf(ErpRecusouError);
-      expect(error).toMatchObject({ status: 422, erpStatus: 422, erros });
-      expect((error as Error).message).toContain("Pedido inválido");
+      expect(error).toMatchObject({
+        status: 422,
+        erpStatus: 422,
+        erpDetail: "Pedido inválido",
+        erros,
+        message: "The ERP refused the request.",
+        extensions: {},
+      });
+    });
+
+    it("logs the ERP status and field names but no ERP text", async () => {
+      const { client, fetch, logs } = setup();
+      fetch.mockResolvedValueOnce(
+        problemResponse(
+          422,
+          {},
+          {
+            detail: "Cliente 23775684000107 sem cadastro",
+            erros: [{ campo: "itens.0.produto", mensagem: "Produto inativo" }],
+          },
+        ),
+      );
+
+      await failureOf(client.criarPedido(novoPedido, "pedido-123"));
+
+      expect(logs()).toContain('"status":422');
+      expect(logs()).toContain("itens.0.produto");
+      expect(logs()).not.toContain("23775684000107");
+      expect(logs()).not.toContain("Produto inativo");
     });
 
     it.each([
@@ -759,13 +819,28 @@ describe("ERP failures at the HTTP boundary", () => {
 
   it("returns 409 for an ERP conflict refusal", async () => {
     const fetch: FetchFake = vi.fn<typeof globalThis.fetch>();
-    fetch.mockResolvedValue(problemResponse(409));
+    fetch.mockResolvedValue(
+      problemResponse(
+        409,
+        {},
+        {
+          detail: "Pedido duplicado do cliente C0001",
+          erros: [{ campo: "referenciaPortal", mensagem: "Já usada" }],
+        },
+      ),
+    );
 
     const failed = await request(createTestApp(fetch))
       .post("/pedidos")
       .expect(409);
 
-    expect(failed.body).toMatchObject({ status: 409 });
+    expect(failed.body).toMatchObject({
+      status: 409,
+      detail: "The ERP refused the request.",
+    });
+    expect(failed.body).not.toHaveProperty("erros");
+    expect(failed.text).not.toContain("Pedido duplicado");
+    expect(failed.text).not.toContain("Já usada");
     expect(failed.text).not.toContain(API_KEY);
   });
 });

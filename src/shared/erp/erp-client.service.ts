@@ -3,6 +3,7 @@ import type { z } from "zod";
 
 import { HttpProblem } from "../http/problem.js";
 import {
+  erpChaveDeEnvioSchema,
   erpClienteSchema,
   erpNovoPedidoSchema,
   erpPageQuerySchema,
@@ -86,15 +87,14 @@ function refusalStatus(erpStatus: number): number {
 export class ErpRecusouError extends HttpProblem {
   constructor(
     public readonly erpStatus: number,
-    erpDetail: string | undefined,
+    public readonly erpDetail: string | undefined,
     public readonly erros: ErpFieldError[] = [],
   ) {
     super(
       refusalStatus(erpStatus),
       "ERP Refused the Request",
-      erpDetail ?? "The ERP refused the request.",
+      "The ERP refused the request.",
       `${PROBLEM_TYPE_BASE}erp-refused`,
-      erros.length > 0 ? { erros } : {},
     );
     this.name = "ErpRecusouError";
   }
@@ -232,11 +232,16 @@ export function createErpClient(options: ErpClientOptions): ErpClient {
     }
 
     logger.warn({ erp: { ...log, status } }, "ERP answered with an error");
-    const retryAfterSeconds = parseRetryAfter(
-      response.headers.get("retry-after"),
-    );
-    if (status === 429) return { kind: "rate-limited", retryAfterSeconds };
-    if (status >= 500) return { kind: "transient", retryAfterSeconds };
+    // Retry-After is honored only on 429 and 503; other 5xx use the backoff.
+    const retryAfterSeconds = () =>
+      parseRetryAfter(response.headers.get("retry-after"));
+    if (status === 429) {
+      return { kind: "rate-limited", retryAfterSeconds: retryAfterSeconds() };
+    }
+    if (status === 503) {
+      return { kind: "transient", retryAfterSeconds: retryAfterSeconds() };
+    }
+    if (status >= 500) return { kind: "transient" };
     if (status === 401 || status === 403) {
       logger.error(
         { erp: { ...log, status } },
@@ -244,7 +249,18 @@ export function createErpClient(options: ErpClientOptions): ErpClient {
       );
       return { kind: "failure", error: new ErpIndisponivelError() };
     }
-    return { kind: "failure", error: refusalOf(status, text) };
+    const refusal = refusalOf(status, text);
+    logger.warn(
+      {
+        erp: {
+          ...log,
+          status,
+          campos: refusal.erros.map((erro) => erro.campo),
+        },
+      },
+      "ERP refused the request",
+    );
+    return { kind: "failure", error: refusal };
   }
 
   /**
@@ -352,7 +368,9 @@ export function createErpClient(options: ErpClientOptions): ErpClient {
       submit(erpPedidoSchema, {
         path: "/v1/pedidos",
         body: erpNovoPedidoSchema.parse(payload),
-        headers: { "idempotency-key": chaveDeEnvio },
+        headers: {
+          "idempotency-key": erpChaveDeEnvioSchema.parse(chaveDeEnvio),
+        },
       }),
     consultarPedido: async (numero) =>
       read(erpPedidoSchema, { path: `/v1/pedidos/${String(numero)}` }),

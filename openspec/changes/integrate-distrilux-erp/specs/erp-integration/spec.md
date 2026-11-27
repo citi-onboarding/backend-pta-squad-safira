@@ -90,7 +90,8 @@ The service SHALL read one customer by its code and one order by its number.
 
 The service SHALL submit an order to the ERP exactly once per call, always
 sending the caller-provided submission key in the `Idempotency-Key` header, and
-MUST NOT retry automatically, whatever the failure (RN-07).
+MUST NOT retry automatically, whatever the failure (RN-07). An empty submission
+key MUST be rejected before any ERP request.
 
 #### Scenario: Order is accepted
 
@@ -107,6 +108,11 @@ MUST NOT retry automatically, whatever the failure (RN-07).
 
 - **WHEN** an order without items, with more than 50 items, or with a quantity outside 1–9999 is submitted
 - **THEN** the operation fails before any ERP request is sent
+
+#### Scenario: Submission key is empty
+
+- **WHEN** an order is submitted with an empty submission key
+- **THEN** the operation fails with a validation error before any ERP request is sent
 
 ### Requirement: Bounded ERP calls
 
@@ -129,7 +135,9 @@ ERP read operations SHALL make up to 3 attempts when the ERP answers with a
 `5xx` status, does not answer before the timeout, or cannot be reached, waiting
 a growing delay between attempts. When a `503` carries `Retry-After`, the
 service SHALL wait that delay instead, and MUST fail immediately when that delay
-exceeds 60 seconds. When all attempts fail, the operation
+exceeds 60 seconds. `Retry-After` on any other `5xx` (for example `500`, `502`,
+or `504`) MUST be ignored: those answers use the growing backoff and the 3
+attempts. When all attempts fail, the operation
 MUST fail with an ERP unavailability and the server MUST keep serving other
 requests.
 
@@ -147,6 +155,11 @@ requests.
 
 - **WHEN** a read receives `503` with `Retry-After: 120`
 - **THEN** exactly one ERP request is sent and the read fails immediately with an ERP unavailability carrying a retry-after of 120 seconds
+
+#### Scenario: Retry-After on a non-503 5xx is ignored
+
+- **WHEN** a read receives `502` with `Retry-After: 120` three times
+- **THEN** exactly 3 ERP requests are sent, 500 ms and 1 000 ms apart, and the read fails with an ERP unavailability without a retry-after
 
 #### Scenario: ERP times out and then answers
 
@@ -178,6 +191,11 @@ immediately with an ERP usage-limit failure when the requested delay exceeds
 - **WHEN** a read receives `429` four times in a row
 - **THEN** the read fails with an ERP usage-limit failure after 3 waits
 
+#### Scenario: Rate limit waits do not spend 5xx attempts
+
+- **WHEN** a read receives `429` with `Retry-After: 1`, then `500` twice, then `200`
+- **THEN** exactly 4 ERP requests are sent and the read succeeds with the last answer
+
 #### Scenario: Requested delay is too long
 
 - **WHEN** a read receives `429` with `Retry-After: 120`
@@ -191,9 +209,12 @@ immediately with an ERP usage-limit failure when the requested delay exceeds
 ### Requirement: ERP refusals
 
 When the ERP refuses a request with `400`, `404`, `409`, or `422`, the service
-MUST fail without retrying and expose the ERP status, `detail`, and field
-errors. A client SHALL receive Problem Details with status `404` for `404`,
-`409` for `409`, and `422` otherwise.
+MUST fail without retrying and carry the ERP status, `detail`, and field errors
+on the failure for server use only. The service SHALL log the ERP status and the
+names of the fields in error, never the ERP `detail` or field messages. A client
+SHALL receive Problem Details with status `404` for `404`, `409` for `409`, and
+`422` otherwise, with the fixed detail `The ERP refused the request.`, and MUST
+NOT receive the ERP `detail` or field errors.
 
 #### Scenario: ERP rejects an order
 
@@ -204,6 +225,13 @@ errors. A client SHALL receive Problem Details with status `404` for `404`,
 
 - **WHEN** a portal request fails with an ERP refusal of status `409`
 - **THEN** the client receives Problem Details with status `409`
+- **AND** the response contains neither the ERP detail nor its field errors
+
+#### Scenario: Refusal is logged without ERP text
+
+- **WHEN** a request receives `422` Problem Details with a detail and a field error on `itens.0.produto`
+- **THEN** the log records the ERP status and `itens.0.produto`
+- **AND** the log contains neither the ERP detail nor the field message
 
 ### Requirement: ERP misconfiguration
 

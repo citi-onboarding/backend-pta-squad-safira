@@ -32,3 +32,12 @@
 - [x] 5.1 Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm build`, and `pnpm test:container`.
 - [x] 5.2 Run `pnpm spec:validate` (strict OpenSpec validation) and typecheck.
 - [x] 5.3 Write `docs/changes/integrate-distrilux-erp.md` from the template and re-evaluate the ADR decision.
+
+## 6. PR #12 review fixes
+
+- [x] 6.1 Update proposal, `erp-integration` spec, and design for the four review points.
+- [x] 6.2 `Retry-After` only on `429` and `503`: Red (502 with `Retry-After: 120`), Green, Refactor.
+- [x] 6.3 Refusals without ERP text in the response, logged with status and field names: Red, Green, Refactor.
+- [x] 6.4 Spec scenario for rate limit waits not spending 5xx attempts: confirm the existing test covers it.
+- [x] 6.5 Empty submission key rejected before any request: Red, Green, Refactor.
+- [x] 6.6 Run `pnpm verify`, `pnpm format:check`, `pnpm test:coverage`, and `pnpm build`; update `docs/changes/integrate-distrilux-erp.md`.

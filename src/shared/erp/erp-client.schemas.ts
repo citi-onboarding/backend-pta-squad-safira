@@ -91,6 +91,9 @@ export const erpNovoPedidoSchema = z.strictObject({
   referenciaPortal: z.string().min(1).max(64).optional(),
 });
 
+/** Caller-provided key sent as `Idempotency-Key` (RN-07). */
+export const erpChaveDeEnvioSchema = z.string().min(1);
+
 export const erpProblemSchema = z.object({
   detail: z.string().optional(),
   erros: z
