@@ -19,6 +19,7 @@ Inspected without printing any cell value:
 - Reads the `.xlsx` files and the CSV (with `parserOptions: { delimiter: ";" }`), so there is one reader library.
 - Chosen because `xlsx` on npm is frozen at 0.18.5, which has known security advisories, and newer SheetJS releases are published outside npm.
 - It adds one moderate `pnpm audit` advisory, GHSA-w5hq-g745-h8pq in `uuid@8.3.2` ("missing buffer bounds check in v3/v5/v6 when buf is provided"). `exceljs` imports only `uuid.v4`, and only in `lib/xlsx/xform/sheet/cf-ext/cf-rule-ext-xform.js`, which builds conditional-formatting XML when writing. This command only reads. To be reviewed in the pull request, as CONTRIBUTING.md asks for every new dependency.
+- It is a development dependency (`devDependencies`): the command runs on a developer machine, and the production image installs only production dependencies, so `exceljs` stays out of it. If DATA-03 turns the load into an API route, it moves back to `dependencies` (squad manager's decision).
 - Rejected: `xlsx@0.18.5` (advisories); a hand-written CSV parser (`exceljs` already parses CSV).
 
 ### Code organization
