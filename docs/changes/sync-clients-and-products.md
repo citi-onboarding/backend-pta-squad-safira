@@ -43,7 +43,7 @@ Keep the portal's clients and products up to date with the DistriLux ERP, normal
 
 - API: two new routes, published in `openapi.json`.
 - Database and migrations: none; uses `Cliente`, `Produto`, and `RegistroSincronizacao` from DATA-01. The number of changed items is stored in `RegistroSincronizacao.relatorio`.
-- Security: the ERP key stays in the ERP client; run details hold only the error name and status. Only administrators trigger an on-demand sync.
+- Security: the ERP key stays in the ERP client; run details hold only the error name, code, and status. Only administrators trigger an on-demand sync.
 - Dependencies: BACK-01 (pull request #13) for authentication; this branch must be rebased when it merges.
 
 ## Validations executed
