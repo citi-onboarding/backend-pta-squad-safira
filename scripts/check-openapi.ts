@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import "../src/modules/auth/auth.openapi.js";
+import "../src/modules/customers/customers.openapi.js";
 import "../src/modules/users/users.openapi.js";
 import { createOpenApiDocument } from "../src/shared/http/openapi.js";
 

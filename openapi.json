@@ -81,6 +81,274 @@
           "codigoVendedor"
         ],
         "additionalProperties": false
+      },
+      "CustomerPage": {
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CustomerListItem"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of clients that match the search in the portfolio."
+          },
+          "pagina": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "tamanhoPagina": {
+            "type": "number",
+            "enum": [
+              60
+            ]
+          }
+        },
+        "required": [
+          "itens",
+          "total",
+          "pagina",
+          "tamanhoPagina"
+        ],
+        "additionalProperties": false
+      },
+      "CustomerListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codigoErp": {
+            "type": "string",
+            "example": "C0044"
+          },
+          "razaoSocial": {
+            "type": "string"
+          },
+          "cnpj": {
+            "type": "string",
+            "description": "Digits only.",
+            "example": "11222333000181"
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ATIVO",
+              "BLOQUEADO",
+              "INATIVO"
+            ]
+          },
+          "codigoVendedor": {
+            "type": "string",
+            "example": "V01"
+          },
+          "vendedorNome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Patrícia Lima"
+          },
+          "limiteDisponivelCentavos": {
+            "type": "integer",
+            "description": "Credit limit minus unpaid ERP receivables (RN-01). May be negative."
+          }
+        },
+        "required": [
+          "id",
+          "codigoErp",
+          "razaoSocial",
+          "cnpj",
+          "cidade",
+          "uf",
+          "status",
+          "codigoVendedor",
+          "vendedorNome",
+          "limiteDisponivelCentavos"
+        ],
+        "additionalProperties": false
+      },
+      "CustomerProfile": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "codigoErp": {
+            "type": "string"
+          },
+          "razaoSocial": {
+            "type": "string"
+          },
+          "cnpj": {
+            "type": "string"
+          },
+          "cidade": {
+            "type": "string"
+          },
+          "uf": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "segmento": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ATIVO",
+              "BLOQUEADO",
+              "INATIVO"
+            ]
+          },
+          "codigoVendedor": {
+            "type": "string",
+            "example": "V01"
+          },
+          "vendedorNome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "Patrícia Lima"
+          },
+          "credito": {
+            "$ref": "#/components/schemas/CreditPosition"
+          },
+          "titulosVencidos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OverdueReceivable"
+            },
+            "description": "Oldest due date first."
+          },
+          "ultimoPedidoEm": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Always null until orders (BACK-06) or the history load (DATA-03 and DATA-04) exist."
+          },
+          "ultimaSincronizacao": {
+            "type": "object",
+            "properties": {
+              "clientesEm": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "End time of the last successful client sync."
+              },
+              "titulosEm": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "End time of the last successful receivables sync."
+              }
+            },
+            "required": [
+              "clientesEm",
+              "titulosEm"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "codigoErp",
+          "razaoSocial",
+          "cnpj",
+          "cidade",
+          "uf",
+          "segmento",
+          "status",
+          "codigoVendedor",
+          "vendedorNome",
+          "credito",
+          "titulosVencidos",
+          "ultimoPedidoEm",
+          "ultimaSincronizacao"
+        ],
+        "additionalProperties": false
+      },
+      "CreditPosition": {
+        "type": "object",
+        "properties": {
+          "limiteCreditoCentavos": {
+            "type": "integer"
+          },
+          "emAbertoCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Unpaid ERP receivables due today or later."
+          },
+          "vencidoCentavos": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Unpaid ERP receivables due before today."
+          },
+          "limiteDisponivelCentavos": {
+            "type": "integer",
+            "description": "limiteCreditoCentavos − emAbertoCentavos − vencidoCentavos (RN-01). May be negative."
+          }
+        },
+        "required": [
+          "limiteCreditoCentavos",
+          "emAbertoCentavos",
+          "vencidoCentavos",
+          "limiteDisponivelCentavos"
+        ],
+        "additionalProperties": false
+      },
+      "OverdueReceivable": {
+        "type": "object",
+        "properties": {
+          "numero": {
+            "type": "string"
+          },
+          "parcela": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "valorCentavos": {
+            "type": "integer"
+          },
+          "vencimento": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-17"
+          },
+          "diasEmAtraso": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "numero",
+          "parcela",
+          "valorCentavos",
+          "vencimento",
+          "diasEmAtraso"
+        ],
+        "additionalProperties": false
       }
     },
     "parameters": {}
@@ -217,6 +485,107 @@
           },
           "401": {
             "description": "No valid session"
+          }
+        }
+      }
+    },
+    "/clientes": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "summary": "Search clients of the signed-in user's portfolio",
+        "description": "A salesperson only finds clients of their own portfolio (RN-08); the sales manager and the finance role find every client. At most 60 clients per page, ordered by company name.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Part of the company name, the ERP code, or the CNPJ (with or without punctuation). Empty returns the whole portfolio.",
+              "example": "11.222.333/0001-81"
+            },
+            "required": false,
+            "description": "Part of the company name, the ERP code, or the CNPJ (with or without punctuation). Empty returns the whole portfolio.",
+            "name": "busca",
+            "in": "query"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "description": "Page number, starting at 1.",
+              "example": 1
+            },
+            "required": false,
+            "description": "Page number, starting at 1.",
+            "name": "pagina",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of matching clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid page or search term"
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "The role has no access to clients (Administrator, or a salesperson without a salesperson code)"
+          }
+        }
+      }
+    },
+    "/clientes/{id}": {
+      "get": {
+        "tags": [
+          "Customers"
+        ],
+        "summary": "Get a client's profile and credit position",
+        "description": "A client of another portfolio answers 404, the same as a client that does not exist.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed client id"
+          },
+          "401": {
+            "description": "No valid session"
+          },
+          "403": {
+            "description": "The role has no access to clients (Administrator, or a salesperson without a salesperson code)"
+          },
+          "404": {
+            "description": "Client not found in the user's portfolio"
           }
         }
       }
