@@ -85,7 +85,7 @@ CREATE TABLE "Titulo" (
     "numero" TEXT NOT NULL,
     "parcela" INTEGER NOT NULL,
     "clienteId" TEXT NOT NULL,
-    "pedidoErp" TEXT,
+    "pedidoErp" TEXT NOT NULL,
     "valorCentavos" INTEGER NOT NULL,
     "emissao" DATE NOT NULL,
     "vencimento" DATE NOT NULL,
@@ -108,7 +108,7 @@ CREATE TABLE "Contrato" (
     "avisoPrevioDias" INTEGER NOT NULL,
     "renovacaoAutomatica" BOOLEAN NOT NULL,
     "prazoPagamentoDias" INTEGER,
-    "volumeMinimo" INTEGER,
+    "volumeMinimoCentavos" INTEGER,
     "temAditivo" BOOLEAN NOT NULL DEFAULT false,
     "dataLimiteAviso" DATE NOT NULL,
     "arquivo" TEXT NOT NULL,
@@ -156,7 +156,7 @@ CREATE TABLE "HistoricoStatus" (
     "pedidoId" TEXT NOT NULL,
     "de" "StatusPedido",
     "para" "StatusPedido" NOT NULL,
-    "usuarioId" TEXT,
+    "usuarioId" TEXT NOT NULL,
     "motivo" TEXT,
     "em" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -175,7 +175,7 @@ CREATE TABLE "PedidoHistorico" (
     "vendedorNome" TEXT,
     "quantidade" INTEGER NOT NULL,
     "precoUnitarioCentavos" INTEGER NOT NULL,
-    "status" TEXT NOT NULL,
+    "cancelado" BOOLEAN NOT NULL,
 
     CONSTRAINT "PedidoHistorico_pkey" PRIMARY KEY ("id")
 );
@@ -238,6 +238,7 @@ CREATE TABLE "RegistroSincronizacao" (
     "erros" INTEGER NOT NULL DEFAULT 0,
     "pendencias" INTEGER NOT NULL DEFAULT 0,
     "detalhe" TEXT,
+    "relatorio" JSONB,
 
     CONSTRAINT "RegistroSincronizacao_pkey" PRIMARY KEY ("id")
 );

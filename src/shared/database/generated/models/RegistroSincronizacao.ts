@@ -72,6 +72,7 @@ export type RegistroSincronizacaoCountAggregateOutputType = {
   erros: number
   pendencias: number
   detalhe: number
+  relatorio: number
   _all: number
 }
 
@@ -122,6 +123,7 @@ export type RegistroSincronizacaoCountAggregateInputType = {
   erros?: true
   pendencias?: true
   detalhe?: true
+  relatorio?: true
   _all?: true
 }
 
@@ -221,6 +223,7 @@ export type RegistroSincronizacaoGroupByOutputType = {
   erros: number
   pendencias: number
   detalhe: string | null
+  relatorio: runtime.JsonValue | null
   _count: RegistroSincronizacaoCountAggregateOutputType | null
   _avg: RegistroSincronizacaoAvgAggregateOutputType | null
   _sum: RegistroSincronizacaoSumAggregateOutputType | null
@@ -256,6 +259,7 @@ export type RegistroSincronizacaoWhereInput = {
   erros?: Prisma.IntFilter<"RegistroSincronizacao"> | number
   pendencias?: Prisma.IntFilter<"RegistroSincronizacao"> | number
   detalhe?: Prisma.StringNullableFilter<"RegistroSincronizacao"> | string | null
+  relatorio?: Prisma.JsonNullableFilter<"RegistroSincronizacao">
 }
 
 export type RegistroSincronizacaoOrderByWithRelationInput = {
@@ -268,6 +272,7 @@ export type RegistroSincronizacaoOrderByWithRelationInput = {
   erros?: Prisma.SortOrder
   pendencias?: Prisma.SortOrder
   detalhe?: Prisma.SortOrderInput | Prisma.SortOrder
+  relatorio?: Prisma.SortOrderInput | Prisma.SortOrder
 }
 
 export type RegistroSincronizacaoWhereUniqueInput = Prisma.AtLeast<{
@@ -283,6 +288,7 @@ export type RegistroSincronizacaoWhereUniqueInput = Prisma.AtLeast<{
   erros?: Prisma.IntFilter<"RegistroSincronizacao"> | number
   pendencias?: Prisma.IntFilter<"RegistroSincronizacao"> | number
   detalhe?: Prisma.StringNullableFilter<"RegistroSincronizacao"> | string | null
+  relatorio?: Prisma.JsonNullableFilter<"RegistroSincronizacao">
 }, "id">
 
 export type RegistroSincronizacaoOrderByWithAggregationInput = {
@@ -295,6 +301,7 @@ export type RegistroSincronizacaoOrderByWithAggregationInput = {
   erros?: Prisma.SortOrder
   pendencias?: Prisma.SortOrder
   detalhe?: Prisma.SortOrderInput | Prisma.SortOrder
+  relatorio?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.RegistroSincronizacaoCountOrderByAggregateInput
   _avg?: Prisma.RegistroSincronizacaoAvgOrderByAggregateInput
   _max?: Prisma.RegistroSincronizacaoMaxOrderByAggregateInput
@@ -315,6 +322,7 @@ export type RegistroSincronizacaoScalarWhereWithAggregatesInput = {
   erros?: Prisma.IntWithAggregatesFilter<"RegistroSincronizacao"> | number
   pendencias?: Prisma.IntWithAggregatesFilter<"RegistroSincronizacao"> | number
   detalhe?: Prisma.StringNullableWithAggregatesFilter<"RegistroSincronizacao"> | string | null
+  relatorio?: Prisma.JsonNullableWithAggregatesFilter<"RegistroSincronizacao">
 }
 
 export type RegistroSincronizacaoCreateInput = {
@@ -327,6 +335,7 @@ export type RegistroSincronizacaoCreateInput = {
   erros?: number
   pendencias?: number
   detalhe?: string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoUncheckedCreateInput = {
@@ -339,6 +348,7 @@ export type RegistroSincronizacaoUncheckedCreateInput = {
   erros?: number
   pendencias?: number
   detalhe?: string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoUpdateInput = {
@@ -351,6 +361,7 @@ export type RegistroSincronizacaoUpdateInput = {
   erros?: Prisma.IntFieldUpdateOperationsInput | number
   pendencias?: Prisma.IntFieldUpdateOperationsInput | number
   detalhe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoUncheckedUpdateInput = {
@@ -363,6 +374,7 @@ export type RegistroSincronizacaoUncheckedUpdateInput = {
   erros?: Prisma.IntFieldUpdateOperationsInput | number
   pendencias?: Prisma.IntFieldUpdateOperationsInput | number
   detalhe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoCreateManyInput = {
@@ -375,6 +387,7 @@ export type RegistroSincronizacaoCreateManyInput = {
   erros?: number
   pendencias?: number
   detalhe?: string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoUpdateManyMutationInput = {
@@ -387,6 +400,7 @@ export type RegistroSincronizacaoUpdateManyMutationInput = {
   erros?: Prisma.IntFieldUpdateOperationsInput | number
   pendencias?: Prisma.IntFieldUpdateOperationsInput | number
   detalhe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoUncheckedUpdateManyInput = {
@@ -399,6 +413,7 @@ export type RegistroSincronizacaoUncheckedUpdateManyInput = {
   erros?: Prisma.IntFieldUpdateOperationsInput | number
   pendencias?: Prisma.IntFieldUpdateOperationsInput | number
   detalhe?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  relatorio?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type RegistroSincronizacaoCountOrderByAggregateInput = {
@@ -411,6 +426,7 @@ export type RegistroSincronizacaoCountOrderByAggregateInput = {
   erros?: Prisma.SortOrder
   pendencias?: Prisma.SortOrder
   detalhe?: Prisma.SortOrder
+  relatorio?: Prisma.SortOrder
 }
 
 export type RegistroSincronizacaoAvgOrderByAggregateInput = {
@@ -469,6 +485,7 @@ export type RegistroSincronizacaoSelect<ExtArgs extends runtime.Types.Extensions
   erros?: boolean
   pendencias?: boolean
   detalhe?: boolean
+  relatorio?: boolean
 }, ExtArgs["result"]["registroSincronizacao"]>
 
 export type RegistroSincronizacaoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -481,6 +498,7 @@ export type RegistroSincronizacaoSelectCreateManyAndReturn<ExtArgs extends runti
   erros?: boolean
   pendencias?: boolean
   detalhe?: boolean
+  relatorio?: boolean
 }, ExtArgs["result"]["registroSincronizacao"]>
 
 export type RegistroSincronizacaoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -493,6 +511,7 @@ export type RegistroSincronizacaoSelectUpdateManyAndReturn<ExtArgs extends runti
   erros?: boolean
   pendencias?: boolean
   detalhe?: boolean
+  relatorio?: boolean
 }, ExtArgs["result"]["registroSincronizacao"]>
 
 export type RegistroSincronizacaoSelectScalar = {
@@ -505,9 +524,10 @@ export type RegistroSincronizacaoSelectScalar = {
   erros?: boolean
   pendencias?: boolean
   detalhe?: boolean
+  relatorio?: boolean
 }
 
-export type RegistroSincronizacaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tipo" | "iniciouEm" | "terminouEm" | "resultado" | "itensLidos" | "erros" | "pendencias" | "detalhe", ExtArgs["result"]["registroSincronizacao"]>
+export type RegistroSincronizacaoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tipo" | "iniciouEm" | "terminouEm" | "resultado" | "itensLidos" | "erros" | "pendencias" | "detalhe" | "relatorio", ExtArgs["result"]["registroSincronizacao"]>
 
 export type $RegistroSincronizacaoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RegistroSincronizacao"
@@ -522,6 +542,7 @@ export type $RegistroSincronizacaoPayload<ExtArgs extends runtime.Types.Extensio
     erros: number
     pendencias: number
     detalhe: string | null
+    relatorio: runtime.JsonValue | null
   }, ExtArgs["result"]["registroSincronizacao"]>
   composites: {}
 }
@@ -954,6 +975,7 @@ export interface RegistroSincronizacaoFieldRefs {
   readonly erros: Prisma.FieldRef<"RegistroSincronizacao", 'Int'>
   readonly pendencias: Prisma.FieldRef<"RegistroSincronizacao", 'Int'>
   readonly detalhe: Prisma.FieldRef<"RegistroSincronizacao", 'String'>
+  readonly relatorio: Prisma.FieldRef<"RegistroSincronizacao", 'Json'>
 }
     
 

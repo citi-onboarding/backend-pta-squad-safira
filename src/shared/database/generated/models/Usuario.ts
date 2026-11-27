@@ -501,12 +501,10 @@ export type UsuarioCreateNestedOneWithoutMudancasDeStatusInput = {
   connect?: Prisma.UsuarioWhereUniqueInput
 }
 
-export type UsuarioUpdateOneWithoutMudancasDeStatusNestedInput = {
+export type UsuarioUpdateOneRequiredWithoutMudancasDeStatusNestedInput = {
   create?: Prisma.XOR<Prisma.UsuarioCreateWithoutMudancasDeStatusInput, Prisma.UsuarioUncheckedCreateWithoutMudancasDeStatusInput>
   connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutMudancasDeStatusInput
   upsert?: Prisma.UsuarioUpsertWithoutMudancasDeStatusInput
-  disconnect?: Prisma.UsuarioWhereInput | boolean
-  delete?: Prisma.UsuarioWhereInput | boolean
   connect?: Prisma.UsuarioWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutMudancasDeStatusInput, Prisma.UsuarioUpdateWithoutMudancasDeStatusInput>, Prisma.UsuarioUncheckedUpdateWithoutMudancasDeStatusInput>
 }

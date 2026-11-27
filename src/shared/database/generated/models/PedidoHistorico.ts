@@ -49,7 +49,7 @@ export type PedidoHistoricoMinAggregateOutputType = {
   vendedorNome: string | null
   quantidade: number | null
   precoUnitarioCentavos: number | null
-  status: string | null
+  cancelado: boolean | null
 }
 
 export type PedidoHistoricoMaxAggregateOutputType = {
@@ -63,7 +63,7 @@ export type PedidoHistoricoMaxAggregateOutputType = {
   vendedorNome: string | null
   quantidade: number | null
   precoUnitarioCentavos: number | null
-  status: string | null
+  cancelado: boolean | null
 }
 
 export type PedidoHistoricoCountAggregateOutputType = {
@@ -77,7 +77,7 @@ export type PedidoHistoricoCountAggregateOutputType = {
   vendedorNome: number
   quantidade: number
   precoUnitarioCentavos: number
-  status: number
+  cancelado: number
   _all: number
 }
 
@@ -105,7 +105,7 @@ export type PedidoHistoricoMinAggregateInputType = {
   vendedorNome?: true
   quantidade?: true
   precoUnitarioCentavos?: true
-  status?: true
+  cancelado?: true
 }
 
 export type PedidoHistoricoMaxAggregateInputType = {
@@ -119,7 +119,7 @@ export type PedidoHistoricoMaxAggregateInputType = {
   vendedorNome?: true
   quantidade?: true
   precoUnitarioCentavos?: true
-  status?: true
+  cancelado?: true
 }
 
 export type PedidoHistoricoCountAggregateInputType = {
@@ -133,7 +133,7 @@ export type PedidoHistoricoCountAggregateInputType = {
   vendedorNome?: true
   quantidade?: true
   precoUnitarioCentavos?: true
-  status?: true
+  cancelado?: true
   _all?: true
 }
 
@@ -234,7 +234,7 @@ export type PedidoHistoricoGroupByOutputType = {
   vendedorNome: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
   _count: PedidoHistoricoCountAggregateOutputType | null
   _avg: PedidoHistoricoAvgAggregateOutputType | null
   _sum: PedidoHistoricoSumAggregateOutputType | null
@@ -271,7 +271,7 @@ export type PedidoHistoricoWhereInput = {
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
-  status?: Prisma.StringFilter<"PedidoHistorico"> | string
+  cancelado?: Prisma.BoolFilter<"PedidoHistorico"> | boolean
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
   produto?: Prisma.XOR<Prisma.ProdutoScalarRelationFilter, Prisma.ProdutoWhereInput>
 }
@@ -287,7 +287,7 @@ export type PedidoHistoricoOrderByWithRelationInput = {
   vendedorNome?: Prisma.SortOrderInput | Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  cancelado?: Prisma.SortOrder
   cliente?: Prisma.ClienteOrderByWithRelationInput
   produto?: Prisma.ProdutoOrderByWithRelationInput
 }
@@ -307,7 +307,7 @@ export type PedidoHistoricoWhereUniqueInput = Prisma.AtLeast<{
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
-  status?: Prisma.StringFilter<"PedidoHistorico"> | string
+  cancelado?: Prisma.BoolFilter<"PedidoHistorico"> | boolean
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
   produto?: Prisma.XOR<Prisma.ProdutoScalarRelationFilter, Prisma.ProdutoWhereInput>
 }, "id" | "numero_linha">
@@ -323,7 +323,7 @@ export type PedidoHistoricoOrderByWithAggregationInput = {
   vendedorNome?: Prisma.SortOrderInput | Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  cancelado?: Prisma.SortOrder
   _count?: Prisma.PedidoHistoricoCountOrderByAggregateInput
   _avg?: Prisma.PedidoHistoricoAvgOrderByAggregateInput
   _max?: Prisma.PedidoHistoricoMaxOrderByAggregateInput
@@ -345,7 +345,7 @@ export type PedidoHistoricoScalarWhereWithAggregatesInput = {
   vendedorNome?: Prisma.StringNullableWithAggregatesFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntWithAggregatesFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntWithAggregatesFilter<"PedidoHistorico"> | number
-  status?: Prisma.StringWithAggregatesFilter<"PedidoHistorico"> | string
+  cancelado?: Prisma.BoolWithAggregatesFilter<"PedidoHistorico"> | boolean
 }
 
 export type PedidoHistoricoCreateInput = {
@@ -357,7 +357,7 @@ export type PedidoHistoricoCreateInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
   cliente: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
   produto: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
 }
@@ -373,7 +373,7 @@ export type PedidoHistoricoUncheckedCreateInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoUpdateInput = {
@@ -385,7 +385,7 @@ export type PedidoHistoricoUpdateInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutPedidosHistoricoNestedInput
   produto?: Prisma.ProdutoUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
@@ -401,7 +401,7 @@ export type PedidoHistoricoUncheckedUpdateInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoCreateManyInput = {
@@ -415,7 +415,7 @@ export type PedidoHistoricoCreateManyInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoUpdateManyMutationInput = {
@@ -427,7 +427,7 @@ export type PedidoHistoricoUpdateManyMutationInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoUncheckedUpdateManyInput = {
@@ -441,7 +441,7 @@ export type PedidoHistoricoUncheckedUpdateManyInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoListRelationFilter = {
@@ -470,7 +470,7 @@ export type PedidoHistoricoCountOrderByAggregateInput = {
   vendedorNome?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  cancelado?: Prisma.SortOrder
 }
 
 export type PedidoHistoricoAvgOrderByAggregateInput = {
@@ -490,7 +490,7 @@ export type PedidoHistoricoMaxOrderByAggregateInput = {
   vendedorNome?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  cancelado?: Prisma.SortOrder
 }
 
 export type PedidoHistoricoMinOrderByAggregateInput = {
@@ -504,7 +504,7 @@ export type PedidoHistoricoMinOrderByAggregateInput = {
   vendedorNome?: Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
-  status?: Prisma.SortOrder
+  cancelado?: Prisma.SortOrder
 }
 
 export type PedidoHistoricoSumOrderByAggregateInput = {
@@ -606,7 +606,7 @@ export type PedidoHistoricoCreateWithoutClienteInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
   produto: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
 }
 
@@ -620,7 +620,7 @@ export type PedidoHistoricoUncheckedCreateWithoutClienteInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoCreateOrConnectWithoutClienteInput = {
@@ -663,7 +663,7 @@ export type PedidoHistoricoScalarWhereInput = {
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
-  status?: Prisma.StringFilter<"PedidoHistorico"> | string
+  cancelado?: Prisma.BoolFilter<"PedidoHistorico"> | boolean
 }
 
 export type PedidoHistoricoCreateWithoutProdutoInput = {
@@ -675,7 +675,7 @@ export type PedidoHistoricoCreateWithoutProdutoInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
   cliente: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
 }
 
@@ -689,7 +689,7 @@ export type PedidoHistoricoUncheckedCreateWithoutProdutoInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoCreateOrConnectWithoutProdutoInput = {
@@ -728,7 +728,7 @@ export type PedidoHistoricoCreateManyClienteInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoUpdateWithoutClienteInput = {
@@ -740,7 +740,7 @@ export type PedidoHistoricoUpdateWithoutClienteInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
   produto?: Prisma.ProdutoUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
 
@@ -754,7 +754,7 @@ export type PedidoHistoricoUncheckedUpdateWithoutClienteInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoUncheckedUpdateManyWithoutClienteInput = {
@@ -767,7 +767,7 @@ export type PedidoHistoricoUncheckedUpdateManyWithoutClienteInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoCreateManyProdutoInput = {
@@ -780,7 +780,7 @@ export type PedidoHistoricoCreateManyProdutoInput = {
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
-  status: string
+  cancelado: boolean
 }
 
 export type PedidoHistoricoUpdateWithoutProdutoInput = {
@@ -792,7 +792,7 @@ export type PedidoHistoricoUpdateWithoutProdutoInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
 
@@ -806,7 +806,7 @@ export type PedidoHistoricoUncheckedUpdateWithoutProdutoInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type PedidoHistoricoUncheckedUpdateManyWithoutProdutoInput = {
@@ -819,7 +819,7 @@ export type PedidoHistoricoUncheckedUpdateManyWithoutProdutoInput = {
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
-  status?: Prisma.StringFieldUpdateOperationsInput | string
+  cancelado?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -835,7 +835,7 @@ export type PedidoHistoricoSelect<ExtArgs extends runtime.Types.Extensions.Inter
   vendedorNome?: boolean
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
-  status?: boolean
+  cancelado?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
@@ -851,7 +851,7 @@ export type PedidoHistoricoSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   vendedorNome?: boolean
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
-  status?: boolean
+  cancelado?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
@@ -867,7 +867,7 @@ export type PedidoHistoricoSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   vendedorNome?: boolean
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
-  status?: boolean
+  cancelado?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
@@ -883,10 +883,10 @@ export type PedidoHistoricoSelectScalar = {
   vendedorNome?: boolean
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
-  status?: boolean
+  cancelado?: boolean
 }
 
-export type PedidoHistoricoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "linha" | "data" | "clienteId" | "clienteNomeOriginal" | "produtoId" | "vendedorNome" | "quantidade" | "precoUnitarioCentavos" | "status", ExtArgs["result"]["pedidoHistorico"]>
+export type PedidoHistoricoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "linha" | "data" | "clienteId" | "clienteNomeOriginal" | "produtoId" | "vendedorNome" | "quantidade" | "precoUnitarioCentavos" | "cancelado", ExtArgs["result"]["pedidoHistorico"]>
 export type PedidoHistoricoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
@@ -917,7 +917,7 @@ export type $PedidoHistoricoPayload<ExtArgs extends runtime.Types.Extensions.Int
     vendedorNome: string | null
     quantidade: number
     precoUnitarioCentavos: number
-    status: string
+    cancelado: boolean
   }, ExtArgs["result"]["pedidoHistorico"]>
   composites: {}
 }
@@ -1353,7 +1353,7 @@ export interface PedidoHistoricoFieldRefs {
   readonly vendedorNome: Prisma.FieldRef<"PedidoHistorico", 'String'>
   readonly quantidade: Prisma.FieldRef<"PedidoHistorico", 'Int'>
   readonly precoUnitarioCentavos: Prisma.FieldRef<"PedidoHistorico", 'Int'>
-  readonly status: Prisma.FieldRef<"PedidoHistorico", 'String'>
+  readonly cancelado: Prisma.FieldRef<"PedidoHistorico", 'Boolean'>
 }
     
 

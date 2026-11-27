@@ -236,7 +236,7 @@ export type TituloGroupByOutputType = {
   numero: string
   parcela: number
   clienteId: string
-  pedidoErp: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date
   vencimento: Date
@@ -275,7 +275,7 @@ export type TituloWhereInput = {
   numero?: Prisma.StringFilter<"Titulo"> | string
   parcela?: Prisma.IntFilter<"Titulo"> | number
   clienteId?: Prisma.StringFilter<"Titulo"> | string
-  pedidoErp?: Prisma.StringNullableFilter<"Titulo"> | string | null
+  pedidoErp?: Prisma.StringFilter<"Titulo"> | string
   valorCentavos?: Prisma.IntFilter<"Titulo"> | number
   emissao?: Prisma.DateTimeFilter<"Titulo"> | Date | string
   vencimento?: Prisma.DateTimeFilter<"Titulo"> | Date | string
@@ -292,7 +292,7 @@ export type TituloOrderByWithRelationInput = {
   numero?: Prisma.SortOrder
   parcela?: Prisma.SortOrder
   clienteId?: Prisma.SortOrder
-  pedidoErp?: Prisma.SortOrderInput | Prisma.SortOrder
+  pedidoErp?: Prisma.SortOrder
   valorCentavos?: Prisma.SortOrder
   emissao?: Prisma.SortOrder
   vencimento?: Prisma.SortOrder
@@ -313,7 +313,7 @@ export type TituloWhereUniqueInput = Prisma.AtLeast<{
   numero?: Prisma.StringFilter<"Titulo"> | string
   parcela?: Prisma.IntFilter<"Titulo"> | number
   clienteId?: Prisma.StringFilter<"Titulo"> | string
-  pedidoErp?: Prisma.StringNullableFilter<"Titulo"> | string | null
+  pedidoErp?: Prisma.StringFilter<"Titulo"> | string
   valorCentavos?: Prisma.IntFilter<"Titulo"> | number
   emissao?: Prisma.DateTimeFilter<"Titulo"> | Date | string
   vencimento?: Prisma.DateTimeFilter<"Titulo"> | Date | string
@@ -330,7 +330,7 @@ export type TituloOrderByWithAggregationInput = {
   numero?: Prisma.SortOrder
   parcela?: Prisma.SortOrder
   clienteId?: Prisma.SortOrder
-  pedidoErp?: Prisma.SortOrderInput | Prisma.SortOrder
+  pedidoErp?: Prisma.SortOrder
   valorCentavos?: Prisma.SortOrder
   emissao?: Prisma.SortOrder
   vencimento?: Prisma.SortOrder
@@ -354,7 +354,7 @@ export type TituloScalarWhereWithAggregatesInput = {
   numero?: Prisma.StringWithAggregatesFilter<"Titulo"> | string
   parcela?: Prisma.IntWithAggregatesFilter<"Titulo"> | number
   clienteId?: Prisma.StringWithAggregatesFilter<"Titulo"> | string
-  pedidoErp?: Prisma.StringNullableWithAggregatesFilter<"Titulo"> | string | null
+  pedidoErp?: Prisma.StringWithAggregatesFilter<"Titulo"> | string
   valorCentavos?: Prisma.IntWithAggregatesFilter<"Titulo"> | number
   emissao?: Prisma.DateTimeWithAggregatesFilter<"Titulo"> | Date | string
   vencimento?: Prisma.DateTimeWithAggregatesFilter<"Titulo"> | Date | string
@@ -369,7 +369,7 @@ export type TituloCreateInput = {
   id?: string
   numero: string
   parcela: number
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -386,7 +386,7 @@ export type TituloUncheckedCreateInput = {
   numero: string
   parcela: number
   clienteId: string
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -401,7 +401,7 @@ export type TituloUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,7 +418,7 @@ export type TituloUncheckedUpdateInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
   clienteId?: Prisma.StringFieldUpdateOperationsInput | string
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -434,7 +434,7 @@ export type TituloCreateManyInput = {
   numero: string
   parcela: number
   clienteId: string
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -449,7 +449,7 @@ export type TituloUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -465,7 +465,7 @@ export type TituloUncheckedUpdateManyInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
   clienteId?: Prisma.StringFieldUpdateOperationsInput | string
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -607,7 +607,7 @@ export type TituloCreateWithoutClienteInput = {
   id?: string
   numero: string
   parcela: number
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -622,7 +622,7 @@ export type TituloUncheckedCreateWithoutClienteInput = {
   id?: string
   numero: string
   parcela: number
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -667,7 +667,7 @@ export type TituloScalarWhereInput = {
   numero?: Prisma.StringFilter<"Titulo"> | string
   parcela?: Prisma.IntFilter<"Titulo"> | number
   clienteId?: Prisma.StringFilter<"Titulo"> | string
-  pedidoErp?: Prisma.StringNullableFilter<"Titulo"> | string | null
+  pedidoErp?: Prisma.StringFilter<"Titulo"> | string
   valorCentavos?: Prisma.IntFilter<"Titulo"> | number
   emissao?: Prisma.DateTimeFilter<"Titulo"> | Date | string
   vencimento?: Prisma.DateTimeFilter<"Titulo"> | Date | string
@@ -682,7 +682,7 @@ export type TituloCreateManyClienteInput = {
   id?: string
   numero: string
   parcela: number
-  pedidoErp?: string | null
+  pedidoErp: string
   valorCentavos: number
   emissao: Date | string
   vencimento: Date | string
@@ -697,7 +697,7 @@ export type TituloUpdateWithoutClienteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -712,7 +712,7 @@ export type TituloUncheckedUpdateWithoutClienteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -727,7 +727,7 @@ export type TituloUncheckedUpdateManyWithoutClienteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   parcela?: Prisma.IntFieldUpdateOperationsInput | number
-  pedidoErp?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pedidoErp?: Prisma.StringFieldUpdateOperationsInput | string
   valorCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   emissao?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   vencimento?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -828,7 +828,7 @@ export type $TituloPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     numero: string
     parcela: number
     clienteId: string
-    pedidoErp: string | null
+    pedidoErp: string
     valorCentavos: number
     emissao: Date
     vencimento: Date

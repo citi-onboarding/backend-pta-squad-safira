@@ -29,13 +29,13 @@ export type AggregateContrato = {
 export type ContratoAvgAggregateOutputType = {
   avisoPrevioDias: number | null
   prazoPagamentoDias: number | null
-  volumeMinimo: number | null
+  volumeMinimoCentavos: number | null
 }
 
 export type ContratoSumAggregateOutputType = {
   avisoPrevioDias: number | null
   prazoPagamentoDias: number | null
-  volumeMinimo: number | null
+  volumeMinimoCentavos: number | null
 }
 
 export type ContratoMinAggregateOutputType = {
@@ -47,7 +47,7 @@ export type ContratoMinAggregateOutputType = {
   avisoPrevioDias: number | null
   renovacaoAutomatica: boolean | null
   prazoPagamentoDias: number | null
-  volumeMinimo: number | null
+  volumeMinimoCentavos: number | null
   temAditivo: boolean | null
   dataLimiteAviso: Date | null
   arquivo: string | null
@@ -66,7 +66,7 @@ export type ContratoMaxAggregateOutputType = {
   avisoPrevioDias: number | null
   renovacaoAutomatica: boolean | null
   prazoPagamentoDias: number | null
-  volumeMinimo: number | null
+  volumeMinimoCentavos: number | null
   temAditivo: boolean | null
   dataLimiteAviso: Date | null
   arquivo: string | null
@@ -85,7 +85,7 @@ export type ContratoCountAggregateOutputType = {
   avisoPrevioDias: number
   renovacaoAutomatica: number
   prazoPagamentoDias: number
-  volumeMinimo: number
+  volumeMinimoCentavos: number
   temAditivo: number
   dataLimiteAviso: number
   arquivo: number
@@ -100,13 +100,13 @@ export type ContratoCountAggregateOutputType = {
 export type ContratoAvgAggregateInputType = {
   avisoPrevioDias?: true
   prazoPagamentoDias?: true
-  volumeMinimo?: true
+  volumeMinimoCentavos?: true
 }
 
 export type ContratoSumAggregateInputType = {
   avisoPrevioDias?: true
   prazoPagamentoDias?: true
-  volumeMinimo?: true
+  volumeMinimoCentavos?: true
 }
 
 export type ContratoMinAggregateInputType = {
@@ -118,7 +118,7 @@ export type ContratoMinAggregateInputType = {
   avisoPrevioDias?: true
   renovacaoAutomatica?: true
   prazoPagamentoDias?: true
-  volumeMinimo?: true
+  volumeMinimoCentavos?: true
   temAditivo?: true
   dataLimiteAviso?: true
   arquivo?: true
@@ -137,7 +137,7 @@ export type ContratoMaxAggregateInputType = {
   avisoPrevioDias?: true
   renovacaoAutomatica?: true
   prazoPagamentoDias?: true
-  volumeMinimo?: true
+  volumeMinimoCentavos?: true
   temAditivo?: true
   dataLimiteAviso?: true
   arquivo?: true
@@ -156,7 +156,7 @@ export type ContratoCountAggregateInputType = {
   avisoPrevioDias?: true
   renovacaoAutomatica?: true
   prazoPagamentoDias?: true
-  volumeMinimo?: true
+  volumeMinimoCentavos?: true
   temAditivo?: true
   dataLimiteAviso?: true
   arquivo?: true
@@ -262,7 +262,7 @@ export type ContratoGroupByOutputType = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias: number | null
-  volumeMinimo: number | null
+  volumeMinimoCentavos: number | null
   temAditivo: boolean
   dataLimiteAviso: Date
   arquivo: string
@@ -304,7 +304,7 @@ export type ContratoWhereInput = {
   avisoPrevioDias?: Prisma.IntFilter<"Contrato"> | number
   renovacaoAutomatica?: Prisma.BoolFilter<"Contrato"> | boolean
   prazoPagamentoDias?: Prisma.IntNullableFilter<"Contrato"> | number | null
-  volumeMinimo?: Prisma.IntNullableFilter<"Contrato"> | number | null
+  volumeMinimoCentavos?: Prisma.IntNullableFilter<"Contrato"> | number | null
   temAditivo?: Prisma.BoolFilter<"Contrato"> | boolean
   dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringFilter<"Contrato"> | string
@@ -326,7 +326,7 @@ export type ContratoOrderByWithRelationInput = {
   avisoPrevioDias?: Prisma.SortOrder
   renovacaoAutomatica?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrderInput | Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrderInput | Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   temAditivo?: Prisma.SortOrder
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
@@ -351,7 +351,7 @@ export type ContratoWhereUniqueInput = Prisma.AtLeast<{
   avisoPrevioDias?: Prisma.IntFilter<"Contrato"> | number
   renovacaoAutomatica?: Prisma.BoolFilter<"Contrato"> | boolean
   prazoPagamentoDias?: Prisma.IntNullableFilter<"Contrato"> | number | null
-  volumeMinimo?: Prisma.IntNullableFilter<"Contrato"> | number | null
+  volumeMinimoCentavos?: Prisma.IntNullableFilter<"Contrato"> | number | null
   temAditivo?: Prisma.BoolFilter<"Contrato"> | boolean
   dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringFilter<"Contrato"> | string
@@ -373,7 +373,7 @@ export type ContratoOrderByWithAggregationInput = {
   avisoPrevioDias?: Prisma.SortOrder
   renovacaoAutomatica?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrderInput | Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrderInput | Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
   temAditivo?: Prisma.SortOrder
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
@@ -400,7 +400,7 @@ export type ContratoScalarWhereWithAggregatesInput = {
   avisoPrevioDias?: Prisma.IntWithAggregatesFilter<"Contrato"> | number
   renovacaoAutomatica?: Prisma.BoolWithAggregatesFilter<"Contrato"> | boolean
   prazoPagamentoDias?: Prisma.IntNullableWithAggregatesFilter<"Contrato"> | number | null
-  volumeMinimo?: Prisma.IntNullableWithAggregatesFilter<"Contrato"> | number | null
+  volumeMinimoCentavos?: Prisma.IntNullableWithAggregatesFilter<"Contrato"> | number | null
   temAditivo?: Prisma.BoolWithAggregatesFilter<"Contrato"> | boolean
   dataLimiteAviso?: Prisma.DateTimeWithAggregatesFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringWithAggregatesFilter<"Contrato"> | string
@@ -418,7 +418,7 @@ export type ContratoCreateInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -438,7 +438,7 @@ export type ContratoUncheckedCreateInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -456,7 +456,7 @@ export type ContratoUpdateInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -476,7 +476,7 @@ export type ContratoUncheckedUpdateInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -495,7 +495,7 @@ export type ContratoCreateManyInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -513,7 +513,7 @@ export type ContratoUpdateManyMutationInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -530,7 +530,7 @@ export type ContratoUncheckedUpdateManyInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -559,7 +559,7 @@ export type ContratoCountOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   renovacaoAutomatica?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrder
   temAditivo?: Prisma.SortOrder
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
@@ -572,7 +572,7 @@ export type ContratoCountOrderByAggregateInput = {
 export type ContratoAvgOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrder
 }
 
 export type ContratoMaxOrderByAggregateInput = {
@@ -584,7 +584,7 @@ export type ContratoMaxOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   renovacaoAutomatica?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrder
   temAditivo?: Prisma.SortOrder
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
@@ -603,7 +603,7 @@ export type ContratoMinOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   renovacaoAutomatica?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrder
   temAditivo?: Prisma.SortOrder
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
@@ -616,7 +616,7 @@ export type ContratoMinOrderByAggregateInput = {
 export type ContratoSumOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
-  volumeMinimo?: Prisma.SortOrder
+  volumeMinimoCentavos?: Prisma.SortOrder
 }
 
 export type ContratoCreateNestedManyWithoutAvisoTratadoPorInput = {
@@ -761,7 +761,7 @@ export type ContratoCreateWithoutAvisoTratadoPorInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -780,7 +780,7 @@ export type ContratoUncheckedCreateWithoutAvisoTratadoPorInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -827,7 +827,7 @@ export type ContratoScalarWhereInput = {
   avisoPrevioDias?: Prisma.IntFilter<"Contrato"> | number
   renovacaoAutomatica?: Prisma.BoolFilter<"Contrato"> | boolean
   prazoPagamentoDias?: Prisma.IntNullableFilter<"Contrato"> | number | null
-  volumeMinimo?: Prisma.IntNullableFilter<"Contrato"> | number | null
+  volumeMinimoCentavos?: Prisma.IntNullableFilter<"Contrato"> | number | null
   temAditivo?: Prisma.BoolFilter<"Contrato"> | boolean
   dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringFilter<"Contrato"> | string
@@ -845,7 +845,7 @@ export type ContratoCreateWithoutClienteInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -863,7 +863,7 @@ export type ContratoUncheckedCreateWithoutClienteInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -907,7 +907,7 @@ export type ContratoCreateWithoutDocumentoInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -926,7 +926,7 @@ export type ContratoUncheckedCreateWithoutDocumentoInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -970,7 +970,7 @@ export type ContratoCreateManyAvisoTratadoPorInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -987,7 +987,7 @@ export type ContratoUpdateWithoutAvisoTratadoPorInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1006,7 +1006,7 @@ export type ContratoUncheckedUpdateWithoutAvisoTratadoPorInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1024,7 +1024,7 @@ export type ContratoUncheckedUpdateManyWithoutAvisoTratadoPorInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1041,7 +1041,7 @@ export type ContratoCreateManyClienteInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -1059,7 +1059,7 @@ export type ContratoUpdateWithoutClienteInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1077,7 +1077,7 @@ export type ContratoUncheckedUpdateWithoutClienteInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1095,7 +1095,7 @@ export type ContratoUncheckedUpdateManyWithoutClienteInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1114,7 +1114,7 @@ export type ContratoCreateManyDocumentoInput = {
   avisoPrevioDias: number
   renovacaoAutomatica: boolean
   prazoPagamentoDias?: number | null
-  volumeMinimo?: number | null
+  volumeMinimoCentavos?: number | null
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
@@ -1131,7 +1131,7 @@ export type ContratoUpdateWithoutDocumentoInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1150,7 +1150,7 @@ export type ContratoUncheckedUpdateWithoutDocumentoInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1168,7 +1168,7 @@ export type ContratoUncheckedUpdateManyWithoutDocumentoInput = {
   avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
   renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
   prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1188,7 +1188,7 @@ export type ContratoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   avisoPrevioDias?: boolean
   renovacaoAutomatica?: boolean
   prazoPagamentoDias?: boolean
-  volumeMinimo?: boolean
+  volumeMinimoCentavos?: boolean
   temAditivo?: boolean
   dataLimiteAviso?: boolean
   arquivo?: boolean
@@ -1210,7 +1210,7 @@ export type ContratoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   avisoPrevioDias?: boolean
   renovacaoAutomatica?: boolean
   prazoPagamentoDias?: boolean
-  volumeMinimo?: boolean
+  volumeMinimoCentavos?: boolean
   temAditivo?: boolean
   dataLimiteAviso?: boolean
   arquivo?: boolean
@@ -1232,7 +1232,7 @@ export type ContratoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   avisoPrevioDias?: boolean
   renovacaoAutomatica?: boolean
   prazoPagamentoDias?: boolean
-  volumeMinimo?: boolean
+  volumeMinimoCentavos?: boolean
   temAditivo?: boolean
   dataLimiteAviso?: boolean
   arquivo?: boolean
@@ -1254,7 +1254,7 @@ export type ContratoSelectScalar = {
   avisoPrevioDias?: boolean
   renovacaoAutomatica?: boolean
   prazoPagamentoDias?: boolean
-  volumeMinimo?: boolean
+  volumeMinimoCentavos?: boolean
   temAditivo?: boolean
   dataLimiteAviso?: boolean
   arquivo?: boolean
@@ -1264,7 +1264,7 @@ export type ContratoSelectScalar = {
   criadoEm?: boolean
 }
 
-export type ContratoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "clienteId" | "inicio" | "fim" | "avisoPrevioDias" | "renovacaoAutomatica" | "prazoPagamentoDias" | "volumeMinimo" | "temAditivo" | "dataLimiteAviso" | "arquivo" | "documentoId" | "avisoTratadoPorId" | "avisoTratadoEm" | "criadoEm", ExtArgs["result"]["contrato"]>
+export type ContratoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "clienteId" | "inicio" | "fim" | "avisoPrevioDias" | "renovacaoAutomatica" | "prazoPagamentoDias" | "volumeMinimoCentavos" | "temAditivo" | "dataLimiteAviso" | "arquivo" | "documentoId" | "avisoTratadoPorId" | "avisoTratadoEm" | "criadoEm", ExtArgs["result"]["contrato"]>
 export type ContratoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
@@ -1297,7 +1297,7 @@ export type $ContratoPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     avisoPrevioDias: number
     renovacaoAutomatica: boolean
     prazoPagamentoDias: number | null
-    volumeMinimo: number | null
+    volumeMinimoCentavos: number | null
     temAditivo: boolean
     dataLimiteAviso: Date
     arquivo: string
@@ -1739,7 +1739,7 @@ export interface ContratoFieldRefs {
   readonly avisoPrevioDias: Prisma.FieldRef<"Contrato", 'Int'>
   readonly renovacaoAutomatica: Prisma.FieldRef<"Contrato", 'Boolean'>
   readonly prazoPagamentoDias: Prisma.FieldRef<"Contrato", 'Int'>
-  readonly volumeMinimo: Prisma.FieldRef<"Contrato", 'Int'>
+  readonly volumeMinimoCentavos: Prisma.FieldRef<"Contrato", 'Int'>
   readonly temAditivo: Prisma.FieldRef<"Contrato", 'Boolean'>
   readonly dataLimiteAviso: Prisma.FieldRef<"Contrato", 'DateTime'>
   readonly arquivo: Prisma.FieldRef<"Contrato", 'String'>

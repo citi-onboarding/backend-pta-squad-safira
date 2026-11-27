@@ -158,7 +158,7 @@ export const ContratoScalarFieldEnum = {
   avisoPrevioDias: 'avisoPrevioDias',
   renovacaoAutomatica: 'renovacaoAutomatica',
   prazoPagamentoDias: 'prazoPagamentoDias',
-  volumeMinimo: 'volumeMinimo',
+  volumeMinimoCentavos: 'volumeMinimoCentavos',
   temAditivo: 'temAditivo',
   dataLimiteAviso: 'dataLimiteAviso',
   arquivo: 'arquivo',
@@ -225,7 +225,7 @@ export const PedidoHistoricoScalarFieldEnum = {
   vendedorNome: 'vendedorNome',
   quantidade: 'quantidade',
   precoUnitarioCentavos: 'precoUnitarioCentavos',
-  status: 'status'
+  cancelado: 'cancelado'
 } as const
 
 export type PedidoHistoricoScalarFieldEnum = (typeof PedidoHistoricoScalarFieldEnum)[keyof typeof PedidoHistoricoScalarFieldEnum]
@@ -287,7 +287,8 @@ export const RegistroSincronizacaoScalarFieldEnum = {
   itensLidos: 'itensLidos',
   erros: 'erros',
   pendencias: 'pendencias',
-  detalhe: 'detalhe'
+  detalhe: 'detalhe',
+  relatorio: 'relatorio'
 } as const
 
 export type RegistroSincronizacaoScalarFieldEnum = (typeof RegistroSincronizacaoScalarFieldEnum)[keyof typeof RegistroSincronizacaoScalarFieldEnum]

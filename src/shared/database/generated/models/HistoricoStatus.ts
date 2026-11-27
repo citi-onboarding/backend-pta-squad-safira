@@ -164,7 +164,7 @@ export type HistoricoStatusGroupByOutputType = {
   pedidoId: string
   de: $Enums.StatusPedido | null
   para: $Enums.StatusPedido
-  usuarioId: string | null
+  usuarioId: string
   motivo: string | null
   em: Date
   _count: HistoricoStatusCountAggregateOutputType | null
@@ -195,11 +195,11 @@ export type HistoricoStatusWhereInput = {
   pedidoId?: Prisma.StringFilter<"HistoricoStatus"> | string
   de?: Prisma.EnumStatusPedidoNullableFilter<"HistoricoStatus"> | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFilter<"HistoricoStatus"> | $Enums.StatusPedido
-  usuarioId?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
+  usuarioId?: Prisma.StringFilter<"HistoricoStatus"> | string
   motivo?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
   em?: Prisma.DateTimeFilter<"HistoricoStatus"> | Date | string
   pedido?: Prisma.XOR<Prisma.PedidoScalarRelationFilter, Prisma.PedidoWhereInput>
-  usuario?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
+  usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
 }
 
 export type HistoricoStatusOrderByWithRelationInput = {
@@ -207,7 +207,7 @@ export type HistoricoStatusOrderByWithRelationInput = {
   pedidoId?: Prisma.SortOrder
   de?: Prisma.SortOrderInput | Prisma.SortOrder
   para?: Prisma.SortOrder
-  usuarioId?: Prisma.SortOrderInput | Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   motivo?: Prisma.SortOrderInput | Prisma.SortOrder
   em?: Prisma.SortOrder
   pedido?: Prisma.PedidoOrderByWithRelationInput
@@ -222,11 +222,11 @@ export type HistoricoStatusWhereUniqueInput = Prisma.AtLeast<{
   pedidoId?: Prisma.StringFilter<"HistoricoStatus"> | string
   de?: Prisma.EnumStatusPedidoNullableFilter<"HistoricoStatus"> | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFilter<"HistoricoStatus"> | $Enums.StatusPedido
-  usuarioId?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
+  usuarioId?: Prisma.StringFilter<"HistoricoStatus"> | string
   motivo?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
   em?: Prisma.DateTimeFilter<"HistoricoStatus"> | Date | string
   pedido?: Prisma.XOR<Prisma.PedidoScalarRelationFilter, Prisma.PedidoWhereInput>
-  usuario?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
+  usuario?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
 }, "id">
 
 export type HistoricoStatusOrderByWithAggregationInput = {
@@ -234,7 +234,7 @@ export type HistoricoStatusOrderByWithAggregationInput = {
   pedidoId?: Prisma.SortOrder
   de?: Prisma.SortOrderInput | Prisma.SortOrder
   para?: Prisma.SortOrder
-  usuarioId?: Prisma.SortOrderInput | Prisma.SortOrder
+  usuarioId?: Prisma.SortOrder
   motivo?: Prisma.SortOrderInput | Prisma.SortOrder
   em?: Prisma.SortOrder
   _count?: Prisma.HistoricoStatusCountOrderByAggregateInput
@@ -250,7 +250,7 @@ export type HistoricoStatusScalarWhereWithAggregatesInput = {
   pedidoId?: Prisma.StringWithAggregatesFilter<"HistoricoStatus"> | string
   de?: Prisma.EnumStatusPedidoNullableWithAggregatesFilter<"HistoricoStatus"> | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoWithAggregatesFilter<"HistoricoStatus"> | $Enums.StatusPedido
-  usuarioId?: Prisma.StringNullableWithAggregatesFilter<"HistoricoStatus"> | string | null
+  usuarioId?: Prisma.StringWithAggregatesFilter<"HistoricoStatus"> | string
   motivo?: Prisma.StringNullableWithAggregatesFilter<"HistoricoStatus"> | string | null
   em?: Prisma.DateTimeWithAggregatesFilter<"HistoricoStatus"> | Date | string
 }
@@ -262,7 +262,7 @@ export type HistoricoStatusCreateInput = {
   motivo?: string | null
   em?: Date | string
   pedido: Prisma.PedidoCreateNestedOneWithoutHistoricoInput
-  usuario?: Prisma.UsuarioCreateNestedOneWithoutMudancasDeStatusInput
+  usuario: Prisma.UsuarioCreateNestedOneWithoutMudancasDeStatusInput
 }
 
 export type HistoricoStatusUncheckedCreateInput = {
@@ -270,7 +270,7 @@ export type HistoricoStatusUncheckedCreateInput = {
   pedidoId: string
   de?: $Enums.StatusPedido | null
   para: $Enums.StatusPedido
-  usuarioId?: string | null
+  usuarioId: string
   motivo?: string | null
   em?: Date | string
 }
@@ -282,7 +282,7 @@ export type HistoricoStatusUpdateInput = {
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pedido?: Prisma.PedidoUpdateOneRequiredWithoutHistoricoNestedInput
-  usuario?: Prisma.UsuarioUpdateOneWithoutMudancasDeStatusNestedInput
+  usuario?: Prisma.UsuarioUpdateOneRequiredWithoutMudancasDeStatusNestedInput
 }
 
 export type HistoricoStatusUncheckedUpdateInput = {
@@ -290,7 +290,7 @@ export type HistoricoStatusUncheckedUpdateInput = {
   pedidoId?: Prisma.StringFieldUpdateOperationsInput | string
   de?: Prisma.NullableEnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
-  usuarioId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -300,7 +300,7 @@ export type HistoricoStatusCreateManyInput = {
   pedidoId: string
   de?: $Enums.StatusPedido | null
   para: $Enums.StatusPedido
-  usuarioId?: string | null
+  usuarioId: string
   motivo?: string | null
   em?: Date | string
 }
@@ -318,7 +318,7 @@ export type HistoricoStatusUncheckedUpdateManyInput = {
   pedidoId?: Prisma.StringFieldUpdateOperationsInput | string
   de?: Prisma.NullableEnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
-  usuarioId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -503,7 +503,7 @@ export type HistoricoStatusScalarWhereInput = {
   pedidoId?: Prisma.StringFilter<"HistoricoStatus"> | string
   de?: Prisma.EnumStatusPedidoNullableFilter<"HistoricoStatus"> | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFilter<"HistoricoStatus"> | $Enums.StatusPedido
-  usuarioId?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
+  usuarioId?: Prisma.StringFilter<"HistoricoStatus"> | string
   motivo?: Prisma.StringNullableFilter<"HistoricoStatus"> | string | null
   em?: Prisma.DateTimeFilter<"HistoricoStatus"> | Date | string
 }
@@ -514,14 +514,14 @@ export type HistoricoStatusCreateWithoutPedidoInput = {
   para: $Enums.StatusPedido
   motivo?: string | null
   em?: Date | string
-  usuario?: Prisma.UsuarioCreateNestedOneWithoutMudancasDeStatusInput
+  usuario: Prisma.UsuarioCreateNestedOneWithoutMudancasDeStatusInput
 }
 
 export type HistoricoStatusUncheckedCreateWithoutPedidoInput = {
   id?: string
   de?: $Enums.StatusPedido | null
   para: $Enums.StatusPedido
-  usuarioId?: string | null
+  usuarioId: string
   motivo?: string | null
   em?: Date | string
 }
@@ -592,7 +592,7 @@ export type HistoricoStatusCreateManyPedidoInput = {
   id?: string
   de?: $Enums.StatusPedido | null
   para: $Enums.StatusPedido
-  usuarioId?: string | null
+  usuarioId: string
   motivo?: string | null
   em?: Date | string
 }
@@ -603,14 +603,14 @@ export type HistoricoStatusUpdateWithoutPedidoInput = {
   para?: Prisma.EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  usuario?: Prisma.UsuarioUpdateOneWithoutMudancasDeStatusNestedInput
+  usuario?: Prisma.UsuarioUpdateOneRequiredWithoutMudancasDeStatusNestedInput
 }
 
 export type HistoricoStatusUncheckedUpdateWithoutPedidoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   de?: Prisma.NullableEnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
-  usuarioId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -619,7 +619,7 @@ export type HistoricoStatusUncheckedUpdateManyWithoutPedidoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   de?: Prisma.NullableEnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido | null
   para?: Prisma.EnumStatusPedidoFieldUpdateOperationsInput | $Enums.StatusPedido
-  usuarioId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  usuarioId?: Prisma.StringFieldUpdateOperationsInput | string
   motivo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   em?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -635,7 +635,7 @@ export type HistoricoStatusSelect<ExtArgs extends runtime.Types.Extensions.Inter
   motivo?: boolean
   em?: boolean
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["historicoStatus"]>
 
 export type HistoricoStatusSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -647,7 +647,7 @@ export type HistoricoStatusSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   motivo?: boolean
   em?: boolean
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["historicoStatus"]>
 
 export type HistoricoStatusSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -659,7 +659,7 @@ export type HistoricoStatusSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   motivo?: boolean
   em?: boolean
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["historicoStatus"]>
 
 export type HistoricoStatusSelectScalar = {
@@ -675,29 +675,29 @@ export type HistoricoStatusSelectScalar = {
 export type HistoricoStatusOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "pedidoId" | "de" | "para" | "usuarioId" | "motivo" | "em", ExtArgs["result"]["historicoStatus"]>
 export type HistoricoStatusInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }
 export type HistoricoStatusIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }
 export type HistoricoStatusIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   pedido?: boolean | Prisma.PedidoDefaultArgs<ExtArgs>
-  usuario?: boolean | Prisma.HistoricoStatus$usuarioArgs<ExtArgs>
+  usuario?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
 }
 
 export type $HistoricoStatusPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "HistoricoStatus"
   objects: {
     pedido: Prisma.$PedidoPayload<ExtArgs>
-    usuario: Prisma.$UsuarioPayload<ExtArgs> | null
+    usuario: Prisma.$UsuarioPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     pedidoId: string
     de: $Enums.StatusPedido | null
     para: $Enums.StatusPedido
-    usuarioId: string | null
+    usuarioId: string
     motivo: string | null
     em: Date
   }, ExtArgs["result"]["historicoStatus"]>
@@ -1095,7 +1095,7 @@ readonly fields: HistoricoStatusFieldRefs;
 export interface Prisma__HistoricoStatusClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   pedido<T extends Prisma.PedidoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PedidoDefaultArgs<ExtArgs>>): Prisma.Prisma__PedidoClient<runtime.Types.Result.GetResult<Prisma.$PedidoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  usuario<T extends Prisma.HistoricoStatus$usuarioArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.HistoricoStatus$usuarioArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  usuario<T extends Prisma.UsuarioDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UsuarioDefaultArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1530,25 +1530,6 @@ export type HistoricoStatusDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many HistoricoStatuses to delete.
    */
   limit?: number
-}
-
-/**
- * HistoricoStatus.usuario
- */
-export type HistoricoStatus$usuarioArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Usuario
-   */
-  select?: Prisma.UsuarioSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Usuario
-   */
-  omit?: Prisma.UsuarioOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.UsuarioInclude<ExtArgs> | null
-  where?: Prisma.UsuarioWhereInput
 }
 
 /**
