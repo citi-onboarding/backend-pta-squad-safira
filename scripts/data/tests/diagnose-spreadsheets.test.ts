@@ -205,7 +205,7 @@ describe("detection of data problems", () => {
     expect(
       diagnose(spreadsheets({})).problems.map((entry) => entry.id),
     ).toEqual(PROBLEM_IDS);
-    expect(PROBLEM_IDS).toHaveLength(14);
+    expect(PROBLEM_IDS).toHaveLength(15);
   });
 
   it("reports nothing found for clean sample files", () => {
@@ -494,6 +494,51 @@ describe("problems found after the first review", () => {
     });
   });
 
+  it("includes the clients' Situação in the status spellings", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [
+          { ...validClient, Situação: "Ativo" },
+          { ...validClient, "Cód.": "C002", Situação: "Ativo" },
+          { ...validClient, "Cód.": "C003", Situação: "ativo" },
+        ],
+      }),
+      "status-written-differently",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 1,
+      byFile: [{ file: SPREADSHEETS.clientes.file, rows: 1, exampleRows: [6] }],
+    });
+  });
+
+  it("finds status values outside the portal values", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [
+          { ...validClient, Situação: "Bloqueado" },
+          { ...validClient, "Cód.": "C002", Situação: "ok" },
+        ],
+        titulos: [
+          validReceivable,
+          { ...validReceivable, id_titulo: "T2", status: "Em aberto " },
+          { ...validReceivable, id_titulo: "T3", status: "QUITADO" },
+        ],
+      }),
+      "unknown-status-values",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 2,
+      byFile: [
+        { file: SPREADSHEETS.clientes.file, rows: 1, exampleRows: [5] },
+        { file: SPREADSHEETS.titulos.file, rows: 1, exampleRows: [4] },
+      ],
+    });
+  });
+
   it("finds CNPJs written in different formats", () => {
     const result = problem(
       spreadsheets({
@@ -583,5 +628,9 @@ describe("column match with the ERP", () => {
       COLUMN_MATCHES.clientes.find((match) => match.column === "Vendedor")
         ?.conversion,
     ).toMatch(/name.*ERP salesperson code/);
+    expect(
+      COLUMN_MATCHES.titulos.find((match) => match.column === "parcela")
+        ?.conversion,
+    ).toMatch(/before .\/. or .de./);
   });
 });

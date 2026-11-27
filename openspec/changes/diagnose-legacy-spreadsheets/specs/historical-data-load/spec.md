@@ -78,9 +78,10 @@ The diagnosis SHALL check every problem below and report, for each one, whether 
 - quantities typed wrong: a quantity that is not a positive whole number, or a row where quantity times unit price differs from its total by more than one cent;
 - total lines: rows whose first filled cell starts with "total" in any letter case;
 - outdated status: a receivable with a payment date whose status is not paid, or a paid status without a payment date;
-- status written in different ways: in the orders `Status` and the receivables `status` columns, spellings that become equal after trimming and ignoring letter case and accents but are not written identically; the rows that do not use the most common spelling of their status are counted;
+- status written in different ways: in the clients `Situação`, the orders `Status`, and the receivables `status` columns, spellings that become equal after trimming and ignoring letter case and accents but are not written identically; the rows that do not use the most common spelling of their status are counted;
 - salespeople identified by name: non-empty `Vendedor` cells in the clients and orders files, because they hold names while the portal links a salesperson by ERP code; the report also states how many distinct spellings each file has, without the names;
 - missing required values: a client without `Cód.`, an order item without `Produto`, or a receivable without `id_cliente`;
+- status outside the portal values: a client `Situação` that is not active, blocked, or inactive, or a receivable `status` that is not paid, open, or overdue, after trimming and ignoring letter case and accents;
 - CNPJ in different formats: a `CNPJ` column holding more than one of masked text, digits-only text, and an Excel number; the rows that do not use the most common format are counted.
 
 #### Scenario: Problem found
@@ -103,6 +104,11 @@ The diagnosis SHALL check every problem below and report, for each one, whether 
 - **WHEN** the sample orders have `Vendedor` filled in 3 rows with 2 distinct spellings
 - **THEN** the document reports "salespeople identified by name" as found, with 3 rows and 2 distinct spellings, without the names
 
+#### Scenario: Status outside the portal values
+
+- **WHEN** a sample client has the `Situação` `ok`
+- **THEN** the document reports "status outside the portal values" as found, with that row
+
 #### Scenario: Invalid CNPJ
 
 - **WHEN** a sample client has the CNPJ `11.222.333/0001-82`, whose last check digit is wrong
@@ -110,12 +116,12 @@ The diagnosis SHALL check every problem below and report, for each one, whether 
 
 ### Requirement: Volumes compared with the task
 
-The document SHALL compare the row counts of each file with the volumes the task expects (135 clients, about 9,700 orders, and about 6,500 receivables) and explain each difference with the counts it found (blank rows, total lines, item rows, and distinct orders).
+The document SHALL compare the row counts of each file with the volumes the task expects (135 clients, about 9,700 orders, and about 6,500 receivables). When the counts found do not account for a difference, the document SHALL say so and that the difference must be confirmed with the squad manager, instead of presenting the counts as an explanation.
 
 #### Scenario: Orders counted by item
 
-- **WHEN** the orders file has more item rows than the task's expected volume
-- **THEN** the document states the expected volume, the item rows, and the distinct orders, and explains that the file has one row per item
+- **WHEN** neither the item rows nor the distinct orders of the orders file match the task's expected volume
+- **THEN** the document states the expected volume, the item rows, and the distinct orders, says that the files do not explain the difference, and that it must be confirmed with the squad manager
 
 ### Requirement: Receivables that will come from the ERP
 

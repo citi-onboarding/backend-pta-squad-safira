@@ -24,6 +24,7 @@ export const PROBLEM_IDS = [
   "salespeople-identified-by-name",
   "missing-required-values",
   "cnpj-different-formats",
+  "unknown-status-values",
 ] as const;
 
 export type ProblemId = (typeof PROBLEM_IDS)[number];
@@ -185,7 +186,12 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
       "client code to Cliente.id",
     ),
     match("num_pedido", "Titulo.pedidoErp", "titulo.pedidoErp"),
-    match("parcela", "Titulo.parcela", "titulo.parcela", "text to integer"),
+    match(
+      "parcela",
+      "Titulo.parcela",
+      "titulo.parcela",
+      "installment number before `/` or `de` (written `1/2` or `1 de 2`)",
+    ),
     match(
       "valor",
       "Titulo.valorCentavos",
@@ -630,6 +636,7 @@ function offSpellingRows(rows: SheetRow[], column: string): number[] {
 
 function statusWrittenDifferently(sheets: Spreadsheets): RowsByFile {
   return {
+    clientes: offSpellingRows(contentRows(sheets.clientes), "Situação"),
     pedidos: offSpellingRows(contentRows(sheets.pedidos), "Status"),
     titulos: offSpellingRows(contentRows(sheets.titulos), "status"),
   };
@@ -702,6 +709,29 @@ function cnpjDifferentFormats(sheets: Spreadsheets): RowsByFile {
   };
 }
 
+// Values the portal accepts, compared after normalizeName. Order statuses
+// are free text in the portal, so they have no fixed list.
+const PORTAL_STATUSES = {
+  clientes: { column: "Situação", values: ["ativo", "bloqueado", "inativo"] },
+  titulos: { column: "status", values: ["pago", "em aberto", "vencido"] },
+} as const;
+
+function unknownStatusValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const [name, { column, values }] of Object.entries(PORTAL_STATUSES)) {
+    const allowed: readonly string[] = values;
+    found[name as SpreadsheetName] = contentRows(
+      sheets[name as SpreadsheetName],
+    )
+      .filter((row) => {
+        const value = text(row.cells[column]);
+        return value !== "" && !allowed.includes(normalizeName(value));
+      })
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
 const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "clients-written-differently": clientsWrittenDifferently,
   "invalid-cnpj": invalidCnpj,
@@ -717,6 +747,7 @@ const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "salespeople-identified-by-name": salespeopleIdentifiedByName,
   "missing-required-values": missingRequiredValues,
   "cnpj-different-formats": cnpjDifferentFormats,
+  "unknown-status-values": unknownStatusValues,
 };
 
 export function diagnose(sheets: Spreadsheets): Diagnosis {

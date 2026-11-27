@@ -20,12 +20,22 @@ async function sampleDocument(): Promise<string> {
       firstClient,
       secondClient,
       secondClient.map((value, index) =>
-        index === 0 ? "C003" : index === 1 ? "ELETRICA  MODELO SA." : value,
+        index === 0
+          ? "C003"
+          : index === 1
+            ? "ELETRICA  MODELO SA."
+            : index === 5
+              ? "Vendedora Ficticia"
+              : value,
       ),
     ],
     orderRows: [
       firstOrder.map((value, index) =>
-        index === 9 ? { formula: "G5*I5" } : value,
+        index === 9
+          ? { formula: "G5*I5" }
+          : index === 3
+            ? "Vendedor Inventado"
+            : value,
       ),
     ],
   });
@@ -107,6 +117,8 @@ describe("renderDiagnosis", () => {
       "11.222.333/0001-81",
       "11222333000181",
       "45.723.174/0001-10",
+      "Vendedora Ficticia",
+      "Vendedor Inventado",
     ]) {
       expect(document).not.toContain(secret);
     }
@@ -123,5 +135,13 @@ describe("renderDiagnosis", () => {
       expect(document).toContain(expected);
     }
     expect(document).toMatch(/one row per item/i);
+    expect(document).toMatch(/do not explain the difference/i);
+    expect(document).toMatch(/confirm.*squad manager/i);
+  });
+
+  it("sends a client with neither a code nor a CNPJ to the pending list", () => {
+    expect(CLEANING_RULES["missing-required-values"]).toMatch(
+      /neither a code nor a CNPJ.*pending list/,
+    );
   });
 });

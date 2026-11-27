@@ -38,3 +38,10 @@
 - [x] Red: developer writes the failing tests for each new scenario and runs them.
 - [x] Green: implement the detections, rules, volume note, and conversion column; regenerate the document and check it for personal data.
 - [x] Refactor and run all gates again.
+
+## Second review of the diagnosis
+
+- [x] Specify the clients' `Situação` in the status check, status values outside the portal, the honest volume comparison, and the installment conversion.
+- [x] Red: developer writes the failing tests, including privacy and volume checks on the generated document.
+- [x] Green: implement, regenerate the document twice, and check it for personal data.
+- [x] Refactor and run all gates again.

@@ -26,6 +26,7 @@ const PROBLEM_TITLES: Record<ProblemId, string> = {
   "salespeople-identified-by-name": "salespeople identified by name",
   "missing-required-values": "missing required values",
   "cnpj-different-formats": "CNPJ in different formats",
+  "unknown-status-values": "status outside the portal values",
 };
 
 // Proposed rules for DATA-03. They follow RN-09 (the ERP wins) and RN-16 (a
@@ -56,9 +57,11 @@ export const CLEANING_RULES: Record<ProblemId, string> = {
   "salespeople-identified-by-name":
     "Link each spelling to an ERP salesperson code through a correspondence table confirmed by the squad manager; never guess. A spelling with no correspondence goes to the pending list. Without this link, the salesperson portfolio (RN-08) does not work for historical clients.",
   "missing-required-values":
-    "A client without a code is linked to the ERP by CNPJ. A receivable without a client takes the ERP receivable with the same number when it exists; otherwise it goes to the pending list. An order item without a product goes to the pending list.",
+    "A client without a code is linked to the ERP by CNPJ; a client with neither a code nor a CNPJ goes to the pending list. A receivable without a client takes the ERP receivable with the same number when it exists; otherwise it goes to the pending list. An order item without a product goes to the pending list.",
   "cnpj-different-formats":
     "Normalize every CNPJ to 14 digits (remove the mask and add the leading zeros an Excel number loses) before comparing it with the ERP.",
+  "unknown-status-values":
+    "Do not guess a status: send the row to the pending list until the squad manager confirms what each value (for example, `ok` or `Prospect` in the clients' `Situação`, or `Estornado` in the receivables' `status`) means in the portal. A client or receivable that exists in the ERP takes the ERP status (RN-09).",
 };
 
 const SHEET_ORDER: SpreadsheetName[] = ["clientes", "pedidos", "titulos"];
@@ -150,9 +153,7 @@ function notes(diagnosis: Diagnosis): string[] {
   const lines = [
     "## Notes for DATA-03",
     "",
-    `- Volumes: the task expects 135 clients; the file has ${formatNumber(clientes.contentRows)} client rows, plus ${formatNumber(clientes.blankRows)} blank rows and ${formatNumber(clientes.totalLines)} total lines below the header.`,
-    `- Volumes: the task expects about 9,700 orders; the file has one row per item, so it has ${formatNumber(pedidos.contentRows)} item rows for ${formatNumber(pedidos.distinctOrders ?? 0)} distinct orders.`,
-    `- Volumes: the task expects about 6,500 receivables; the file has ${formatNumber(titulos.contentRows)} receivable rows.`,
+    `- Volumes: the task expects 135 clients, about 9,700 orders, and about 6,500 receivables. The files have ${formatNumber(clientes.contentRows)} client rows (plus ${formatNumber(clientes.blankRows)} blank rows and ${formatNumber(clientes.totalLines)} total lines), ${formatNumber(pedidos.contentRows)} order item rows (the orders file has one row per item) for ${formatNumber(pedidos.distinctOrders ?? 0)} distinct orders, and ${formatNumber(titulos.contentRows)} receivable rows. These counts do not explain the differences from the task, so the volumes must be confirmed with the squad manager.`,
   ];
   if (totalFormulas > 0) {
     lines.push(
