@@ -1,5 +1,6 @@
 import type { Database } from "../../shared/database/create-database.js";
 import type { Papel } from "../../shared/database/generated/enums.js";
+import { UserConflictError } from "./users.service.js";
 import type {
   NewUserData,
   UserChanges,
@@ -16,14 +17,17 @@ const userFields = {
   codigoVendedor: true,
 } as const;
 
-// Prisma rejects properties set to undefined, so only the changes that were
-// actually sent are passed on.
-function toUpdateData(changes: UserChanges): {
+interface UpdateData {
   nome?: string;
   papel?: Papel;
   ativo?: boolean;
-} {
-  const data: { nome?: string; papel?: Papel; ativo?: boolean } = {};
+  codigoVendedor?: string | null;
+}
+
+// Prisma rejects properties set to undefined, so only the changes that were
+// actually sent are passed on.
+function toUpdateData(changes: UserChanges): UpdateData {
+  const data: UpdateData = {};
   if (changes.nome !== undefined) {
     data.nome = changes.nome;
   }
@@ -33,7 +37,29 @@ function toUpdateData(changes: UserChanges): {
   if (changes.ativo !== undefined) {
     data.ativo = changes.ativo;
   }
+  if (changes.codigoVendedor !== undefined) {
+    data.codigoVendedor = changes.codigoVendedor;
+  }
   return data;
+}
+
+// A unique-constraint violation (Prisma code P2002) means another request
+// stored the same email or salesperson code first; it becomes the same
+// conflict the service raises after its own checks.
+function toConflict(error: unknown): unknown {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "P2002"
+  ) {
+    return new UserConflictError(
+      JSON.stringify(error).includes("codigoVendedor")
+        ? "codigoVendedor"
+        : "email",
+    );
+  }
+  return error;
 }
 
 export class PrismaUsersRepository implements UsersRepository {
@@ -43,6 +69,19 @@ export class PrismaUsersRepository implements UsersRepository {
     return this.database.usuario.findMany({
       select: userFields,
       orderBy: { nome: "asc" },
+    });
+  }
+
+  findById(id: string): Promise<UserRecord | null> {
+    return this.database.usuario.findUnique({
+      where: { id },
+      select: userFields,
+    });
+  }
+
+  countActiveAdministrators(): Promise<number> {
+    return this.database.usuario.count({
+      where: { papel: "ADMINISTRADOR", ativo: true },
     });
   }
 
@@ -60,15 +99,24 @@ export class PrismaUsersRepository implements UsersRepository {
     });
   }
 
-  create(data: NewUserData): Promise<UserRecord> {
-    return this.database.usuario.create({ data, select: userFields });
+  async create(data: NewUserData): Promise<UserRecord> {
+    try {
+      return await this.database.usuario.create({ data, select: userFields });
+    } catch (error) {
+      throw toConflict(error);
+    }
   }
 
   async update(id: string, changes: UserChanges): Promise<UserRecord | null> {
-    const { count } = await this.database.usuario.updateMany({
-      where: { id },
-      data: toUpdateData(changes),
-    });
+    let count: number;
+    try {
+      ({ count } = await this.database.usuario.updateMany({
+        where: { id },
+        data: toUpdateData(changes),
+      }));
+    } catch (error) {
+      throw toConflict(error);
+    }
     if (count === 0) {
       return null;
     }

@@ -151,3 +151,28 @@ describe("GET /auth/me", () => {
     await request(app).get("/auth/me").expect(401);
   });
 });
+
+describe("POST /auth/login normalization and limit", () => {
+  it("signs in with the email typed in different letter case and with spaces", async () => {
+    const { app } = createTestApp();
+
+    await request(app)
+      .post("/auth/login")
+      .send({ email: "  Patricia@Distrilux.COM.br ", senha: "right-password" })
+      .expect(200);
+  });
+
+  it("answers 10 attempts per minute normally and responds 429 to the 11th", async () => {
+    const { app } = createTestApp();
+    const attempt = () =>
+      request(app)
+        .post("/auth/login")
+        .send({ email: "patricia@distrilux.com.br", senha: "wrong-password" });
+
+    for (let index = 0; index < 10; index += 1) {
+      await attempt().expect(401);
+    }
+
+    await attempt().expect(429);
+  });
+});

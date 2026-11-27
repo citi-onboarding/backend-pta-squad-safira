@@ -66,7 +66,9 @@ describe("user management with PostgreSQL", () => {
       SESSION_SECRET: "a-test-secret-that-is-long-enough-for-hs256",
       corsOrigins: ["http://localhost:5173"],
     };
-    app = createApp({ database, environment });
+    // These tests sign in more than 10 times a minute; the 10-attempt limit
+    // itself is covered by the auth router tests.
+    app = createApp({ database, environment, signInAttemptsPerMinute: 1000 });
   });
 
   afterAll(async () => {
@@ -212,5 +214,133 @@ describe("user management with PostgreSQL", () => {
       .send({ email: "ana@distrilux.com.br", senha: "ana-password" })
       .expect(200);
     await ana.get("/users").expect(200);
+  });
+
+  it("stores the email in lowercase, and the user signs in with any letter case", async () => {
+    const agent = await signInAsAdmin();
+
+    const created = await agent
+      .post("/users")
+      .send({
+        nome: "Beatriz",
+        email: "  Beatriz@Distrilux.COM.br ",
+        senha: "beatriz-password",
+        papel: "GERENTE",
+      })
+      .expect(201);
+
+    expect(created.body.email).toBe("beatriz@distrilux.com.br");
+    await agent
+      .post("/users")
+      .send({
+        nome: "Beatriz 2",
+        email: "beatriz@distrilux.com.br",
+        senha: "beatriz-password",
+        papel: "GERENTE",
+      })
+      .expect(409);
+    await request(app)
+      .post("/auth/login")
+      .send({ email: "BEATRIZ@distrilux.com.br", senha: "beatriz-password" })
+      .expect(200);
+  });
+
+  it("answers one of two simultaneous creations with 201 and the other with 409", async () => {
+    const agent = await signInAsAdmin();
+    const user = {
+      nome: "Daniel",
+      email: "daniel@distrilux.com.br",
+      senha: "daniel-password",
+      papel: "FINANCEIRO",
+    };
+
+    const responses = await Promise.all([
+      agent.post("/users").send(user),
+      agent.post("/users").send(user),
+    ]);
+
+    expect(responses.map((response) => response.status).sort()).toEqual([
+      201, 409,
+    ]);
+  });
+
+  it("rejects passwords shorter than 8 characters", async () => {
+    const agent = await signInAsAdmin();
+
+    await agent
+      .post("/users")
+      .send({
+        nome: "Eva",
+        email: "eva@distrilux.com.br",
+        senha: "1234567",
+        papel: "GERENTE",
+      })
+      .expect(400);
+    const created = await agent
+      .post("/users")
+      .send({
+        nome: "Eva",
+        email: "eva@distrilux.com.br",
+        senha: "eva-password",
+        papel: "GERENTE",
+      })
+      .expect(201);
+    await agent
+      .post(`/users/${String(created.body.id)}/redefinir-senha`)
+      .send({ senha: "1234567" })
+      .expect(400);
+  });
+
+  it("requires a free salesperson code to turn a user into a salesperson", async () => {
+    const agent = await signInAsAdmin();
+    const created = await agent
+      .post("/users")
+      .send({
+        nome: "Fábio",
+        email: "fabio@distrilux.com.br",
+        senha: "fabio-password",
+        papel: "GERENTE",
+      })
+      .expect(201);
+    const id = String(created.body.id);
+
+    await agent.patch(`/users/${id}`).send({ papel: "VENDEDOR" }).expect(400);
+    await agent
+      .patch(`/users/${id}`)
+      .send({ papel: "VENDEDOR", codigoVendedor: "V02" })
+      .expect(409);
+    const updated = await agent
+      .patch(`/users/${id}`)
+      .send({ papel: "VENDEDOR", codigoVendedor: "V20" })
+      .expect(200);
+
+    expect(updated.body).toMatchObject({
+      papel: "VENDEDOR",
+      codigoVendedor: "V20",
+    });
+    const left = await agent
+      .patch(`/users/${id}`)
+      .send({ papel: "GERENTE" })
+      .expect(200);
+    expect(left.body.codigoVendedor).toBe("V20");
+  });
+
+  // Runs last: it leaves Lucas as the only active administrator.
+  it("keeps at least one active administrator", async () => {
+    await database.usuario.updateMany({
+      where: { papel: "ADMINISTRADOR", NOT: { email: admin.email } },
+      data: { ativo: false },
+    });
+    const agent = await signInAsAdmin();
+    const lucas = await database.usuario.findUniqueOrThrow({
+      where: { email: admin.email },
+    });
+
+    await agent.patch(`/users/${lucas.id}`).send({ ativo: false }).expect(409);
+    await agent
+      .patch(`/users/${lucas.id}`)
+      .send({ papel: "GERENTE" })
+      .expect(409);
+    await agent.get("/users").expect(200);
   });
 });

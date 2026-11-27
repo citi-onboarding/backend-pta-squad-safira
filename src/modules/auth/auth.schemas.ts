@@ -2,7 +2,13 @@ import { Papel } from "../../shared/database/generated/enums.js";
 import { z } from "../../shared/http/openapi-zod.js";
 
 export const signInSchema = z.strictObject({
-  email: z.email(),
+  // Same normalization as user creation, so any letter case signs in.
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email())
+    .openapi({ format: "email" }),
   senha: z.string().min(1),
 });
 

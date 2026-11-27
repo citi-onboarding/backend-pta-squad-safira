@@ -2,7 +2,7 @@
 
 ### Requirement: Sign in with email and password
 
-The system SHALL start a session when an active user signs in with a registered email and the matching password. The session MUST be kept in an HttpOnly, SameSite cookie, and the response MUST NOT contain the password or the password hash.
+The system SHALL start a session when an active user signs in with a registered email and the matching password. Emails MUST be compared without surrounding spaces and without regard to letter case. The session MUST be kept in an HttpOnly, SameSite cookie, and the response MUST NOT contain the password or the password hash.
 
 #### Scenario: Valid credentials
 
@@ -23,6 +23,25 @@ The system SHALL start a session when an active user signs in with a registered 
 
 - **WHEN** an inactive user signs in with the correct email and password
 - **THEN** the system responds 401 with the same message as a wrong password and sets no session cookie
+
+#### Scenario: Email typed with different letter case
+
+- **WHEN** an active user signs in with their email typed in different letter case or with surrounding spaces, and the correct password
+- **THEN** the system responds 200 and starts the session
+
+### Requirement: Sign-in attempt limit
+
+The system SHALL accept at most 10 sign-in attempts per minute from the same IP address, counting successful and failed attempts.
+
+#### Scenario: Too many attempts
+
+- **WHEN** the same IP address sends an 11th sign-in attempt within one minute
+- **THEN** the system responds 429 and does not check the credentials
+
+#### Scenario: Attempts within the limit
+
+- **WHEN** the same IP address sends 10 sign-in attempts within one minute
+- **THEN** every attempt is answered normally (200 or 401)
 
 ### Requirement: Current user
 

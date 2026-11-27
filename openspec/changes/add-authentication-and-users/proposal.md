@@ -12,7 +12,8 @@ Almost every route of the DistriLux order portal needs to know who is signed in 
 - Store passwords only as argon2id hashes with the default parameters of the `argon2` package. Never return or log a password or a hash.
 - Return the same error for an unknown email and a wrong password.
 - Add a reusable role guard that answers 401 without a session and 403 with the wrong role.
-- Add user management for the Administrator role only: list, create, update name, role and active flag, and reset a password. Inactive users cannot sign in.
+- Add user management for the Administrator role only: list, create, update name, role, active flag and salesperson code, and reset a password. Inactive users cannot sign in. At least one active administrator always remains.
+- Store and compare emails trimmed and in lowercase, require at least 8 characters for new passwords, and limit sign-in to 10 attempts per minute per IP address (review of pull request #13).
 - Link a salesperson to the ERP salesperson code that defines the portfolio (RN-08).
 - Make the seed hash passwords with the same function as sign-in and read the passwords from the environment only.
 

@@ -21,6 +21,7 @@ export interface UserChanges {
   nome?: string | undefined;
   papel?: Papel | undefined;
   ativo?: boolean | undefined;
+  codigoVendedor?: string | null | undefined;
 }
 
 export interface CreateUserInput {
@@ -33,7 +34,9 @@ export interface CreateUserInput {
 
 export interface UsersRepository {
   list(): Promise<UserRecord[]>;
+  findById(id: string): Promise<UserRecord | null>;
   findByEmail(email: string): Promise<UserRecord | null>;
+  countActiveAdministrators(): Promise<number>;
   findBySalespersonCode(code: string): Promise<UserRecord | null>;
   create(data: NewUserData): Promise<UserRecord>;
   update(id: string, changes: UserChanges): Promise<UserRecord | null>;
@@ -46,6 +49,20 @@ export class UserConflictError extends Error {
   constructor(readonly field: "email" | "codigoVendedor") {
     super(`A user with this ${field} already exists.`);
     this.name = "UserConflictError";
+  }
+}
+
+export class SalespersonCodeRequiredError extends Error {
+  constructor() {
+    super("A salesperson needs a salesperson code.");
+    this.name = "SalespersonCodeRequiredError";
+  }
+}
+
+export class LastAdministratorError extends Error {
+  constructor() {
+    super("At least one active administrator is required.");
+    this.name = "LastAdministratorError";
   }
 }
 
@@ -81,7 +98,40 @@ export class UsersService {
     });
   }
 
-  update(id: string, changes: UserChanges): Promise<UserRecord | null> {
+  async update(id: string, changes: UserChanges): Promise<UserRecord | null> {
+    const current = await this.repository.findById(id);
+    if (current === null) {
+      return null;
+    }
+
+    const papel = changes.papel ?? current.papel;
+    const ativo = changes.ativo ?? current.ativo;
+    const codigoVendedor =
+      changes.codigoVendedor === undefined
+        ? current.codigoVendedor
+        : changes.codigoVendedor;
+
+    if (papel === "VENDEDOR" && !codigoVendedor) {
+      throw new SalespersonCodeRequiredError();
+    }
+    if (codigoVendedor !== null && codigoVendedor !== current.codigoVendedor) {
+      const owner = await this.repository.findBySalespersonCode(codigoVendedor);
+      if (owner !== null && owner.id !== id) {
+        throw new UserConflictError("codigoVendedor");
+      }
+    }
+
+    const losesAnAdministrator =
+      current.papel === "ADMINISTRADOR" &&
+      current.ativo &&
+      (papel !== "ADMINISTRADOR" || !ativo);
+    if (
+      losesAnAdministrator &&
+      (await this.repository.countActiveAdministrators()) <= 1
+    ) {
+      throw new LastAdministratorError();
+    }
+
     return this.repository.update(id, changes);
   }
 

@@ -39,4 +39,13 @@
 - [x] Write the ADR for session storage and password hashing in `docs/adr/`, using `docs/templates/adr.md`.
 - [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
 - [x] Run `openspec validate add-authentication-and-users --strict`.
-- [ ] Open the pull request to `develop`, noting the dependency on `feat/prismaSchema`, the new `src/shared/security` folder, and the open points.
+- [x] Open the pull request to `develop`, noting the dependency on `feat/prismaSchema`, the new `src/shared/security` folder, and the open points.
+
+## Review of pull request #13
+
+- [x] Update the specs and the design with the review adjustments: salesperson code on update, last active administrator, emails trimmed and lowercased, 409 for simultaneous creation, 8-character passwords, and 10 sign-in attempts per minute.
+- [x] Red: developer writes the failing tests for each new scenario and runs them.
+- [x] Green: implement the minimal code and regenerate `openapi.json`.
+- [x] Refactor: keep every test green.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`, and `openspec validate add-authentication-and-users --strict`.
+- [x] Rename the ADR to 0002 to avoid the clash with the BACK-02 ADR 0001.

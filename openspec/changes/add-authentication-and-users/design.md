@@ -32,6 +32,18 @@ The decisions below follow task BACK-01, PRD section 4.2, RN-08, RN-14, and sect
 - `SESSION_SECRET` is required and must have at least 32 characters.
 - The seed reads the development password from `SEED_PASSWORD` and fails when it is missing. Both variables are documented in `.env.example` with placeholder values only.
 
+### Adjustments from the review of pull request #13
+
+The project manager asked for the salesperson-code validation on update and for the ADR number to be settled by merge order; the developer also accepted the reviewer's suggestions, with the values below.
+
+- Salesperson code on update: `PATCH /users/:id` accepts `codigoVendedor`. The service merges the request with the stored user and applies the create rule to the result: a salesperson without a code answers 400, and a code linked to another user answers 409. A user who leaves the salesperson role keeps the code, which is no longer used.
+- Last administrator: before deactivating or changing the role of an active administrator, the service counts the other active administrators; when there are none, it answers 409 ("At least one active administrator is required.").
+- Emails: the request schemas trim and lowercase the email before validating it, on create and on sign-in, so the stored value and the lookup always match. `PATCH` does not change emails.
+- Simultaneous creation: the repository maps Prisma's unique-constraint error (`P2002`) to the same conflict error the service already raises, so the router answers 409 instead of 500.
+- Passwords: the create and reset schemas require at least 8 characters. Sign-in keeps accepting any non-empty password, so existing passwords still work.
+- Sign-in limit: a dedicated `express-rate-limit` instance on `POST /auth/login` allows 10 attempts per minute per IP address and answers 429. Unlike the global limit, it also runs in tests, so the limit itself is tested; tests that sign in many times receive a higher limit through the application options.
+- The ADR already records that a copied cookie stays valid until it expires (Consequences, Negative), so it does not change.
+
 ## Rejected alternatives
 
 - Session table in the database: it gives a real server-side sign-out, but it needs a new migration and an extra schema review that would delay FRONT-01 and BACK-05. Rejected by the project manager.
@@ -45,5 +57,6 @@ The decisions below follow task BACK-01, PRD section 4.2, RN-08, RN-14, and sect
 
 ## Open points for the team
 
-- A salesperson must have a salesperson code when created (kickoff answer: "the ideal is to have the code at registration"). `PATCH /users/:id` follows the task and does not change the code, so a user whose role changes to salesperson has no portfolio until a decision is made about linking a code after creation.
+- A salesperson must have a salesperson code when created (kickoff answer: "the ideal is to have the code at registration"); since the review of pull request #13, the same rule applies on update.
+- ADR number: BACK-02 (#12) also adds an ADR numbered 0001, so this change's ADR is numbered 0002 (`docs/adr/0002-signed-session-token-and-argon2id.md`), following the project manager's rule for the clash.
 - The first administrator in production: the kickoff mentioned an initial administrator account, but today it only exists through the development seed.

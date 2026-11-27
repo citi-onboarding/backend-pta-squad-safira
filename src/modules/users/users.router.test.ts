@@ -12,7 +12,11 @@ import {
 import { createSessionToken } from "../../shared/security/session-token.js";
 import { createUsersRouter } from "./users.router.js";
 import type { UserRecord, UsersService } from "./users.service.js";
-import { UserConflictError } from "./users.service.js";
+import {
+  LastAdministratorError,
+  SalespersonCodeRequiredError,
+  UserConflictError,
+} from "./users.service.js";
 
 const secret = "a-test-secret-that-is-long-enough-for-hs256";
 const signedInUserId = "0b6f1c2a-3d4e-4f5a-8b9c-0d1e2f3a4b5c";
@@ -183,6 +187,19 @@ describe("POST /users", () => {
       .expect(201);
   });
 
+  it("stores the email trimmed and in lowercase", async () => {
+    const { app, usersService } = createTestApp();
+
+    await request(app)
+      .post("/users")
+      .set("Cookie", await sessionCookie())
+      .send({ ...newSeller, email: "  Juliana@Distrilux.COM.br " })
+      .expect(201);
+    expect(usersService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ email: "juliana@distrilux.com.br" }),
+    );
+  });
+
   it("responds 409 for an email that is already registered", async () => {
     const { app } = createTestApp();
 
@@ -197,6 +214,7 @@ describe("POST /users", () => {
     ["an invalid email", { email: "not-an-email" }],
     ["an empty name", { nome: "" }],
     ["an empty password", { senha: "" }],
+    ["a password shorter than 8 characters", { senha: "1234567" }],
   ])("responds 400 for %s", async (_case, change) => {
     const { app, usersService } = createTestApp();
 
@@ -232,6 +250,47 @@ describe("PATCH /users/:id", () => {
       .expect(404);
   });
 
+  it("passes a new salesperson code to the service", async () => {
+    const { app, usersService } = createTestApp();
+
+    await request(app)
+      .patch(`/users/${patriciaId}`)
+      .set("Cookie", await sessionCookie())
+      .send({ papel: "VENDEDOR", codigoVendedor: "V09" })
+      .expect(200);
+    expect(usersService.update).toHaveBeenCalledWith(patriciaId, {
+      papel: "VENDEDOR",
+      codigoVendedor: "V09",
+    });
+  });
+
+  it.each([
+    [
+      "400 when a salesperson would have no salesperson code",
+      new SalespersonCodeRequiredError(),
+      400,
+    ],
+    [
+      "409 when the salesperson code is linked to another user",
+      new UserConflictError("codigoVendedor"),
+      409,
+    ],
+    [
+      "409 when the last active administrator would be lost",
+      new LastAdministratorError(),
+      409,
+    ],
+  ])("responds %s", async (_case, error, status) => {
+    const { app, usersService } = createTestApp();
+    usersService.update.mockRejectedValueOnce(error);
+
+    await request(app)
+      .patch(`/users/${patriciaId}`)
+      .set("Cookie", await sessionCookie())
+      .send({ papel: "VENDEDOR" })
+      .expect(status);
+  });
+
   it("responds 400 when there is nothing to change", async () => {
     const { app } = createTestApp();
 
@@ -244,6 +303,17 @@ describe("PATCH /users/:id", () => {
 });
 
 describe("POST /users/:id/redefinir-senha", () => {
+  it("responds 400 for a password shorter than 8 characters", async () => {
+    const { app, usersService } = createTestApp();
+
+    await request(app)
+      .post(`/users/${patriciaId}/redefinir-senha`)
+      .set("Cookie", await sessionCookie())
+      .send({ senha: "1234567" })
+      .expect(400);
+    expect(usersService.resetPassword).not.toHaveBeenCalled();
+  });
+
   it("responds 204 after setting the new password", async () => {
     const { app, usersService } = createTestApp();
 

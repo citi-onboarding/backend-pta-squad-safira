@@ -23,7 +23,7 @@ Skip it for routine implementation details, formatting choices, or a local and r
 
 | Number | Title                                                                                                       | Status   | Superseded by |
 | ------ | ----------------------------------------------------------------------------------------------------------- | -------- | ------------- |
-| 0001   | [Signed session token in a cookie and argon2id password hashing](0001-signed-session-token-and-argon2id.md) | Accepted | —             |
+| 0002   | [Signed session token in a cookie and argon2id password hashing](0002-signed-session-token-and-argon2id.md) | Accepted | —             |
 
 <!--
 Add one row per ADR, newest first.

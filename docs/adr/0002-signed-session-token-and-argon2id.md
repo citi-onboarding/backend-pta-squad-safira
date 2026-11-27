@@ -1,5 +1,5 @@
 ---
-title: ADR-0001
+title: ADR-0002
 status: accepted
 date: 2026-11-25
 owners: ["Luana Allatta Guerra"]
@@ -8,7 +8,7 @@ supersedes: null
 superseded_by: null
 ---
 
-# 0001: Signed session token in a cookie and argon2id password hashing
+# 0002: Signed session token in a cookie and argon2id password hashing
 
 ## Context
 

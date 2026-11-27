@@ -1,7 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { NewUserData, UserRecord } from "./users.service.js";
-import { UserConflictError, UsersService } from "./users.service.js";
+import {
+  LastAdministratorError,
+  SalespersonCodeRequiredError,
+  UserConflictError,
+  UsersService,
+} from "./users.service.js";
 
 const patricia: UserRecord = {
   id: "user-1",
@@ -28,9 +33,20 @@ function createService(existingUsers: UserRecord[] = [patricia]) {
     create: vi.fn(({ senhaHash: _senhaHash, ...data }: NewUserData) =>
       Promise.resolve({ ...data, id: "new-user", ativo: true }),
     ),
-    update: vi.fn((id: string, changes: Partial<UserRecord>) =>
-      Promise.resolve(id === patricia.id ? { ...patricia, ...changes } : null),
+    findById: vi.fn((id: string) =>
+      Promise.resolve(existingUsers.find((user) => user.id === id) ?? null),
     ),
+    countActiveAdministrators: vi.fn(() =>
+      Promise.resolve(
+        existingUsers.filter(
+          (user) => user.papel === "ADMINISTRADOR" && user.ativo,
+        ).length,
+      ),
+    ),
+    update: vi.fn((id: string, changes: Partial<UserRecord>) => {
+      const user = existingUsers.find((candidate) => candidate.id === id);
+      return Promise.resolve(user ? { ...user, ...changes } : null);
+    }),
     updatePasswordHash: vi.fn((id: string) =>
       Promise.resolve(id === patricia.id),
     ),
@@ -133,6 +149,126 @@ describe("update a user", () => {
     await expect(
       service.update("missing", { ativo: false }),
     ).resolves.toBeNull();
+  });
+});
+
+const fernanda: UserRecord = {
+  id: "user-2",
+  nome: "Fernanda",
+  email: "fernanda@distrilux.com.br",
+  papel: "GERENTE",
+  ativo: true,
+  codigoVendedor: null,
+};
+
+const lucas: UserRecord = {
+  id: "user-3",
+  nome: "Lucas",
+  email: "lucas@distrilux.com.br",
+  papel: "ADMINISTRADOR",
+  ativo: true,
+  codigoVendedor: null,
+};
+
+describe("update the salesperson code", () => {
+  it("rejects turning a user without a code into a salesperson and changes nothing", async () => {
+    const { service, repository } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(fernanda.id, { papel: "VENDEDOR" }),
+    ).rejects.toBeInstanceOf(SalespersonCodeRequiredError);
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it("turns a user into a salesperson when a free code is sent", async () => {
+    const { service, repository } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(fernanda.id, { papel: "VENDEDOR", codigoVendedor: "V09" }),
+    ).resolves.toMatchObject({ papel: "VENDEDOR", codigoVendedor: "V09" });
+    expect(repository.update).toHaveBeenCalledWith(fernanda.id, {
+      papel: "VENDEDOR",
+      codigoVendedor: "V09",
+    });
+  });
+
+  it("rejects a code linked to another user and changes nothing", async () => {
+    const { service, repository } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(fernanda.id, { papel: "VENDEDOR", codigoVendedor: "V01" }),
+    ).rejects.toEqual(new UserConflictError("codigoVendedor"));
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it("accepts the salesperson's own current code", async () => {
+    const { service } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(patricia.id, { codigoVendedor: "V01" }),
+    ).resolves.toMatchObject({ codigoVendedor: "V01" });
+  });
+
+  it("changes the code of a salesperson", async () => {
+    const { service } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(patricia.id, { codigoVendedor: "V10" }),
+    ).resolves.toMatchObject({ papel: "VENDEDOR", codigoVendedor: "V10" });
+  });
+
+  it("rejects removing the code of a user who stays a salesperson", async () => {
+    const { service, repository } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(patricia.id, { codigoVendedor: null }),
+    ).rejects.toBeInstanceOf(SalespersonCodeRequiredError);
+    expect(repository.update).not.toHaveBeenCalled();
+  });
+
+  it("keeps the code when a salesperson leaves the role", async () => {
+    const { service, repository } = createService([patricia, fernanda]);
+
+    await expect(
+      service.update(patricia.id, { papel: "GERENTE" }),
+    ).resolves.toMatchObject({ papel: "GERENTE", codigoVendedor: "V01" });
+    expect(repository.update).toHaveBeenCalledWith(patricia.id, {
+      papel: "GERENTE",
+    });
+  });
+});
+
+describe("keep an active administrator", () => {
+  it.each([
+    ["deactivating", { ativo: false }],
+    ["demoting", { papel: "GERENTE" as const }],
+  ])(
+    "rejects %s the only active administrator and changes nothing",
+    async (_action, changes) => {
+      const { service, repository } = createService([patricia, lucas]);
+
+      await expect(service.update(lucas.id, changes)).rejects.toBeInstanceOf(
+        LastAdministratorError,
+      );
+      expect(repository.update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("deactivates an administrator when another one stays active", async () => {
+    const ana: UserRecord = { ...lucas, id: "user-4", nome: "Ana" };
+    const { service } = createService([lucas, ana]);
+
+    await expect(
+      service.update(lucas.id, { ativo: false }),
+    ).resolves.toMatchObject({ ativo: false });
+  });
+
+  it("changes the name of the only active administrator", async () => {
+    const { service } = createService([lucas]);
+
+    await expect(
+      service.update(lucas.id, { nome: "Lucas Moura" }),
+    ).resolves.toMatchObject({ nome: "Lucas Moura" });
   });
 });
 

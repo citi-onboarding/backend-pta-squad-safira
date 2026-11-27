@@ -25,7 +25,7 @@ The system SHALL return every user with `id`, `nome`, `email`, `papel`, `ativo`,
 
 ### Requirement: Create a user
 
-The system SHALL create a user from a name, email, role, initial password, and, for a salesperson, the ERP salesperson code. A salesperson MUST have a salesperson code when created; the other roles MAY be created without one. Administrators MAY create other administrators. The password MUST be stored only as a hash, and the response MUST NOT contain it.
+The system SHALL create a user from a name, email, role, initial password, and, for a salesperson, the ERP salesperson code. The email MUST be stored without surrounding spaces and in lowercase. The initial password MUST have at least 8 characters. A salesperson MUST have a salesperson code when created; the other roles MAY be created without one. Administrators MAY create other administrators. The password MUST be stored only as a hash, and the response MUST NOT contain it.
 
 #### Scenario: Valid user
 
@@ -34,12 +34,22 @@ The system SHALL create a user from a name, email, role, initial password, and, 
 
 #### Scenario: Email already registered
 
-- **WHEN** an administrator creates a user with an email that already exists
+- **WHEN** an administrator creates a user with an email that already exists, in any letter case
 - **THEN** the system responds 409 and creates nothing
+
+#### Scenario: Email with uppercase letters
+
+- **WHEN** an administrator creates a user with an email that has uppercase letters or surrounding spaces
+- **THEN** the system responds 201 and returns and stores the email trimmed and in lowercase
+
+#### Scenario: Simultaneous creation with the same email
+
+- **WHEN** two requests create users with the same email at the same time
+- **THEN** one responds 201 and the other responds 409, never 500
 
 #### Scenario: Invalid data
 
-- **WHEN** an administrator creates a user with an invalid email, an empty name, or an empty password
+- **WHEN** an administrator creates a user with an invalid email, an empty name, or a password shorter than 8 characters
 - **THEN** the system responds 400 and creates nothing
 
 #### Scenario: Salesperson without salesperson code
@@ -64,7 +74,7 @@ The system SHALL create a user from a name, email, role, initial password, and, 
 
 ### Requirement: Update a user
 
-The system SHALL let an administrator change a user's name, role, and active flag.
+The system SHALL let an administrator change a user's name, role, active flag, and ERP salesperson code. After the change, a salesperson MUST have a salesperson code, and a salesperson code MUST NOT be linked to two users. When a user leaves the salesperson role, the salesperson code is kept and no longer used. At least one active administrator MUST remain.
 
 #### Scenario: Deactivate a user
 
@@ -81,14 +91,54 @@ The system SHALL let an administrator change a user's name, role, and active fla
 - **WHEN** an administrator updates a user id that does not exist
 - **THEN** the system responds 404
 
+#### Scenario: Becoming a salesperson without a salesperson code
+
+- **WHEN** an administrator changes the role of a user without a salesperson code to salesperson and sends no salesperson code
+- **THEN** the system responds 400 and changes nothing
+
+#### Scenario: Becoming a salesperson with a salesperson code
+
+- **WHEN** an administrator changes the role of a user to salesperson and sends a salesperson code that no other user has
+- **THEN** the system responds 200 with the new role and salesperson code
+
+#### Scenario: Setting the salesperson code of a salesperson
+
+- **WHEN** an administrator sends a new salesperson code for a salesperson
+- **THEN** the system responds 200 with the new salesperson code
+
+#### Scenario: Salesperson code linked to another user
+
+- **WHEN** an administrator sends a salesperson code that is already linked to another user
+- **THEN** the system responds 409 and changes nothing
+
+#### Scenario: Removing the code of a salesperson
+
+- **WHEN** an administrator sends an empty salesperson code for a user who stays a salesperson
+- **THEN** the system responds 400 and changes nothing
+
+#### Scenario: Leaving the salesperson role
+
+- **WHEN** an administrator changes a salesperson's role to another role
+- **THEN** the system responds 200 and the salesperson code is kept
+
+#### Scenario: Deactivating or demoting the last active administrator
+
+- **WHEN** an administrator deactivates the only active administrator, or changes its role, including their own account
+- **THEN** the system responds 409 and changes nothing
+
 ### Requirement: Reset a password
 
-The system SHALL let an administrator set a new password for a user. After the reset, only the new password MUST work.
+The system SHALL let an administrator set a new password for a user. The new password MUST have at least 8 characters. After the reset, only the new password MUST work.
 
 #### Scenario: Password reset
 
 - **WHEN** an administrator resets a user's password
 - **THEN** the system responds 204, the old password no longer signs in, and the new password does
+
+#### Scenario: New password too short
+
+- **WHEN** an administrator resets a user's password to one shorter than 8 characters
+- **THEN** the system responds 400 and the old password keeps working
 
 ### Requirement: Development users
 

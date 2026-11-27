@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import type { RequestHandler, Router as ExpressRouter } from "express";
 
 import { HttpProblem } from "../../shared/http/problem.js";
@@ -17,18 +18,31 @@ interface AuthRouterOptions {
   authenticate: RequestHandler;
   sessionSecret: string;
   secureCookie: boolean;
+  signInAttemptsPerMinute?: number | undefined;
 }
+
+const DEFAULT_SIGN_IN_ATTEMPTS_PER_MINUTE = 10;
 
 export function createAuthRouter({
   authService,
   authenticate,
   sessionSecret,
   secureCookie,
+  signInAttemptsPerMinute = DEFAULT_SIGN_IN_ATTEMPTS_PER_MINUTE,
 }: AuthRouterOptions): ExpressRouter {
   const router = Router();
+  // Counts every attempt, successful or not, per IP address. Unlike the global
+  // limit, it also runs in tests, so the limit itself is tested.
+  const signInLimit = rateLimit({
+    windowMs: 60_000,
+    limit: signInAttemptsPerMinute,
+    standardHeaders: "draft-8",
+    legacyHeaders: false,
+  });
 
   router.post(
     "/login",
+    signInLimit,
     validate({ body: signInSchema }),
     async (request, response) => {
       const { email, senha } = signInSchema.parse(request.body);

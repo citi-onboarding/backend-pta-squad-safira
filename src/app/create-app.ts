@@ -27,11 +27,13 @@ import { hashPassword, verifyPassword } from "../shared/security/password.js";
 interface CreateAppOptions {
   database: Database;
   environment: Environment;
+  signInAttemptsPerMinute?: number | undefined;
 }
 
 export function createApp({
   database,
   environment,
+  signInAttemptsPerMinute,
 }: CreateAppOptions): Express {
   const app = express();
   const logger = createLogger(environment);
@@ -111,6 +113,7 @@ export function createApp({
       authenticate,
       sessionSecret: environment.SESSION_SECRET,
       secureCookie,
+      signInAttemptsPerMinute,
     }),
   );
   app.use(

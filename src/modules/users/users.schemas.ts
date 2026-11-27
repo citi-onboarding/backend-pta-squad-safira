@@ -3,11 +3,20 @@ import { z } from "../../shared/http/openapi-zod.js";
 
 export const userIdSchema = z.object({ id: z.uuid() });
 
+// Emails are stored and compared trimmed and in lowercase.
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email())
+  .openapi({ format: "email" });
+const newPasswordSchema = z.string().min(8);
+
 export const createUserSchema = z
   .strictObject({
     nome: z.string().trim().min(1),
-    email: z.email(),
-    senha: z.string().min(1),
+    email: emailSchema,
+    senha: newPasswordSchema,
     papel: z.enum(Papel),
     codigoVendedor: z.string().trim().min(1).nullable().optional(),
   })
@@ -21,6 +30,7 @@ export const updateUserSchema = z
     nome: z.string().trim().min(1).optional(),
     papel: z.enum(Papel).optional(),
     ativo: z.boolean().optional(),
+    codigoVendedor: z.string().trim().min(1).nullable().optional(),
   })
   .refine(
     (value) => Object.keys(value).length > 0,
@@ -28,7 +38,7 @@ export const updateUserSchema = z
   );
 
 export const resetPasswordSchema = z.strictObject({
-  senha: z.string().min(1),
+  senha: newPasswordSchema,
 });
 
 export const userSchema = z.strictObject({

@@ -12,7 +12,11 @@ import {
   userListSchema,
   userSchema,
 } from "./users.schemas.js";
-import { UserConflictError } from "./users.service.js";
+import {
+  LastAdministratorError,
+  SalespersonCodeRequiredError,
+  UserConflictError,
+} from "./users.service.js";
 import type { UsersService } from "./users.service.js";
 import "./users.openapi.js";
 
@@ -23,6 +27,19 @@ interface UsersRouterOptions {
 
 function userNotFound(): HttpProblem {
   return new HttpProblem(404, "Not Found", "User not found.");
+}
+
+function toProblem(error: unknown): unknown {
+  if (error instanceof SalespersonCodeRequiredError) {
+    return new HttpProblem(400, "Bad Request", error.message);
+  }
+  if (
+    error instanceof UserConflictError ||
+    error instanceof LastAdministratorError
+  ) {
+    return new HttpProblem(409, "Conflict", error.message);
+  }
+  return error;
 }
 
 export function createUsersRouter({
@@ -48,10 +65,7 @@ export function createUsersRouter({
           .status(201)
           .json(userSchema.parse(user));
       } catch (error) {
-        if (error instanceof UserConflictError) {
-          throw new HttpProblem(409, "Conflict", error.message);
-        }
-        throw error;
+        throw toProblem(error);
       }
     },
   );
@@ -62,7 +76,12 @@ export function createUsersRouter({
     async (request, response) => {
       const { id } = userIdSchema.parse(request.params);
       const changes = updateUserSchema.parse(request.body);
-      const user = await usersService.update(id, changes);
+      let user;
+      try {
+        user = await usersService.update(id, changes);
+      } catch (error) {
+        throw toProblem(error);
+      }
       if (user === null) {
         throw userNotFound();
       }
