@@ -36,4 +36,5 @@ The history load (F11) needs to know what is actually inside the spreadsheets th
 ## Provisional decisions (to confirm with the squad manager)
 
 1. File paths: the DATA-02 task text names `scripts/carga/diagnostico.ts` and `docs/carga-historico-diagnostico.md`, while its file tree and details name `scripts/data/read-spreadsheets.ts`, `scripts/data/__tests__/read-spreadsheets.test.ts`, and `docs/data/diagnostico-planilhas.md`. The tree is used because it is the only list with every file and because AGENTS.md asks for English code names.
-2. Expected volumes: the task mentions about 9,700 order rows and about 6,500 receivable rows, while the files have 15,363 and 8,314 physical rows. The diagnosis reports the real counts and explains the difference.
+2. Test folder: the task names `scripts/data/__tests__/`, but the repository lint requires kebab-case folders under `scripts/` (`check-file/folder-naming-convention`), so the tests live in `scripts/data/tests/`.
+3. Expected volumes: the task mentions about 9,700 order rows and about 6,500 receivable rows, while the files have 15,363 and 8,314 physical rows. The diagnosis reports the real counts and explains the difference.

@@ -29,7 +29,7 @@ The task tree lists only `scripts/data/read-spreadsheets.ts` and its test. To ke
 - `diagnose-spreadsheets.ts`: pure functions that build the profile, detect the problems, count receivables from 2026-10-01, and list the column matches.
 - `render-diagnosis.ts`: turns the diagnosis into Markdown, including one fixed cleaning rule per problem found.
 - `run-diagnosis.ts`: the command: reads `--input <folder>`, calls the three steps, and writes `docs/data/diagnostico-planilhas.md`.
-- Tests in `scripts/data/__tests__/`: `read-spreadsheets.test.ts` (task file), `diagnose-spreadsheets.test.ts`, `render-diagnosis.test.ts`, and `run-diagnosis.test.ts`.
+- Tests in `scripts/data/tests/`: `read-spreadsheets.test.ts` (task file), `diagnose-spreadsheets.test.ts`, `render-diagnosis.test.ts`, and `run-diagnosis.test.ts`.
 
 `scripts/` is outside `src/`, so the module boundaries of `src/` do not apply; the command imports nothing from `src/modules`.
 

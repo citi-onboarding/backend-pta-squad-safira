@@ -4,11 +4,11 @@
 
 - [x] Write the proposal, the `historical-data-load` spec, and the design; inspect the three files' structure without printing cell values.
 - [x] Add `exceljs@4.4.0` with `--save-exact` and record the audit finding in the design.
-- [ ] Confirm the provisional file paths and the volume difference with the squad manager.
+- [ ] Confirm the provisional file paths, the `tests/` folder, and the volume difference with the squad manager.
 
 ## Red
 
-- [ ] Developer writes `read-spreadsheets.test.ts`: header found below title rows, missing column, missing file, the three files read without being changed, and `;`-separated CSV.
+- [x] Developer writes `read-spreadsheets.test.ts`: header found below title rows, missing column, missing file, the three files read without being changed, and `;`-separated CSV.
 - [ ] Developer writes `diagnose-spreadsheets.test.ts`: profile counts, distinct orders, each of the ten problems found and not found, receivables from 2026-10-01, and the column match table.
 - [ ] Developer writes `render-diagnosis.test.ts`: one rule per problem found, "not found" for the others, masked CNPJs, and no names, contacts, or phones.
 - [ ] Developer writes `run-diagnosis.test.ts`: missing `--input`, and two runs producing byte-identical documents.
