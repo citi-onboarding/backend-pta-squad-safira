@@ -4,7 +4,7 @@
 
 - [x] 1.1 Write the proposal, the customer-search and customer-profile specs, and the design.
 - [x] 1.2 Run `openspec validate add-customer-search-and-profile --strict`.
-- [ ] 1.3 Confirm with the project manager whether the administrator sees clients, and update the specs and the design if the answer changes the rule.
+- [x] 1.3 Confirm with the project manager whether the administrator sees clients (confirmed on 27/11: no access), and update the design.
 
 ## 2. Contract
 
@@ -42,4 +42,4 @@
 - [ ] 6.2 Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
 - [ ] 6.3 Run `openspec validate add-customer-search-and-profile --strict`.
 - [ ] 6.4 After BACK-03 and BACK-04 are reviewed, merge their branches, run the sync against the ERP, and check the profile of real clients (limit, open, and overdue amounts).
-- [ ] 6.5 Open the pull request to `feat/authAndUsers`, noting the dependency on BACK-01, BACK-03, and BACK-04 and the open question about the administrator.
+- [ ] 6.5 Open the pull request to `feat/authAndUsers`, noting the dependency on BACK-01, BACK-03, and BACK-04 and the project manager's confirmation that the administrator has no access to clients.

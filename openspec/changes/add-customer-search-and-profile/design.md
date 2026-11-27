@@ -37,7 +37,7 @@ The decisions below follow task BACK-05, PRD sections 4.2 and 7.1, US-002, US-00
 - Both routes use the BACK-01 session middleware. The router reads `clientPortfolioFilter(request.user)`: `null` answers 403; otherwise the filter goes into the repository query.
 - The profile query looks the client up by id and portfolio filter together. A client of another portfolio is therefore indistinguishable from a missing one and answers 404 (task note: do not reveal that it exists).
 - Alternative rejected: load the client and then call `canAccessClient`. It works, but it loads data the user may not see and makes the 404 depend on a second check that a later change could forget.
-- The administrator has no access, following the BACK-01 design (PRD 4.2 and the prototype menu). The task card mentions the administrator among the roles that see every client; this is pending confirmation by the project manager (see Open Questions).
+- The administrator has no access, following the BACK-01 design (PRD 4.2 and the prototype menu). The task card also listed the administrator among the roles that see every client; the project manager confirmed on 27/11 that this was an inconsistency in the card and that the administrator has no access to clients.
 
 ### Search
 
@@ -70,12 +70,7 @@ The decisions below follow task BACK-05, PRD sections 4.2 and 7.1, US-002, US-00
 - [`contains` search does not use the indexes] → Acceptable for a few hundred clients; revisit with a trigram index if the portfolio grows.
 - [Data is as fresh as the last sync] → The profile returns the last successful sync times so the screen can show them (US-002); on-demand refresh is BACK-13.
 - [Receivables of a client missing from the portal] → Not possible: `Titulo.clienteId` is a required foreign key.
-- [The card and BACK-01 disagree on the administrator] → One authorization branch and one test change if the project manager decides otherwise.
 
 ## Migration Plan
 
 No migration. The routes are new and read-only; rollback is removing the router registration.
-
-## Open Questions
-
-- Should the administrator see clients? The task card says yes; the BACK-01 design and the task's detail section say only the sales manager and finance. The question was sent to the project manager on 27/11; until the answer, the administrator receives 403. A change in the answer only flips that branch and its test.
