@@ -8,6 +8,26 @@ context: |
   Every API change must update runtime validation, response validation, tests,
   and the generated OpenAPI contract together.
 
+  Domain: DistriLux order portal (PTA). DistriLux is a distributor whose sales
+  team and customers place orders through the portal. The DistriLux ERP is the
+  system of record for customers (clientes, identified by codigo such as C0001,
+  with credit limit and status ATIVO/BLOQUEADO/INATIVO), products (produtos,
+  codigo such as P00001, table price, active flag), receivables (titulos, with
+  installment, due date, and status PAGO/EM_ABERTO/VENCIDO), and orders
+  (pedidos, numbered by the ERP, status RECEBIDO). The portal synchronizes
+  customers, products, and receivables incrementally through paginated reads
+  filtered by atualizadoDesde, and submits orders to the ERP.
+  Business rules: RN-07 order submission is idempotent through a submission key
+  sent as Idempotency-Key and owned by the submission flow; RN-13 monetary
+  values are integer cents end to end and are converted to reais only for
+  presentation; RN-14 the ERP key exists only on the server and never appears in
+  logs or responses; RN-15 ERP rate limits and outages must not lose or
+  duplicate work.
+  The ERP client in src/shared/erp is the only code that talks to the ERP;
+  modules depend on its ErpClient interface and never on HTTP. ERP domain terms
+  (cliente, produto, titulo, pedido, centavos) keep their Portuguese names in
+  code.
+
 rules:
   proposal:
     - State the user or operational outcome and explicit non-goals.

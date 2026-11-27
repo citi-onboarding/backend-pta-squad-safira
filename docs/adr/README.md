@@ -21,8 +21,9 @@ Skip it for routine implementation details, formatting choices, or a local and r
 
 ## Index
 
-| Number | Title | Status | Superseded by |
-| ------ | ----- | ------ | ------------- |
+| Number                                                    | Title                                     | Status   | Superseded by |
+| --------------------------------------------------------- | ----------------------------------------- | -------- | ------------- |
+| [0001](0001-erp-access-through-a-single-shared-client.md) | ERP access through a single shared client | Accepted | —             |
 
 <!--
 Add one row per ADR, newest first.

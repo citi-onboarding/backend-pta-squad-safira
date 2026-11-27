@@ -11,6 +11,8 @@ const envSchema = z.object({
     .default("info"),
   CORS_ORIGINS: z.string().default("http://localhost:5173"),
   DATABASE_URL: z.url().startsWith("postgresql://"),
+  ERP_API_URL: z.url(),
+  ERP_API_KEY: z.string().min(1),
 });
 
 export type Environment = z.infer<typeof envSchema> & { corsOrigins: string[] };
