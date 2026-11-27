@@ -50,7 +50,8 @@ The decisions below follow task BACK-05, PRD sections 4.2 and 7.1, US-002, US-00
 
 - A pure function `calcularLimiteDisponivel` lives in `src/shared/credit/available-credit.ts`, because BACK-07 (another module) reuses it. It receives the credit limit, the receivables (amount, due date, status, origin), and today's date, and returns the open, overdue, and available amounts in cents. It has no database or clock access. The name is the one given in the task, so BACK-07 finds it; it follows the Portuguese domain names of the schema.
 - Counted receivables: origin `ERP` and status other than `PAGO`. Overdue: due date before today; open: due today or later. The status `VENCIDO` sent by the ERP is not used to split open and overdue, because between two syncs a receivable that fell due yesterday may still say `EM_ABERTO`; the due date gives the same answer at any time.
-- Today is the date in `America/Recife`, given by a clock injected into the service, so tests are deterministic.
+- `listOverdueReceivables` in the same file applies the same rule to list the overdue receivables, oldest first, with their days overdue, so the profile and BACK-07 never disagree on what is overdue.
+- Today is the date in `America/Recife`, given by a clock injected into the service, so tests are deterministic. `businessDate(now)` and `daysBetween(from, to)` live in `src/shared/credit/business-date.ts`, next to the credit rule that needs them.
 - Days overdue = whole days between the due date and today.
 - The list computes the available credit for the clients of the page only, with one grouped query of unpaid ERP receivables per page.
 
