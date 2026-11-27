@@ -23,6 +23,7 @@ export function createLogger(
           "ERP_API_KEY",
           'headers["x-api-key"]',
           "ANTHROPIC_API_KEY",
+          "GEMINI_API_KEY",
         ],
         censor: "[REDACTED]",
       },

@@ -57,6 +57,27 @@ describe("parseEnvironment", () => {
     ).toThrow();
   });
 
+  it("accepts a missing Gemini key", () => {
+    const environment = parseEnvironment(validEnvironment);
+
+    expect(environment).not.toHaveProperty("GEMINI_API_KEY");
+  });
+
+  it("exposes a non-empty Gemini key", () => {
+    const environment = parseEnvironment({
+      ...validEnvironment,
+      GEMINI_API_KEY: "gemini-test-key",
+    });
+
+    expect(environment).toHaveProperty("GEMINI_API_KEY", "gemini-test-key");
+  });
+
+  it("rejects an empty Gemini key", () => {
+    expect(() =>
+      parseEnvironment({ ...validEnvironment, GEMINI_API_KEY: "" }),
+    ).toThrow(/GEMINI_API_KEY/);
+  });
+
   it("exposes a valid ERP configuration", () => {
     const environment = parseEnvironment(validEnvironment);
 

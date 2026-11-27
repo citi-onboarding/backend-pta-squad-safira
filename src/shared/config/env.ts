@@ -13,8 +13,9 @@ const envSchema = z.object({
   DATABASE_URL: z.url().startsWith("postgresql://"),
   ERP_API_URL: z.url(),
   ERP_API_KEY: z.string().min(1),
-  // Optional until the triage module uses it; server-only, never logged.
+  // Optional until the triage module uses them; server-only, never logged.
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  GEMINI_API_KEY: z.string().min(1).optional(),
 });
 
 export type Environment = z.infer<typeof envSchema> & { corsOrigins: string[] };

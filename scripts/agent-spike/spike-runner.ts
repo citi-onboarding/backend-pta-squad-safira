@@ -1,7 +1,8 @@
 import { resolve } from "node:path";
 
-import { buildTriageRequest } from "../../src/modules/triage/triage-request.js";
+import { proposalSchema } from "../../src/modules/triage/triage-request.js";
 import type {
+  DocumentoDeEntrada,
   Effort,
   Referencia,
   TipoDeDocumento,
@@ -20,21 +21,29 @@ import {
 } from "./grader.js";
 import type { ContractScore, OrderScore } from "./grader.js";
 import { costOf } from "./pricing.js";
-import type { TokenUsage } from "./pricing.js";
+import { PROVIDER_NAMES, PROVIDERS } from "./providers/triage-provider.js";
+import type {
+  ProviderName,
+  ProviderResponse,
+  TokenUsage,
+  TriageProvider,
+} from "./providers/triage-provider.js";
 
 export type Approach = "text" | "pdf";
 
 const EFFORTS: readonly Effort[] = ["low", "medium", "high", "xhigh", "max"];
-export const DEFAULT_MODELS = ["claude-haiku-5-5", "claude-sonnet-5-5"];
 export const DEFAULT_APPROACHES: Approach[] = ["text", "pdf"];
 
 export interface RunOptions {
   execute: boolean;
   effort: Effort;
-  models: string[];
   approaches: Approach[];
   materialsDir: string;
-  apiKey?: string | undefined;
+  /** From `AGENT_SPIKE_PROVIDER`; required to execute. */
+  provider?: ProviderName | undefined;
+  /** Overrides the provider's default models. */
+  models?: string[] | undefined;
+  apiKeys: Partial<Record<ProviderName, string>>;
 }
 
 export interface SpikeDocument {
@@ -45,42 +54,32 @@ export interface SpikeDocument {
   expected: ExpectedOrder | ExpectedContract;
 }
 
-export interface SpikeResponse {
-  parsed_output: unknown;
-  stop_reason: string | null;
-  usage: TokenUsage;
-}
-
-export interface SpikeClient {
-  messages: {
-    parse(
-      params: ReturnType<typeof buildTriageRequest>,
-    ): Promise<SpikeResponse>;
-  };
-}
-
 export interface SpikeDeps {
   loadDocuments: () => Promise<SpikeDocument[]>;
   loadReference: () => Promise<Referencia>;
-  createClient: (apiKey: string) => SpikeClient;
+  createProvider: (provider: ProviderName, apiKey: string) => TriageProvider;
   now: () => number;
+  /** Run date (YYYY-MM-DD) that picks the price period. */
+  today: () => string;
   log: (line: string) => void;
 }
 
 export interface DocumentResult {
   arquivo: string;
   tipo: TipoDeDocumento;
+  provider: ProviderName;
   model: string;
   approach: Approach;
   valid: boolean;
   stopReason: string | null;
   latencyMs: number;
-  costUsd: number;
+  custoEstimadoMicrodolares: number;
   usage: TokenUsage;
   score: OrderScore | ContractScore;
 }
 
 export interface Summary {
+  provider: ProviderName;
   model: string;
   approach: Approach;
   tipo: TipoDeDocumento;
@@ -88,16 +87,12 @@ export interface Summary {
   invalid: number;
   scores: Record<string, number>;
   latencyMs: number;
-  costUsd: number;
-  tokens: {
-    input: number;
-    output: number;
-    cacheWrite: number;
-    cacheRead: number;
-  };
+  custoEstimadoMicrodolares: number;
+  tokens: TokenUsage;
 }
 
 export interface InjectionCheck {
+  provider: ProviderName;
   model: string;
   flagged: boolean;
   valid: boolean;
@@ -105,6 +100,7 @@ export interface InjectionCheck {
 
 export interface SpikeReport {
   planned: number;
+  plannedPerProvider: Partial<Record<ProviderName, number>>;
   sent: number;
   results: DocumentResult[];
   summaries: Summary[];
@@ -119,11 +115,12 @@ export const SYNTHETIC_INJECTION_TEXT = [
   "2  Disjuntor DIN monopolar 16A  20 UN",
 ].join("\n");
 
-export function parseRunArgs(argv: readonly string[]): RunOptions {
-  const options: RunOptions = {
+export function parseRunArgs(
+  argv: readonly string[],
+): Omit<RunOptions, "apiKeys"> {
+  const options: Omit<RunOptions, "apiKeys"> = {
     execute: false,
     effort: "medium",
-    models: [...DEFAULT_MODELS],
     approaches: [...DEFAULT_APPROACHES],
     materialsDir: resolve("..", "materiais-distrilux"),
   };
@@ -146,40 +143,47 @@ export function parseRunArgs(argv: readonly string[]): RunOptions {
 }
 
 interface Job {
+  provider: ProviderName;
   model: string;
   approach: Approach;
   document: SpikeDocument | null; // null = synthetic injection check
 }
 
+function modelsFor(
+  provider: ProviderName,
+  options: RunOptions,
+): readonly string[] {
+  return options.models ?? PROVIDERS[provider].defaultModels;
+}
+
 function planJobs(
+  provider: ProviderName,
   options: RunOptions,
   documents: readonly SpikeDocument[],
 ): Job[] {
   const jobs: Job[] = [];
-  for (const model of options.models) {
+  for (const model of modelsFor(provider, options)) {
     for (const approach of options.approaches) {
       for (const document of documents)
-        jobs.push({ model, approach, document });
+        jobs.push({ provider, model, approach, document });
     }
     if (options.approaches.includes("text")) {
-      jobs.push({ model, approach: "text", document: null });
+      jobs.push({ provider, model, approach: "text", document: null });
     }
   }
   return jobs;
 }
 
-function isValid(tipo: TipoDeDocumento, response: SpikeResponse): boolean {
-  if (response.stop_reason !== "end_turn" || response.parsed_output == null) {
+function isValid(tipo: TipoDeDocumento, response: ProviderResponse): boolean {
+  if (!response.completed || response.parsed_output == null) {
     return false;
   }
-  const schema =
-    tipo === "pedido" ? propostaPedidoSchema : propostaContratoSchema;
-  return schema.safeParse(response.parsed_output).success;
+  return proposalSchema(tipo).safeParse(response.parsed_output).success;
 }
 
 function score(
   document: SpikeDocument,
-  response: SpikeResponse,
+  response: ProviderResponse,
   valid: boolean,
 ) {
   if (document.tipo === "pedido") {
@@ -200,7 +204,7 @@ function score(
 function summarize(results: readonly DocumentResult[]): Summary[] {
   const groups = new Map<string, DocumentResult[]>();
   for (const result of results) {
-    const key = `${result.model}|${result.approach}|${result.tipo}`;
+    const key = `${result.provider}|${result.model}|${result.approach}|${result.tipo}`;
     groups.set(key, [...(groups.get(key) ?? []), result]);
   }
   return [...groups.values()].map((group) => {
@@ -208,6 +212,7 @@ function summarize(results: readonly DocumentResult[]): Summary[] {
     const sum = (pick: (result: DocumentResult) => number) =>
       group.reduce((total, result) => total + pick(result), 0);
     return {
+      provider: first.provider,
       model: first.model,
       approach: first.approach,
       tipo: first.tipo,
@@ -215,17 +220,26 @@ function summarize(results: readonly DocumentResult[]): Summary[] {
       invalid: group.filter((result) => !result.valid).length,
       scores: meanScores(group.map((result) => ({ ...result.score }))),
       latencyMs: sum((result) => result.latencyMs) / group.length,
-      costUsd: sum((result) => result.costUsd),
+      custoEstimadoMicrodolares: sum(
+        (result) => result.custoEstimadoMicrodolares,
+      ),
       tokens: {
-        input: sum((result) => result.usage.input_tokens),
-        output: sum((result) => result.usage.output_tokens),
-        cacheWrite: sum(
-          (result) => result.usage.cache_creation_input_tokens ?? 0,
-        ),
-        cacheRead: sum((result) => result.usage.cache_read_input_tokens ?? 0),
+        input: sum((result) => result.usage.input),
+        output: sum((result) => result.usage.output),
+        cacheWrite: sum((result) => result.usage.cacheWrite),
+        cacheRead: sum((result) => result.usage.cacheRead),
       },
     };
   });
+}
+
+function documentFor(job: Job): DocumentoDeEntrada {
+  if (job.document === null) {
+    return { formato: "texto", texto: SYNTHETIC_INJECTION_TEXT };
+  }
+  return job.approach === "pdf"
+    ? { formato: "pdf", base64: job.document.pdfBase64 }
+    : { formato: "texto", texto: job.document.texto ?? "" };
 }
 
 export async function runSpike(
@@ -233,51 +247,61 @@ export async function runSpike(
   deps: SpikeDeps,
 ): Promise<SpikeReport> {
   const documents = await deps.loadDocuments();
-  const jobs = planJobs(options, documents);
-  deps.log(
-    `Planned ${String(jobs.length)} requests: ${String(documents.length)} documents × ${options.approaches.join("/")} × ${options.models.join("/")}, plus the synthetic injection check; effort ${options.effort}.`,
+  const providers = options.provider ? [options.provider] : PROVIDER_NAMES;
+  const plannedPerProvider: Partial<Record<ProviderName, number>> = {};
+  for (const provider of providers) {
+    const count = planJobs(provider, options, documents).length;
+    plannedPerProvider[provider] = count;
+    deps.log(
+      `${provider}: planned ${String(count)} requests: ${String(documents.length)} documents × ${options.approaches.join("/")} × ${modelsFor(provider, options).join("/")}, plus the synthetic injection check; effort ${options.effort}.`,
+    );
+  }
+  const planned = Object.values(plannedPerProvider).reduce(
+    (total, count) => total + count,
+    0,
   );
 
   if (!options.execute) {
     deps.log("Dry run: no request was sent. Pass --execute to call the API.");
     return {
-      planned: jobs.length,
+      planned,
+      plannedPerProvider,
       sent: 0,
       results: [],
       summaries: [],
       injectionChecks: [],
     };
   }
-  if (!options.apiKey) {
+  const provider = options.provider;
+  if (!provider) {
     throw new Error(
-      "ANTHROPIC_API_KEY is required to execute; nothing was sent.",
+      `AGENT_SPIKE_PROVIDER is required to execute (${PROVIDER_NAMES.join(" or ")}); nothing was sent.`,
+    );
+  }
+  const apiKey = options.apiKeys[provider];
+  if (!apiKey) {
+    throw new Error(
+      `${PROVIDERS[provider].keyVariable} is required to execute; nothing was sent.`,
     );
   }
 
   const referencia = await deps.loadReference();
-  const client = deps.createClient(options.apiKey);
+  const client = deps.createProvider(provider, apiKey);
+  const runDate = deps.today();
   const results: DocumentResult[] = [];
   const injectionChecks: InjectionCheck[] = [];
   let sent = 0;
 
-  for (const job of jobs) {
+  for (const job of planJobs(provider, options, documents)) {
     const tipo: TipoDeDocumento = job.document?.tipo ?? "pedido";
-    const documento =
-      job.document === null
-        ? { formato: "texto" as const, texto: SYNTHETIC_INJECTION_TEXT }
-        : job.approach === "pdf"
-          ? { formato: "pdf" as const, base64: job.document.pdfBase64 }
-          : { formato: "texto" as const, texto: job.document.texto ?? "" };
-    const params = buildTriageRequest({
+    const started = deps.now();
+    const response = await client.triage({
       tipo,
       modelo: job.model,
       effort: options.effort,
-      documento,
+      documento: documentFor(job),
       referencia,
     });
-
-    const started = deps.now();
-    const response = await client.messages.parse(params);
     const latencyMs = deps.now() - started;
     sent += 1;
     const valid = isValid(tipo, response);
@@ -287,6 +311,7 @@ export async function runSpike(
         ? propostaPedidoSchema.parse(response.parsed_output).alertas
         : [];
       injectionChecks.push({
+        provider,
         model: job.model,
         flagged: alertas.some(
           (alerta) => alerta.categoria === "INSTRUCAO_NO_DOCUMENTO",
@@ -299,22 +324,24 @@ export async function runSpike(
     results.push({
       arquivo: job.document.arquivo,
       tipo,
+      provider,
       model: job.model,
       approach: job.approach,
       valid,
-      stopReason: response.stop_reason,
+      stopReason: response.stopReason,
       latencyMs,
-      costUsd: costOf(job.model, response.usage),
+      custoEstimadoMicrodolares: costOf(job.model, response.usage, runDate),
       usage: response.usage,
       score: score(job.document, response, valid),
     });
     deps.log(
-      `${job.model} ${job.approach} ${job.document.arquivo}: ${valid ? "valid" : "invalid"}, ${String(latencyMs)} ms`,
+      `${provider} ${job.model} ${job.approach} ${job.document.arquivo}: ${valid ? "valid" : "invalid"}, ${String(latencyMs)} ms`,
     );
   }
 
   return {
-    planned: jobs.length,
+    planned,
+    plannedPerProvider,
     sent,
     results,
     summaries: summarize(results),

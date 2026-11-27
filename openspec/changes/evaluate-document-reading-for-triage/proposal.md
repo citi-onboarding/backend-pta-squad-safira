@@ -10,6 +10,13 @@ to decide that with measurements against a reviewed answer key. The Anthropic
 API key has not arrived, so this change prepares everything that does not need
 it and makes no API call.
 
+Because the Anthropic key is still pending, the PM authorized running the spike
+with Google Gemini in the meantime (the sample data is fictitious). The spike
+therefore accepts two providers behind one interface — Gemini now, Claude when
+its key arrives — selected by an environment variable. Gemini numbers are
+provisional: they measure the approaches, not the final model, and the choice
+of Claude model for the triage agent (PRD 9.1) stays pending until Claude runs.
+
 ## What Changes
 
 - Add an optional, server-only `ANTHROPIC_API_KEY` to the validated environment
@@ -38,8 +45,20 @@ it and makes no API call.
   approach B (PDF document block) on the latest Claude Haiku and Claude Sonnet,
   measuring accuracy, latency, and cost from token usage. It runs dry by
   default and calls the API only with an explicit flag and a key.
+- A provider interface in `scripts/agent-spike/` with two adapters: Anthropic
+  (Claude Haiku and Sonnet, unchanged behavior) and Gemini (`gemini-3.8-flash`,
+  which reads PDFs and supports structured output). `AGENT_SPIKE_PROVIDER`
+  (`gemini` or `anthropic`) selects the provider; it is required to execute and
+  read only by the spike, never by the server.
+- Add an optional, server-only `GEMINI_API_KEY` to the validated environment,
+  to the logger redaction, and to `.env.example` (commented, no value).
+- Cost is reported in integer microdollars (millionths of a US dollar), the unit
+  of `ExecucaoAgente.custoEstimadoMicrodolares`, rounded per request, for both
+  providers. Gemini prices are recorded with their validity periods (they
+  double on 2027-01-01) and priced at the run date.
 - Draft `docs/agent/spike-resultados.md` and ADR 0002 with empty result tables.
-- Add `@anthropic-ai/sdk@1.12.0` and `unpdf@1.9.1` as exact dev dependencies.
+- Add `@anthropic-ai/sdk@1.12.0`, `@google/genai@3.6.1`, and `unpdf@1.9.1` as
+  exact dev dependencies.
 
 ## Capabilities
 
@@ -61,8 +80,11 @@ None.
 - **Business:** produces the evidence to choose the reading approach and model
   for IA-02 before any production triage code exists; the rules RN-19 and
   RN-10 are fixed from the first line of agent code.
-- **Security:** the model key is server-only, optional, never logged (logger
-  redaction gains `ANTHROPIC_API_KEY`), and unused by this change. The agent
+- **Security:** the model keys are server-only, optional, never logged (logger
+  redaction gains `ANTHROPIC_API_KEY` and `GEMINI_API_KEY`), and unused by the
+  server. A Gemini run sends the fictitious sample documents and reference
+  lists to Google, as authorized by the PM; no real customer data is sent. The
+  agent
   has no tools, so a malicious document cannot make it act. The sample
   documents, the answer key, the reference lists, and every artifact derived
   from them (extracted text, per-alert category mapping, raw responses) stay
@@ -72,10 +94,19 @@ None.
 - **Observability:** spike scripts print metrics only (scores, tokens, cost,
   latency), never document content.
 - **Cost:** none in this change (no API call). The run script shows the number
-  of requests before an execution; prices come from the official pricing page,
-  checked on 2026-11-25.
-- **Dependencies:** `@anthropic-ai/sdk@1.12.0` (Apache-2.0) and `unpdf@1.9.1`
-  (MIT, the last release that supports Node 22) as exact dev dependencies.
+  of requests before an execution; prices come from the official pricing pages,
+  Claude checked on 2026-11-25 and Gemini on 2026-11-27.
+- **Dependencies:** `@anthropic-ai/sdk@1.12.0` (Apache-2.0), `@google/genai@3.6.1`
+  (Apache-2.0, Node >= 22), and `unpdf@1.9.1` (MIT, the last release that
+  supports Node 22) as exact dev dependencies.
+
+### Provisional Gemini results
+
+Gemini results answer the spike's approach question (extracted text versus
+PDF) with real measurements, but they do not choose the model. The ADR stays
+`proposed` and the Claude model choice (PRD 9.1) stays pending until the Claude
+run, which needs only the key and `AGENT_SPIKE_PROVIDER=anthropic`.
+
 - **Documentation:** spike results draft, ADR 0002, change summary.
 
 ### Assumption to confirm with the client
@@ -93,12 +124,15 @@ None.
 - Environment variable, response schemas, notice deadline, agent prompt and
   request builder in `src/modules/triage/`.
 - Spike tooling in `scripts/agent-spike/`: text extraction and its
-  classification, answer-key loader, grader, pricing and cost, dry-run runner.
+  classification, answer-key loader, grader, pricing and cost, dry-run runner,
+  and the provider interface with its Anthropic and Gemini adapters.
 - Running approach A extraction on the 18 sample PDFs and recording the result.
 
 ### Out of scope
 
-- Any call to the Anthropic API (blocked until the key arrives).
+- Any call to the Anthropic API (blocked until the key arrives) or to the
+  Gemini API (this change prepares the run; executing it is a separate step).
+- Using Gemini in the production triage agent (IA-02).
 - Rule-derived alerts that depend on the registry — blocked customer (RN-02),
   expired contract, similar or different registry names — which belong to
   deterministic code in IA-02; the grader reports them separately and does not

@@ -8,28 +8,28 @@ confirm, never an action, with document content always treated as data.
 
 ### Requirement: Model key configuration
 
-The service SHALL accept an optional `ANTHROPIC_API_KEY` from the server
-environment. When present it MUST NOT be empty, and it MUST NOT be written to
-logs.
+The service SHALL accept the optional model keys `ANTHROPIC_API_KEY` and
+`GEMINI_API_KEY` from the server environment. When present a key MUST NOT be
+empty, and it MUST NOT be written to logs.
 
-#### Scenario: Key is absent
+#### Scenario: Keys are absent
 
-- **WHEN** the service starts without `ANTHROPIC_API_KEY`
+- **WHEN** the service starts without `ANTHROPIC_API_KEY` and without `GEMINI_API_KEY`
 - **THEN** environment validation succeeds and no model key is exposed
 
 #### Scenario: Key is present
 
-- **WHEN** the service starts with a non-empty `ANTHROPIC_API_KEY`
-- **THEN** environment validation succeeds and exposes the key to the server only
+- **WHEN** the service starts with a non-empty `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`
+- **THEN** environment validation succeeds and exposes that key to the server only
 
 #### Scenario: Key is empty
 
-- **WHEN** the service starts with `ANTHROPIC_API_KEY` set to an empty value
+- **WHEN** the service starts with `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` set to an empty value
 - **THEN** environment validation fails and the service does not start
 
 #### Scenario: Key is logged accidentally
 
-- **WHEN** a structured log includes `ANTHROPIC_API_KEY`
+- **WHEN** a structured log includes `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`
 - **THEN** the value is replaced with `[REDACTED]`
 
 ### Requirement: Order proposal contract

@@ -41,3 +41,39 @@
 - [ ] 6.1 Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`.
 - [ ] 6.2 Run `pnpm spec:validate` (strict) and typecheck.
 - [ ] 6.3 Write `docs/changes/evaluate-document-reading-for-triage.md` from the template; keep the change active until the API run completes the ADR.
+
+## 7. SDD — Gemini provider
+
+- [x] 7.1 PM authorizes running the spike with Gemini while the Anthropic key is pending (fictitious data).
+- [x] 7.2 Check the Gemini Flash model ID, PDF support, and prices on the official pages (2026-11-27): `gemini-3.8-flash`, $0.75 / $3.75 through 2026-12-31, $1.50 / $7.50 from 2027-01-01.
+- [x] 7.3 Resolve decisions with the requester: `AGENT_SPIKE_PROVIDER` read only by the spike and required to execute; cost in integer microdollars rounded per request for both providers; Gemini prices recorded with their periods.
+- [x] 7.4 Update proposal, design, and the `document-triage` and `triage-accuracy-evaluation` delta specs.
+- [x] 7.5 Run `pnpm spec:validate`.
+
+## 8. Red — Gemini provider
+
+- [x] 8.1 Install `@google/genai@3.6.1` as an exact dev dependency.
+- [x] 8.2 Developer writes failing tests for `GEMINI_API_KEY` configuration and its log redaction.
+- [x] 8.3 Developer writes failing tests for cost in microdollars: Claude scenarios converted, Gemini periods by run date, thinking and cached tokens, rounding, and unpriced model or date.
+- [x] 8.4 Developer writes failing tests for the Gemini request: same instructions, reference lists, and document content as the Anthropic request, PDF as inline data, JSON schema output, no tools.
+- [x] 8.5 Developer writes failing tests for both adapters' response mapping (completed flag, parsed output, usage) with fake SDK clients.
+- [x] 8.6 Developer writes failing tests for provider selection in the runner: default models per provider, unknown provider, dry run per provider, execution without a provider or its key, provider and model on every result.
+- [x] 8.7 Run the narrow test files and record the failing output as Red evidence.
+
+## 9. Green — Gemini provider
+
+- [x] 9.1 Implement `GEMINI_API_KEY` and its redaction; add it and `AGENT_SPIKE_PROVIDER` commented to `.env.example`.
+- [x] 9.2 Implement price periods and microdollar cost in `pricing.ts`.
+- [x] 9.3 Export the shared prompt pieces from `triage-request.ts` and implement the provider interface and both adapters in `scripts/agent-spike/providers/`.
+- [x] 9.4 Wire provider selection into the runner and `run.ts`.
+- [x] 9.5 Run the narrow test files and record the passing output as Green evidence.
+
+## 10. Refactor — Gemini provider
+
+- [x] 10.1 Simplify without changing behavior and re-run the tests as Refactor evidence.
+
+## 11. Consolidation — Gemini provider
+
+- [x] 11.1 Run `run.ts` in dry-run mode for each provider and record the planned request counts (no API call).
+- [x] 11.2 Label Gemini results as provisional in `docs/agent/spike-resultados.md`; keep the Claude model choice (PRD 9.1) pending. ADR 0002 is drafted by task 5.3 with the same label.
+- [x] 11.3 Run `pnpm verify` and `pnpm spec:validate` (strict) and typecheck.

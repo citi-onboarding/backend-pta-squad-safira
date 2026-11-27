@@ -43,7 +43,7 @@ export interface TriageRequestInput {
   referencia: Referencia;
 }
 
-const MAX_TOKENS = 16_000;
+export const MAX_TOKENS = 16_000;
 const OPEN = "<documento>";
 const CLOSE = "</documento>";
 
@@ -52,7 +52,7 @@ const NOMES: Record<TipoDeDocumento, string> = {
   contrato: "supply contract",
 };
 
-function instructions(tipo: TipoDeDocumento): string {
+export function triageInstructions(tipo: TipoDeDocumento): string {
   const specific =
     tipo === "pedido"
       ? [
@@ -78,7 +78,7 @@ function instructions(tipo: TipoDeDocumento): string {
   ].join("\n");
 }
 
-function referenceBlock(referencia: Referencia): string {
+export function referenceBlock(referencia: Referencia): string {
   // Registry status is left out on purpose: registry-derived alerts belong to code.
   const clientes = referencia.clientes.map(
     ({ codigo, razao_social, cnpj, cidade, uf }) => ({
@@ -103,10 +103,32 @@ function neutralize(texto: string): string {
     .replace(/<\s*documento\s*>/gi, "[documento]");
 }
 
+/**
+ * The user-turn text for a document: the delimited, neutralized text for
+ * approach A, or the short prompt that follows the attached PDF for approach B.
+ */
+export function documentPrompt(
+  tipo: TipoDeDocumento,
+  documento: DocumentoDeEntrada,
+): string {
+  if (documento.formato === "pdf") {
+    return `Read the attached ${NOMES[tipo]} and propose its data.`;
+  }
+  return `Read the ${NOMES[tipo]} below and propose its data.\n\n${OPEN}\n${neutralize(documento.texto)}\n${CLOSE}`;
+}
+
+export function proposalSchema(tipo: TipoDeDocumento) {
+  return tipo === "pedido" ? propostaPedidoSchema : propostaContratoSchema;
+}
+
 function userContent(
   tipo: TipoDeDocumento,
   documento: DocumentoDeEntrada,
 ): (Anthropic.TextBlockParam | Anthropic.DocumentBlockParam)[] {
+  const text: Anthropic.TextBlockParam = {
+    type: "text",
+    text: documentPrompt(tipo, documento),
+  };
   if (documento.formato === "pdf") {
     return [
       {
@@ -117,18 +139,10 @@ function userContent(
           data: documento.base64,
         },
       },
-      {
-        type: "text",
-        text: `Read the attached ${NOMES[tipo]} and propose its data.`,
-      },
+      text,
     ];
   }
-  return [
-    {
-      type: "text",
-      text: `Read the ${NOMES[tipo]} below and propose its data.\n\n${OPEN}\n${neutralize(documento.texto)}\n${CLOSE}`,
-    },
-  ];
+  return [text];
 }
 
 /**
@@ -137,13 +151,12 @@ function userContent(
  * the proposal contract through structured outputs.
  */
 export function buildTriageRequest(input: TriageRequestInput) {
-  const schema =
-    input.tipo === "pedido" ? propostaPedidoSchema : propostaContratoSchema;
+  const schema = proposalSchema(input.tipo);
   return {
     model: input.modelo,
     max_tokens: MAX_TOKENS,
     system: [
-      { type: "text", text: instructions(input.tipo) },
+      { type: "text", text: triageInstructions(input.tipo) },
       {
         type: "text",
         text: referenceBlock(input.referencia),

@@ -40,6 +40,23 @@ describe("createLogger", () => {
     expect(output).toContain("[REDACTED]");
   });
 
+  it("redacts the Gemini key", async () => {
+    let output = "";
+    const destination = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    const logger = createLogger({ LOG_LEVEL: "info" }, destination);
+
+    logger.info({ GEMINI_API_KEY: "gemini-key-value" }, "gemini key");
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(output).not.toContain("gemini-key-value");
+    expect(output).toContain("[REDACTED]");
+  });
+
   it("redacts the ERP key", async () => {
     let output = "";
     const destination = new Writable({

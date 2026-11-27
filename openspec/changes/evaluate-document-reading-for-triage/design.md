@@ -19,6 +19,21 @@ Models and prices were checked on 2026-11-25 against
 | Claude Haiku 5.5 (prompt > 100K tokens) | `claude-haiku-5-5`  | $0.50        | $2.50         | $0.625         | $0.05      |
 | Claude Sonnet 5.5                       | `claude-sonnet-5-5` | $2.00        | $10.00        | $2.50          | $0.10      |
 
+Gemini was checked on 2026-11-27 against `https://aistudio.google.com/docs/pricing`
+(the former `https://ai.google.dev/gemini-api/docs/pricing` redirects there) and
+`https://aistudio.google.com/docs/models/gemini-3.8-flash`, paid tier, Standard:
+
+| Model            | API ID             | Period             | Input / MTok | Output / MTok (incl. thinking) | Cache read |
+| ---------------- | ------------------ | ------------------ | ------------ | ------------------------------ | ---------- |
+| Gemini 3.8 Flash | `gemini-3.8-flash` | through 2026-12-31 | $0.75        | $3.75                          | $0.075     |
+| Gemini 3.8 Flash | `gemini-3.8-flash` | from 2027-01-01    | $1.50        | $7.50                          | $0.15      |
+
+The model page lists PDF among the inputs and structured outputs as supported.
+No long-context tier is listed. The pricing page does not say whether PDF pages
+bill as text or image tokens; the spike prices the token counts the API reports,
+so this does not change the computation. Context-cache storage ($0.50 /
+MTok·hour) does not apply: the spike creates no explicit cache.
+
 PDF input is processed per page as extracted text plus a page image
 (1,500–3,000 text tokens and at most 1,568 image tokens per page, per
 `https://platform.claude.com/docs/en/build-with-claude/pdf-support`), so
@@ -147,9 +162,10 @@ customers with the same city name") maps to two categories.
 
 ### Run script safety and measurement
 
-- Dry run by default: builds all 72 requests (2 approaches × 2 models × 18
-  documents) plus the synthetic injection check, prints counts and payload
-  sizes, sends nothing. `--execute` is required, and with it a missing key
+- Dry run by default: builds all 72 Anthropic requests (2 approaches × 2 models
+  × 18 documents) and 36 Gemini requests (2 approaches × 1 model × 18), plus one
+  synthetic injection check per model, prints counts per provider, sends
+  nothing. `--execute` is required, and with it a missing key
   stops the script before any request.
 - Effort is set explicitly (`medium` by default, configurable) and recorded,
   because the two models default differently (Haiku `medium`, Sonnet `high`).
@@ -183,6 +199,8 @@ developer has the key.
 three days old) and `unpdf@1.9.1` (2026-10-19; every 2.x requires Node 24, and
 `engine-strict=true` with Node 22.23.2 in CI would fail the install). Both are
 exact dev dependencies; IA-02 moves the SDK to `dependencies`.
+`@google/genai@3.6.1` (published 2026-11-18, Apache-2.0, `node >=22.0.0`) is an
+exact dev dependency used only by the spike.
 
 ### Naming
 
@@ -208,6 +226,71 @@ and documentation are in English.
 No deployment impact: the variable is optional and unused at runtime. Rollback
 is reverting the change.
 
+### Two providers behind one interface
+
+The Anthropic key is pending and the PM authorized Gemini for the spike with
+the fictitious sample data. `scripts/agent-spike/providers/` holds:
+
+- `triage-provider.ts`: the `TriageProvider` interface. A provider receives the
+  provider-neutral input (`tipo`, `modelo`, `effort`, `documento`,
+  `referencia`) and returns `{ parsed_output, completed, stopReason, usage }`,
+  where `usage` is `{ input, output, cacheWrite, cacheRead }` in tokens billed at
+  each rate. The runner validates, scores, times, and prices only through this
+  shape and never imports an SDK.
+- `anthropic-provider.ts`: wraps `buildTriageRequest` and
+  `client.messages.parse()`. `completed` is `stop_reason === "end_turn"`; usage
+  maps one to one. Behavior is unchanged.
+- `gemini-provider.ts`: builds a `generateContent` request with `@google/genai`:
+  the same instructions and reference lists as `systemInstruction`, the
+  delimited text or the PDF as `inlineData` (`application/pdf`), JSON output
+  constrained by `responseJsonSchema` from `z.toJSONSchema()` of the same Zod
+  schema, and no `tools`. `completed` is `finishReason === "STOP"`;
+  `parsed_output` is `JSON.parse(response.text)` or null when it does not parse.
+  Usage: `cacheRead = cachedContentTokenCount`, `input = promptTokenCount −
+cacheRead`, `output = candidatesTokenCount + thoughtsTokenCount` (thinking
+  bills as output), `cacheWrite = 0` (implicit caching has no write charge).
+  `effort` maps to Gemini's `thinkingLevel` one to one (`low`, `medium`,
+  `high`, `xhigh`); SDK 3.6.1 has no level above `XHIGH`, so `max` also maps
+  to `XHIGH`.
+
+The prompt text lives once in `src/modules/triage/triage-request.ts`; it gains
+named exports for the instructions, the reference block, and the delimited
+document text, so both adapters send the same prompt and the comparison stays
+fair. The Gemini request builder stays in `scripts/` because Gemini is a spike
+tool, not a decision for IA-02.
+
+Provider selection: `AGENT_SPIKE_PROVIDER` (`gemini` | `anthropic`) is read by
+`run.ts` from `.env` and validated with Zod in the runner; it is not part of
+`src/shared/config/env.ts` because the server never uses it. Each provider has
+default models (Anthropic: `claude-haiku-5-5`, `claude-sonnet-5-5`; Gemini:
+`gemini-3.8-flash`) and its key variable. A dry run without the variable plans
+every provider and sends nothing; `--execute` without it, or without the
+selected provider's key, stops before any request. Rejected: defaulting to
+Gemini (the default would have to flip when the Claude key arrives, and a
+forgotten variable would run the wrong provider) and validating the variable
+at server start (the server does not use it).
+
+`GEMINI_API_KEY` joins `ANTHROPIC_API_KEY` in `env.ts` as optional and
+non-empty, in the logger redaction, and commented in `.env.example`.
+
+### Cost in microdollars
+
+`costOf(model, usage, onDate)` returns integer microdollars
+(`custoEstimadoMicrodolares`, the unit of `ExecucaoAgente`): tokens × price per
+MTok equals microdollars directly, rounded with `Math.round` per request, so
+totals are sums of integers. `pricing.ts` records, per model, the source URL,
+the check date, and the price periods; the period in force on the run date is
+used, and the date is injected so tests do not depend on the clock. A model or
+date without a checked price is rejected. Rejected: rounding only in the
+totals (per-request values would not match the `Int` column) and recording
+only the current Gemini price (wrong if the run slips into 2027).
+
+### Gemini numbers are provisional
+
+Gemini results are recorded in the results report labeled provisional. They
+measure approach A versus B with a real model; they do not pick the Claude
+model. ADR 0002 stays `proposed` until the Claude run.
+
 ## ADR
 
 The reading approach and model for the triage agent are cross-cutting and hard
@@ -215,7 +298,17 @@ to reverse once IA-02 builds on them, so the decision is recorded in
 `docs/adr/0002-document-reading-approach-for-triage.md`. This change drafts it
 with status `proposed` and empty results; it is decided after the run.
 
+- [Gemini rejects JSON-schema keywords that Zod emits] → the dry run builds the
+  Gemini request with the real schema, and the runner validates every response
+  with Zod again; an unsupported keyword surfaces as an invalid response, not a
+  silent pass.
+- [Gemini and Claude results are not comparable as models] → reports keep the
+  provider and model on every row; Gemini rows are labeled provisional.
+
 ## Open Questions
+
+- Claude model for the triage agent (PRD 9.1): pending until the Anthropic key
+  arrives and the Claude run completes.
 
 - Effort level for the final decision: measured at `medium`; a second run at
   another level is optional once the key arrives.

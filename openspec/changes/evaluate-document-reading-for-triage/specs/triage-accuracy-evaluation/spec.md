@@ -132,20 +132,69 @@ case and spaces).
 
 The evaluation SHALL report, per approach and model, the mean score of each
 field, the latency per document, the input, output, cache-write, and cache-read
-tokens, and the cost computed from those tokens with the official prices and
-the date they were checked. A response that fails the proposal contract, is
-refused, or is truncated SHALL score `0` in every field and be counted
-separately.
+tokens, and the cost computed from those tokens with the official prices in
+force on the run date and the date they were checked. Cost SHALL be an integer
+number of microdollars (millionths of a US dollar), rounded to the nearest
+integer per request. A response that fails the proposal contract, is refused,
+or is truncated SHALL score `0` in every field and be counted separately.
 
 #### Scenario: Cost from usage
 
 - **WHEN** a Claude Sonnet 5.5 response used 10,000 input and 1,000 output tokens
-- **THEN** its cost is US$ 0.03
+- **THEN** its cost is 30,000 microdollars
 
 #### Scenario: Haiku long prompt
 
 - **WHEN** a Claude Haiku 5.5 request's prompt, including cache reads and writes, is over 100,000 tokens
 - **THEN** all of its tokens are priced at the long-prompt rates
+
+#### Scenario: Gemini price in force on the run date
+
+- **WHEN** a Gemini 3.8 Flash response used 10,000 input and 1,000 output tokens
+- **THEN** its cost is 11,250 microdollars on 2026-12-31 and 22,500 microdollars on 2027-01-01
+
+#### Scenario: Gemini thinking and cached tokens
+
+- **WHEN** a Gemini response reports thinking tokens and cached prompt tokens
+- **THEN** thinking tokens are priced as output and cached tokens at the cache-read price, not as input
+
+#### Scenario: Fractional cost
+
+- **WHEN** a request's exact cost is not a whole number of microdollars
+- **THEN** it is rounded to the nearest integer
+
+#### Scenario: No checked price
+
+- **WHEN** a model, or a run date, has no checked price
+- **THEN** the cost computation is rejected naming the model
+
+### Requirement: Provider selection
+
+The run script SHALL run against the provider named by `AGENT_SPIKE_PROVIDER`,
+`gemini` or `anthropic`, each with its default models and its own key
+(`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`). Every provider SHALL receive the same
+instructions, reference lists, and document for a given approach, and SHALL be
+given no tools. Results SHALL name the provider and model of every response.
+
+#### Scenario: Gemini selected
+
+- **WHEN** `AGENT_SPIKE_PROVIDER` is `gemini`
+- **THEN** the run plans `gemini-3.8-flash` for both approaches
+
+#### Scenario: Anthropic selected
+
+- **WHEN** `AGENT_SPIKE_PROVIDER` is `anthropic`
+- **THEN** the run plans Claude Haiku 5.5 and Claude Sonnet 5.5 for both approaches
+
+#### Scenario: Unknown provider
+
+- **WHEN** `AGENT_SPIKE_PROVIDER` has any other value
+- **THEN** the run script stops naming the value and sends nothing
+
+#### Scenario: Same prompt for every provider
+
+- **WHEN** the Gemini and Anthropic requests for the same document and approach are built
+- **THEN** both carry the same instructions, reference lists, and document content, and neither carries tools
 
 #### Scenario: Invalid response
 
@@ -155,15 +204,21 @@ separately.
 ### Requirement: No call without explicit execution
 
 The run script MUST NOT call the model API unless it is run with an explicit
-execution flag and a configured key. Without the flag it SHALL build every
-request and report how many would be sent, without sending any.
+execution flag, a selected provider, and that provider's key. Without the flag
+it SHALL build every request and report how many would be sent, without sending
+any.
 
 #### Scenario: Dry run
 
 - **WHEN** the run script is started without the execution flag
-- **THEN** it reports the planned requests per approach and model and sends none
+- **THEN** it reports the planned requests per provider, approach, and model and sends none
+
+#### Scenario: Execution without a provider
+
+- **WHEN** the run script is started with the execution flag and no `AGENT_SPIKE_PROVIDER`
+- **THEN** it stops before sending any request
 
 #### Scenario: Execution without a key
 
-- **WHEN** the run script is started with the execution flag and no key
-- **THEN** it stops before sending any request
+- **WHEN** the run script is started with the execution flag and no key for the selected provider
+- **THEN** it stops before sending any request, naming the missing variable
