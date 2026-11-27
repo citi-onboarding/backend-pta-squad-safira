@@ -37,10 +37,27 @@ The diagnosis SHALL locate the header row of each spreadsheet by the expected co
 
 For each file, the diagnosis SHALL report the columns with their inferred types, the number of content rows, blank rows, and total lines, the number of empty values per column, the date formats found in date columns, and the value formats found in money and quantity columns. For the orders file, it SHALL also report the number of distinct order numbers, because the file has one row per item.
 
+Cells that hold a formula without a saved result SHALL be counted as formulas, never as empty values. Date formats SHALL be named as `Excel date`, `Excel serial number` (a five-digit day count written as text), `dd/mm/yyyy`, `dd/mm/yy`, `dd.mm.yyyy`, `dd-mm-yyyy`, or `yyyy-mm-dd`, and every named format SHALL be understood when counting receivables from 2026-10-01; value formats as `number`, `text with decimal comma`, or `text with decimal point`. Any other text SHALL be described by its shape (each digit shown as `9` and each letter as `a`, for example `99 aaa`), never by its value.
+
 #### Scenario: Counts and types
 
 - **WHEN** a sample spreadsheet has 3 content rows, 1 blank row, and 1 empty `CNPJ`
 - **THEN** the document reports 3 content rows, 1 blank row, and 1 empty value in `CNPJ`
+
+#### Scenario: Formula without a saved result
+
+- **WHEN** a sample `Total` cell holds a formula without a saved result
+- **THEN** the document counts it as a formula in `Total`, not as an empty value
+
+#### Scenario: Other date and value formats
+
+- **WHEN** sample date cells hold `03.02.2025`, `03/02/25`, and `03-02-2025`, and a sample quantity cell holds `10 cx`
+- **THEN** the document reports the formats `dd.mm.yyyy`, `dd/mm/yy`, and `dd-mm-yyyy`, and the shape `99 aa` for the quantity, without the values themselves
+
+#### Scenario: Excel serial numbers in a date column
+
+- **WHEN** sample receivables have `data_emissao` written as `46295` (2026-09-30) and `46296` (2026-10-01)
+- **THEN** the document reports the format `Excel serial number` and counts 1 receivable that will come from the ERP
 
 #### Scenario: Orders and items
 

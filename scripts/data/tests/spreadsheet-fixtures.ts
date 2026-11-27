@@ -48,7 +48,7 @@ export const RECEIVABLE_COLUMNS = [
   "status",
 ];
 
-type CellInput = string | number | Date | null;
+type CellInput = string | number | Date | null | { formula: string };
 
 export const defaultClientRows: CellInput[][] = [
   [

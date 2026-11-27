@@ -11,6 +11,7 @@ import {
 } from "../read-spreadsheets.js";
 import {
   CLIENT_COLUMNS,
+  defaultOrderRows,
   RECEIVABLE_COLUMNS,
   writeFixtures,
 } from "./spreadsheet-fixtures.js";
@@ -133,5 +134,20 @@ describe("readSpreadsheets", () => {
 
     expect(error).toBeInstanceOf(MissingFileError);
     expect((error as Error).message).toContain("titulos.csv");
+  });
+
+  it("reads a formula without a saved result as a formula, not as empty", async () => {
+    const [firstOrder] = defaultOrderRows;
+    const folder = await writeFixtures({
+      orderRows: [
+        (firstOrder ?? []).map((value, index) =>
+          index === 9 ? { formula: "G5*I5" } : value,
+        ),
+      ],
+    });
+
+    const { pedidos } = await readSpreadsheets(folder);
+
+    expect(pedidos.rows[0]?.cells.Total).toEqual({ kind: "formula" });
   });
 });

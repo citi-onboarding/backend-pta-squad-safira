@@ -38,6 +38,11 @@ The task tree lists only `scripts/data/read-spreadsheets.ts` and its test. To ke
 - `pnpm data:diagnose -- --input "<folder>"` (new package script, run with `node --import tsx`, like `openapi:generate`). Without `--input`, or with a missing file, the command stops with a clear message and writes nothing.
 - The output path is fixed: `docs/data/diagnostico-planilhas.md`, overwritten on each run.
 
+### Findings from the first run on the real files
+
+- Every `Total` cell in the orders file (15,359) is a formula without a saved result, so the file was not last saved by Excel. The reader reports these cells as `formula` instead of empty, and the quantity-times-price check skips rows without a readable total. The proposed rule for DATA-03 is to compute the total as `Qtd` times `Preço Unit.`.
+- Besides `dd/mm/yyyy` and `yyyy-mm-dd`, the dates use `dd.mm.yyyy`, `dd/mm/yy`, and `dd-mm-yyyy`; some limits and quantities are numbers followed by words or units (shapes `999 aaa` and `99 aa`). The CSV dates also include five-digit numbers, which are Excel serial dates (days since 1899-12-30) copied as text; they are named `Excel serial number` and converted when counting receivables from 2026-10-01. These formats are named in the report; any other text is described by its shape, never by its value.
+
 ### Header detection
 
 The reader looks for the first row whose cells contain every expected column name for that file, compared after trimming. Rows above it (titles, blank rows) are ignored. A missing column stops the command with the file and column names, so a changed spreadsheet fails loudly instead of producing a wrong diagnosis.

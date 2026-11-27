@@ -60,7 +60,9 @@ export type Cell =
   | { kind: "empty" }
   | { kind: "number"; value: number }
   | { kind: "date"; value: Date }
-  | { kind: "text"; value: string };
+  | { kind: "text"; value: string }
+  /** A formula whose result was not saved in the file. */
+  | { kind: "formula" };
 
 export interface SheetRow {
   /** Row number as shown by Excel (or the line number in the CSV). */
@@ -116,7 +118,8 @@ function toCell(value: ExcelJS.CellValue): Cell {
     return toCell(value.richText.map((part) => part.text).join(""));
   }
   if ("formula" in value || "sharedFormula" in value) {
-    return toCell((value as { result?: ExcelJS.CellValue }).result ?? null);
+    const { result } = value as { result?: ExcelJS.CellValue };
+    return result === undefined ? { kind: "formula" } : toCell(result);
   }
   if ("text" in value) {
     return toCell(value.text);
