@@ -28,9 +28,10 @@ to date as the change evolves.
 
 ## Index
 
-| Change ID                 | Title                         | Status  | Related ADRs |
-| ------------------------- | ----------------------------- | ------- | ------------ |
-| create-backend-foundation | Create the backend foundation | shipped | —            |
+| Change ID                 | Title                         | Status      | Related ADRs |
+| ------------------------- | ----------------------------- | ----------- | ------------ |
+| integrate-distrilux-erp   | Integrate the DistriLux ERP   | in-progress | ADR-0001     |
+| create-backend-foundation | Create the backend foundation | shipped     | —            |
 
 <!--
 Add one row per change doc.

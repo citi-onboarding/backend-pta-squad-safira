@@ -39,4 +39,28 @@ describe("createLogger", () => {
     expect(output).not.toContain("model-key-value");
     expect(output).toContain("[REDACTED]");
   });
+
+  it("redacts the ERP key", async () => {
+    let output = "";
+    const destination = new Writable({
+      write(chunk, _encoding, callback) {
+        output += chunk.toString();
+        callback();
+      },
+    });
+    const logger = createLogger({ LOG_LEVEL: "info" }, destination);
+
+    logger.info(
+      {
+        apiKey: "erp-key-1",
+        ERP_API_KEY: "erp-key-2",
+        headers: { "x-api-key": "erp-key-3" },
+      },
+      "erp key",
+    );
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(output).not.toContain("erp-key-");
+    expect(output).toContain("[REDACTED]");
+  });
 });

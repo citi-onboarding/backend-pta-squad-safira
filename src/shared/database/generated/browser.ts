@@ -18,7 +18,67 @@ export { Prisma }
 export * as $Enums from './enums.js'
 export * from './enums.js';
 /**
- * Model ExampleItem
+ * Model Usuario
  * 
  */
-export type ExampleItem = Prisma.ExampleItemModel
+export type Usuario = Prisma.UsuarioModel
+/**
+ * Model Cliente
+ * 
+ */
+export type Cliente = Prisma.ClienteModel
+/**
+ * Model Produto
+ * 
+ */
+export type Produto = Prisma.ProdutoModel
+/**
+ * Model Titulo
+ * 
+ */
+export type Titulo = Prisma.TituloModel
+/**
+ * Model Contrato
+ * 
+ */
+export type Contrato = Prisma.ContratoModel
+/**
+ * Model Pedido
+ * 
+ */
+export type Pedido = Prisma.PedidoModel
+/**
+ * Model ItemPedido
+ * 
+ */
+export type ItemPedido = Prisma.ItemPedidoModel
+/**
+ * Model HistoricoStatus
+ * 
+ */
+export type HistoricoStatus = Prisma.HistoricoStatusModel
+/**
+ * Model PedidoHistorico
+ * 
+ */
+export type PedidoHistorico = Prisma.PedidoHistoricoModel
+/**
+ * Model Documento
+ * 
+ */
+export type Documento = Prisma.DocumentoModel
+/**
+ * Model ExecucaoAgente
+ * 
+ */
+export type ExecucaoAgente = Prisma.ExecucaoAgenteModel
+/**
+ * Model RiscoChurn
+ * 
+ */
+export type RiscoChurn = Prisma.RiscoChurnModel
+/**
+ * Model RegistroSincronizacao
+ * 
+ */
+export type RegistroSincronizacao = Prisma.RegistroSincronizacaoModel

@@ -11,6 +11,6 @@ export default defineConfig({
   datasource: {
     url:
       process.env.DATABASE_URL ??
-      "postgresql://postgres:postgres@localhost:5432/node_boilerplate?schema=public",
+      "postgresql://postgres:postgres@localhost:5432/distrilux_portal?schema=public",
   },
 });
