@@ -34,6 +34,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "data:diagnose": "node --import tsx scripts/data/run-diagnosis.ts",
     "db:studio": "prisma studio",
     "init:project": "node scripts/initialize-project.mjs",
     "gen:module": "node scripts/generate-module.mjs",

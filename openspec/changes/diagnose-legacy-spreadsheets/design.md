@@ -37,6 +37,7 @@ The task tree lists only `scripts/data/read-spreadsheets.ts` and its test. To ke
 
 - `pnpm data:diagnose -- --input "<folder>"` (new package script, run with `node --import tsx`, like `openapi:generate`). Without `--input`, or with a missing file, the command stops with a clear message and writes nothing.
 - The output path is fixed: `docs/data/diagnostico-planilhas.md`, overwritten on each run.
+- Before writing, the command formats the document with the repository's Prettier settings, so `pnpm format:check` accepts it without changing `.prettierignore`.
 
 ### Findings from the first run on the real files
 
