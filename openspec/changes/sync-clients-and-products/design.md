@@ -37,19 +37,19 @@ See `proposal.md` for the motivation and the decisions taken with the developer,
 
 ### Writing
 
-- For each page, the service loads the existing rows for the page's codes, compares every mapped field, and writes only new or changed items, by upsert on `codigoErp`, in one transaction per page. Unchanged rows are not rewritten, so the second run of the same data reports 0 changed items and keeps `atualizadoEm`.
-- When a page's transaction fails because of an item's data, the service writes its items one by one; an item that still fails for that reason (for example, a CNPJ already used by another client) is skipped and recorded as `{ codigo, motivo }` in the report, where the reason is the error name and, for Prisma, its code. The run ends `PARCIAL`, which moves the incremental start like `SUCESSO`; otherwise one bad item would block every later change forever.
+- For each page, the service loads the existing rows for the page's codes, compares every mapped field, and writes only new or changed items, by upsert on `codigoErp`, in one transaction per page. Unchanged rows are not rewritten, so the second run of the same data rewrites no row and keeps `atualizadoEm`.
+- When a page's transaction fails because of an item's data, the service writes its items one by one; an item that still fails for that reason (for example, a CNPJ already used by another client) is skipped and recorded as `{ codigo, motivo }` in the report, where the reason is the error name and, for Prisma, its code. The run ends `PARCIAL`, which does not move the incremental start (squad manager's decision): the next run asks for the same changes and tries the skipped item again, while every other item keeps being written.
 - Only the Prisma codes an ERP item can cause in these tables count as the item's data: `P2002` (unique value, such as the CNPJ), `P2000` (text longer than the column, such as `uf`), and `P2020` (number out of range, such as the credit limit). It is a list of what may be skipped, not of what may not: temporary codes such as `P2024` (no free connection), `P2028` (transaction API error or timeout) and `P2034` (write conflict or deadlock), and any unknown error, make the run `FALHA`, so the incremental start does not move and no item is lost.
 - A full load (no successful run of the type yet) collects every code it read; at the end it sets `INATIVO` (clients) or `ativo = false` (products) on rows whose code was not read, but only when it read at least one item, the number of distinct codes equals the ERP's `total`, and that total did not change between pages. The ERP's ordering is not documented, so items moving between pages, or an empty answer, must never make existing items inactive; in those cases the run is `FALHA` and the next one repeats the full load. Nothing is deleted.
 
 ### Incremental start
 
-The start of the last `SUCESSO` row of the same type (`iniciouEm`) is the `atualizadoDesde` of the next run. Using the start, not the end, means an item changed while a run was reading is fetched again next time; the upsert makes the repeat harmless.
+The start of the last `SUCESSO` row of the same type (`iniciouEm`) minus 5 minutes is the `atualizadoDesde` of the next run. `PARCIAL` and `FALHA` rows do not move it, and with no `SUCESSO` row the run is a full load (squad manager's decision). Using the start, not the end, means an item changed while a run was reading is fetched again next time; the 5-minute margin also covers a small clock difference between the portal and the ERP; the upsert makes the repeat harmless.
 
 ### Lock and run rows
 
 - A run acquires the lock in one short transaction that takes a Postgres transaction-level advisory lock (`pg_advisory_xact_lock`), checks that no `EM_ANDAMENTO` row newer than 30 minutes exists, and inserts the two `EM_ANDAMENTO` rows (clients and products). The advisory lock makes the check-and-insert atomic across processes; the `EM_ANDAMENTO` rows are the lock while the run lasts and record its start. A run that finds the lock taken returns without reading the ERP.
-- When a type finishes, its row gets `terminouEm`, `SUCESSO` or `FALHA`, `itensLidos`, `erros` (0 or 1), a safe `detalhe` (the error class and status, never the key or a body), and `relatorio = { itensAlterados }`.
+- When a type finishes, its row gets `terminouEm`, `SUCESSO`, `PARCIAL`, or `FALHA`, `itensLidos`, `erros` and `pendencias`, a safe `detalhe` (the error class, code, and status, never the key or a body), and `relatorio = { itensIgnorados: [{ codigo, motivo }] }` (empty when nothing was skipped). Changed items are counted only for the log; their record and the complete report belong to BACK-04 (squad manager's decision).
 - An `EM_ANDAMENTO` row older than 30 minutes is considered left behind by a crashed process: the next run marks it `FALHA` with that reason and proceeds. A full load is about five pages, far below 30 minutes even with the ERP client's waits.
 - The on-demand client sync checks for a recent `EM_ANDAMENTO` row before reading the ERP, and writes (or makes inactive) under the same advisory lock after checking again, so a scheduled run that started meanwhile wins and the on-demand sync answers 409; it writes no run row.
 - The advisory lock is taken with Prisma's tagged `$executeRaw`, not the unsafe variant.
@@ -76,12 +76,12 @@ The start of the last `SUCESSO` row of the same type (`iniciouEm`) is the `atual
 - Session-level advisory lock held for the whole run: Prisma's connection pool does not guarantee the same connection for the unlock, so the lock could leak.
 - In-memory flag: does not protect against a second API process.
 - One transaction for the whole run: a failure on the last page would undo everything and the portal would keep older data than necessary.
-- Largest `atualizadoNoErpEm` as the incremental start: suggested by the DATA-01 schema comment, but the task names the start of the last successful run (proposal, decision 1).
+- Largest `atualizadoNoErpEm` as the incremental start: rejected by the squad manager, because a run stopped midway would move it past items not yet read. The DATA-01 schema comment that suggested it is corrected.
 
 ## Risks
 
-- [Portal and ERP clocks differ] → the incremental start comes from the portal clock; a large difference could skip changes. Reported to the squad manager with decision 1.
-- [Two ERP clients share a CNPJ] → the unique CNPJ makes that page's transaction fail; the items are written one by one, the second client is skipped and recorded, and the run is `PARCIAL`.
+- [Portal and ERP clocks differ] → the incremental start comes from the portal clock; the 5-minute margin covers a small difference, but a larger one could skip changes.
+- [Two ERP clients share a CNPJ] → the unique CNPJ makes that page's transaction fail; the items are written one by one, the second client is skipped and recorded, and the run is `PARCIAL`. Until the ERP fixes it, the incremental start does not move, so every run asks again since the last `SUCESSO` (or repeats the full load when there was none), which stays small at this volume.
 - [A temporary database failure looks like an item's data] → only `P2002`, `P2000` and `P2020` skip an item; any other failure ends the run `FALHA` and the same changes are asked for again next hour. A new data error not in that list also ends `FALHA` until the list is reviewed.
 - [BACK-01 changes before merge] → this branch merges `develop` and BACK-01; it is rebased when BACK-01 merges.
 

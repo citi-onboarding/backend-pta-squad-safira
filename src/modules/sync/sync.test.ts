@@ -134,7 +134,7 @@ describe("full load on the first run", () => {
 });
 
 describe("incremental runs", () => {
-  it("asks only for changes since the start of the last successful run, 50 per page", async () => {
+  it("asks only for changes since 5 minutes before the start of the last SUCESSO run, 50 per page", async () => {
     const { service, mock, time } = setup();
     await service.runOnce();
     mock.listClientes.mockClear();
@@ -145,7 +145,39 @@ describe("incremental runs", () => {
     expect(mock.listClientes).toHaveBeenCalledWith({
       pagina: 1,
       tamanho: 50,
-      atualizadoDesde: T10.toISOString(),
+      atualizadoDesde: "2026-11-27T09:55:00.000Z",
+    });
+  });
+
+  it("does not move the start after a PARCIAL run", async () => {
+    const { service, repository, mock, state, time } = setup();
+    await service.runOnce();
+    // Every client changes in the ERP; one of them cannot be written.
+    state.clientes = many(120, (index) =>
+      erpCliente(index, {
+        cidade: "Olinda",
+        atualizadoEm: "2026-11-27T10:30:00.000Z",
+      }),
+    );
+    const save = repository.saveClientes.bind(repository);
+    repository.saveClientes = (rows) =>
+      rows.some((row) => row.codigoErp === "C002")
+        ? Promise.reject(prismaError("P2002"))
+        : save(rows);
+    time.set(T11);
+    await service.runOnce();
+    expect(runOf(repository, "SINCRONIZACAO_CLIENTES")?.resultado).toBe(
+      "PARCIAL",
+    );
+    mock.listClientes.mockClear();
+
+    time.set(T12);
+    await service.runOnce();
+
+    expect(mock.listClientes).toHaveBeenCalledWith({
+      pagina: 1,
+      tamanho: 50,
+      atualizadoDesde: "2026-11-27T09:55:00.000Z",
     });
   });
 
@@ -176,7 +208,7 @@ describe("incremental runs", () => {
 });
 
 describe("upsert by ERP code", () => {
-  it("keeps the same rows and reports 0 changed items when the same data comes twice", async () => {
+  it("keeps the same rows and rewrites none of them when the same data comes twice", async () => {
     // Items updated after both starts, so the incremental run brings them again.
     const erp = simulatedErp({
       clientes: many(120, (index) =>
@@ -188,20 +220,21 @@ describe("upsert by ERP code", () => {
     });
     const { service, repository, time } = setup(erp);
     await service.runOnce();
+    const pagesAfterFirstRun = repository.savedPages.length;
     time.set(T11);
 
     await service.runOnce();
 
     expect(repository.clientes.size).toBe(120);
     expect(repository.produtos.size).toBe(60);
+    expect(repository.savedPages).toHaveLength(pagesAfterFirstRun);
     expect(runOf(repository, "SINCRONIZACAO_CLIENTES")).toMatchObject({
       resultado: "SUCESSO",
       itensLidos: 120,
-      itensAlterados: 0,
     });
     expect(runOf(repository, "SINCRONIZACAO_PRODUTOS")).toMatchObject({
+      resultado: "SUCESSO",
       itensLidos: 60,
-      itensAlterados: 0,
     });
   });
 
@@ -300,7 +333,7 @@ describe("data stays available when the ERP fails", () => {
 });
 
 describe("run record", () => {
-  it("records type, start, end, result, items read, errors, and changed items", async () => {
+  it("records type, start, end, result, items read, and errors, but not the changed items", async () => {
     const { service, repository } = setup();
 
     await service.runOnce();
@@ -312,7 +345,6 @@ describe("run record", () => {
       terminouEm: T10,
       resultado: "SUCESSO",
       itensLidos: 120,
-      itensAlterados: 120,
       itensIgnorados: [],
       erros: 0,
       pendencias: 0,
@@ -518,11 +550,12 @@ describe("an item that cannot be written does not block the others", () => {
 
     expect(repository.clientes.size).toBe(119);
     expect(repository.clientes.has("C120")).toBe(true);
-    expect(mock.listClientes).toHaveBeenCalledWith({
-      pagina: 1,
-      tamanho: 50,
-      atualizadoDesde: T11.toISOString(),
-    });
+    // No client run ended SUCESSO, so every one of them was a full load.
+    expect(
+      mock.listClientes.mock.calls.every(
+        ([query]) => query?.atualizadoDesde === undefined,
+      ),
+    ).toBe(true);
   });
 
   it("skips nothing and ends FALHA on a temporary database failure, so the next run asks for the same changes", async () => {
@@ -557,7 +590,9 @@ describe("an item that cannot be written does not block the others", () => {
     await service.runOnce();
 
     expect(mock.listClientes).toHaveBeenLastCalledWith(
-      expect.objectContaining({ atualizadoDesde: T10.toISOString() }),
+      expect.objectContaining({
+        atualizadoDesde: "2026-11-27T09:55:00.000Z",
+      }),
     );
   });
 
@@ -806,15 +841,16 @@ describe("on-demand sync and a scheduled run that starts meanwhile", () => {
 });
 
 describe("status with a partial run", () => {
-  it("counts a partial run as synchronized and reports it as the worse result", async () => {
+  it("does not count a partial run as synchronized and reports it as the worse result", async () => {
     const { service, repository } = setup();
     repository.runs.push(
-      run("SINCRONIZACAO_CLIENTES", "PARCIAL", "2026-11-27T10:05:00.000Z"),
-      run("SINCRONIZACAO_PRODUTOS", "SUCESSO", "2026-11-27T10:03:00.000Z"),
+      run("SINCRONIZACAO_CLIENTES", "SUCESSO", "2026-11-27T10:05:00.000Z"),
+      run("SINCRONIZACAO_CLIENTES", "PARCIAL", "2026-11-27T11:05:00.000Z"),
+      run("SINCRONIZACAO_PRODUTOS", "SUCESSO", "2026-11-27T11:03:00.000Z"),
     );
 
     await expect(service.status()).resolves.toEqual({
-      ultimaSincronizacaoOk: new Date("2026-11-27T10:03:00.000Z"),
+      ultimaSincronizacaoOk: new Date("2026-11-27T10:05:00.000Z"),
       ultimoResultado: "PARCIAL",
     });
   });

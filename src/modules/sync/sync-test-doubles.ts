@@ -140,8 +140,6 @@ export function prismaError(code: string): Error {
   });
 }
 
-const SUCCESSFUL = new Set(["SUCESSO", "PARCIAL"]);
-
 export class InMemorySyncRepository implements SyncRepository {
   readonly clientes = new Map<string, ClienteData>();
   readonly produtos = new Map<string, ProdutoData>();
@@ -231,7 +229,7 @@ export class InMemorySyncRepository implements SyncRepository {
 
   lastSuccessfulStart(tipo: SyncType): Promise<Date | null> {
     const success = this.runs
-      .filter((run) => run.tipo === tipo && SUCCESSFUL.has(run.resultado))
+      .filter((run) => run.tipo === tipo && run.resultado === "SUCESSO")
       .at(-1);
     return Promise.resolve(success?.iniciouEm ?? null);
   }
@@ -253,7 +251,6 @@ export class InMemorySyncRepository implements SyncRepository {
         terminouEm: null,
         resultado: "EM_ANDAMENTO",
         itensLidos: 0,
-        itensAlterados: 0,
         itensIgnorados: [],
         erros: 0,
         pendencias: 0,
@@ -283,7 +280,7 @@ export class InMemorySyncRepository implements SyncRepository {
     const of = (tipo: SyncType) => {
       const ofType = this.runs.filter((run) => run.tipo === tipo);
       const lastSuccess = ofType
-        .filter((run) => SUCCESSFUL.has(run.resultado))
+        .filter((run) => run.resultado === "SUCESSO")
         .at(-1);
       return {
         latestResult: ofType.at(-1)?.resultado ?? null,

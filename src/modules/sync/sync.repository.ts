@@ -1,5 +1,4 @@
 import type { Database } from "../../shared/database/create-database.js";
-import type { ResultadoRegistro } from "../../shared/database/generated/enums.js";
 import type {
   ClienteData,
   ProdutoData,
@@ -17,9 +16,6 @@ const SYNC_TYPES: SyncType[] = [
   "SINCRONIZACAO_CLIENTES",
   "SINCRONIZACAO_PRODUTOS",
 ];
-// Runs that end like this move the incremental start (an item that could not
-// be written is recorded and skipped, see PARCIAL in the design).
-const SUCCESSFUL: ResultadoRegistro[] = ["SUCESSO", "PARCIAL"];
 // A run still in progress after this long was left behind by a crashed process.
 export const ABANDONED_AFTER_MS = 30 * 60 * 1000;
 
@@ -147,7 +143,7 @@ export class PrismaSyncRepository implements SyncRepository {
 
   async lastSuccessfulStart(tipo: SyncType): Promise<Date | null> {
     const run = await this.database.registroSincronizacao.findFirst({
-      where: { tipo, resultado: { in: SUCCESSFUL } },
+      where: { tipo, resultado: "SUCESSO" },
       orderBy: { iniciouEm: "desc" },
       select: { iniciouEm: true },
     });
@@ -212,7 +208,6 @@ export class PrismaSyncRepository implements SyncRepository {
         pendencias: outcome.pendencias,
         detalhe: outcome.detalhe,
         relatorio: {
-          itensAlterados: outcome.itensAlterados,
           itensIgnorados: outcome.itensIgnorados.map((item) => ({
             codigo: item.codigo,
             motivo: item.motivo,
@@ -251,7 +246,7 @@ export class PrismaSyncRepository implements SyncRepository {
         select: { resultado: true },
       }),
       this.database.registroSincronizacao.findFirst({
-        where: { tipo, resultado: { in: SUCCESSFUL } },
+        where: { tipo, resultado: "SUCESSO" },
         orderBy: { iniciouEm: "desc" },
         select: { terminouEm: true },
       }),

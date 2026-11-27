@@ -50,10 +50,11 @@ export interface SkippedItem {
   motivo: string;
 }
 
+// What a run records. The number of changed items is logged only; its record
+// belongs to BACK-04.
 export interface RunOutcome {
   resultado: ResultadoRegistro;
   itensLidos: number;
-  itensAlterados: number;
   itensIgnorados: SkippedItem[];
   erros: number;
   pendencias: number;
@@ -88,7 +89,7 @@ export interface SyncRepository {
   saveClienteOnDemand(row: ClienteData, now: Date): Promise<boolean>;
   /** Makes one client inactive under the lock; false when a run is in progress. */
   deactivateClienteOnDemand(codigo: string, now: Date): Promise<boolean>;
-  /** Start of the last SUCESSO or PARCIAL run of the type. */
+  /** Start of the last SUCESSO run of the type (PARCIAL and FALHA never count). */
   lastSuccessfulStart(tipo: SyncType): Promise<Date | null>;
   /** Takes the lock and opens the two run rows, or returns null when busy. */
   startRun(now: Date): Promise<RunIds | null>;
@@ -238,6 +239,13 @@ interface TypeHandler<TErp, TData extends { codigoErp: string }> {
   deactivateExcept(codes: string[]): Promise<number>;
 }
 
+// The run's outcome plus the changed items, which only the log reports.
+type RunProgress = RunOutcome & { itensAlterados: number };
+
+// The next run asks for changes since this long before the last SUCESSO
+// start, which also covers a small clock difference with the ERP.
+const INCREMENTAL_MARGIN_MS = 5 * 60 * 1000;
+
 interface PageWrite {
   saved: number;
   skipped: SkippedItem[];
@@ -289,7 +297,7 @@ export class SyncService {
     handler: TypeHandler<TErp, TData>,
   ): Promise<void> {
     const startedAt = this.now();
-    const outcome: RunOutcome = {
+    const outcome: RunProgress = {
       resultado: "SUCESSO",
       itensLidos: 0,
       itensAlterados: 0,
@@ -317,7 +325,16 @@ export class SyncService {
 
     const terminouEm = this.now();
     try {
-      await this.repository.finishRun(runId, { ...outcome, terminouEm });
+      // The changed items are left out: only the log reports them.
+      await this.repository.finishRun(runId, {
+        resultado: outcome.resultado,
+        itensLidos: outcome.itensLidos,
+        itensIgnorados: outcome.itensIgnorados,
+        erros: outcome.erros,
+        pendencias: outcome.pendencias,
+        detalhe: outcome.detalhe,
+        terminouEm,
+      });
     } catch (error) {
       this.logger.error(
         { sync: { tipo: handler.tipo, detalhe: safeDetail(error) } },
@@ -329,10 +346,14 @@ export class SyncService {
 
   private async readAndWrite<TErp, TData extends { codigoErp: string }>(
     handler: TypeHandler<TErp, TData>,
-    outcome: RunOutcome,
+    outcome: RunProgress,
   ): Promise<void> {
-    const since = await this.repository.lastSuccessfulStart(handler.tipo);
-    const fullLoad = since === null;
+    const lastSuccess = await this.repository.lastSuccessfulStart(handler.tipo);
+    const fullLoad = lastSuccess === null;
+    const since =
+      lastSuccess === null
+        ? null
+        : new Date(lastSuccess.getTime() - INCREMENTAL_MARGIN_MS);
     const readCodes = new Set<string>();
     let firstTotal: number | null = null;
     let totalChanged = false;
@@ -407,7 +428,7 @@ export class SyncService {
     return result;
   }
 
-  private log(tipo: SyncType, outcome: RunOutcome, duracaoMs: number): void {
+  private log(tipo: SyncType, outcome: RunProgress, duracaoMs: number): void {
     const entry = {
       sync: {
         tipo,

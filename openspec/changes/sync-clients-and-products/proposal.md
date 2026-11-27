@@ -7,10 +7,10 @@ The portal has no clients and no product catalog until it copies them from the D
 ## What changes
 
 - Add the `sync` module, which reads clients and products from the ERP through the shared ERP client (BACK-02) and writes them to the `Cliente` and `Produto` tables (DATA-01).
-- The first run is a full load; later runs fetch only what changed since the start of the last successful run (RN-15), 50 items per page.
+- The first run is a full load; later runs fetch only what changed since 5 minutes before the start of the last `SUCESSO` run (RN-15), 50 items per page.
 - Write by upsert on the ERP code, one transaction per page, so running twice gives the same rows; a client or product missing from a full load becomes inactive and is never deleted. The client status (Ativo, Bloqueado, Inativo) and the product active flag are kept as the ERP sends them (RN-02, RN-04, RN-09).
 - Run automatically at most every hour, with a database lock so that two runs never overlap. When the ERP is down or its usage limit persists, the run fails, the data already in the portal stays available, the failure is recorded, and the next hourly run retries.
-- Record each run in `RegistroSincronizacao`, one row for clients and one for products: type, start, end, result, items read, errors, and a safe error detail; the number of changed items goes in the row's report.
+- Record each run in `RegistroSincronizacao`, one row for clients and one for products: type, start, end, result, items read, errors, and a safe error detail; skipped items go in the row's report. The number of changed items and the complete report belong to BACK-04.
 - Add `GET /sync/status`, `{ ultimaSincronizacaoOk, ultimoResultado }`, for the web bar "Sincronizado com o ERP em...", and `POST /sync/clientes/:codigo` for an administrator to synchronize one client on demand.
 
 ## Impact
@@ -34,12 +34,12 @@ The portal has no clients and no product catalog until it copies them from the D
 
 ## Decisions taken with the developer
 
-1. The incremental filter starts at the start time of the last successful (or partial) run of the same type, as the task note says. The DATA-01 schema comment suggests the largest `atualizadoNoErpEm` instead; this difference is reported to the squad manager, and the schema comment (a DATA-01 file) is left as it is until then.
-2. No migration: changed items go in the run's `relatorio`, errors in `erros` and `detalhe`; BACK-04 completes the report.
+1. The incremental filter starts 5 minutes before the start time of the last `SUCESSO` run of the same type; `PARCIAL` and `FALHA` runs do not move it, and without a `SUCESSO` run the run is a full load (squad manager's decision). The largest `atualizadoNoErpEm` is not used, because a run stopped midway would skip items; the DATA-01 schema comment that suggested it is corrected, at the squad manager's request.
+2. No migration: the run records type, start, end, result, items read, and the error in `detalhe`; skipped items go in `relatorio`. Changed items and the complete report belong to BACK-04 (squad manager's decision).
 3. Missing items are detected only in a full load (the first run).
 4. `GET /sync/status` for any signed-in user; `POST /sync/clientes/:codigo` for administrators only.
 5. The branch is based on BACK-01 with `develop` merged in, because the routes need the BACK-01 authentication and the sync needs the BACK-02 ERP client.
 6. An on-demand client sync writes no `RegistroSincronizacao` row, so it never moves the incremental start; a client the ERP no longer has becomes inactive.
-7. `ultimaSincronizacaoOk` is the older of the last successful client and product runs; `ultimoResultado` is the worse of their latest results.
-8. An item that cannot be written because of its own data (a repeated unique value, a text too long, or a number out of range) is skipped and recorded, and the run ends `PARCIAL` and moves the incremental start, so one bad ERP record never stops the synchronization. Any other write failure, such as a temporary database failure, ends the run `FALHA` and skips nothing.
+7. `ultimaSincronizacaoOk` is the older of the last `SUCESSO` client and product runs (a `PARCIAL` run does not count); `ultimoResultado` is the worse of their latest results.
+8. An item that cannot be written because of its own data (a repeated unique value, a text too long, or a number out of range) is skipped and recorded, and the run ends `PARCIAL`, so one bad ERP record never stops the other items. A `PARCIAL` run does not move the incremental start, so the next run tries that item again. Any other write failure, such as a temporary database failure, ends the run `FALHA` and skips nothing.
 9. File names follow the task tree (`sync.service.ts`); the routes add `sync.router.ts`, `sync.schemas.ts`, and `sync.openapi.ts`, like the other modules.

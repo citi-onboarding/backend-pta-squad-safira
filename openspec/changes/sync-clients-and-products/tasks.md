@@ -5,7 +5,7 @@
 - [x] Merge `develop` into the BACK-01-based branch, keeping both sides of every conflict, and run all tests.
 - [x] Generate the module with `pnpm gen:module sync`.
 - [x] Write the proposal, the `erp-synchronization` spec, and the design.
-- [ ] Send the open points to the squad manager: the incremental start (task note versus DATA-01 schema comment) and the dependency on BACK-01.
+- [x] Send the open points to the squad manager: the incremental start (task note versus DATA-01 schema comment) and the dependency on BACK-01.
 
 ## Red
 
@@ -44,3 +44,10 @@
 - [x] Red: developer writes the failing tests (a write conflict `P2034` does not skip items and ends `FALHA`; `P2000` and `P2020` skip the item).
 - [x] Green: list the data-error codes in `sync.service.ts`, and add the error code to the safe detail of a failed run.
 - [x] Refactor and run all gates.
+
+## Squad manager decisions
+
+- [x] Specify the incremental start (last `SUCESSO` start minus 5 minutes; `PARCIAL` and `FALHA` do not move it), the status counting only `SUCESSO`, and the run record without changed items.
+- [x] Red: developer writes the failing tests (5-minute margin, a `PARCIAL` run does not move the start nor count in the status, the run record has no changed items).
+- [x] Green: use only `SUCESSO` for the incremental start and the status, subtract 5 minutes, and stop recording changed items; correct the DATA-01 schema comment on `atualizadoNoErpEm`.
+- [x] Refactor, update the change summary, and run all gates.

@@ -123,7 +123,7 @@ describe("client and product sync with PostgreSQL", () => {
     expect(latest).toMatchObject({
       resultado: "SUCESSO",
       itensLidos: 120,
-      relatorio: { itensAlterados: 0 },
+      relatorio: { itensIgnorados: [] },
     });
   });
 
@@ -150,7 +150,7 @@ describe("client and product sync with PostgreSQL", () => {
     ).resolves.toMatchObject({ status: "INATIVO" });
   });
 
-  it("records each run with type, start, end, result, counts, and changed items", async () => {
+  it("records each run with type, start, end, result, and counts, without the changed items", async () => {
     await service(fullErp()).runOnce();
 
     const rows = await database.registroSincronizacao.findMany({
@@ -165,13 +165,13 @@ describe("client and product sync with PostgreSQL", () => {
         itensLidos: 120,
         erros: 0,
         detalhe: null,
-        relatorio: { itensAlterados: 120, itensIgnorados: [] },
+        relatorio: { itensIgnorados: [] },
       }),
       expect.objectContaining({
         tipo: "SINCRONIZACAO_PRODUTOS",
         resultado: "SUCESSO",
         itensLidos: 60,
-        relatorio: { itensAlterados: 60, itensIgnorados: [] },
+        relatorio: { itensIgnorados: [] },
       }),
     ]);
     await expect(service(fullErp()).status()).resolves.toEqual({
@@ -260,6 +260,17 @@ describe("client and product sync with PostgreSQL", () => {
       }),
       expect.objectContaining({ resultado: "PARCIAL" }),
     ]);
+    // No client run ended SUCESSO: both were full loads, and the status bar
+    // has no synchronized date yet.
+    expect(
+      erp.mock.listClientes.mock.calls.every(
+        ([query]) => query?.atualizadoDesde === undefined,
+      ),
+    ).toBe(true);
+    await expect(service(erp, () => T11).status()).resolves.toMatchObject({
+      ultimaSincronizacaoOk: null,
+      ultimoResultado: "PARCIAL",
+    });
   });
 
   it("refuses an on-demand write while a run is in progress", async () => {

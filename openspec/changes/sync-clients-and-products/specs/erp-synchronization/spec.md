@@ -2,7 +2,7 @@
 
 ### Requirement: Full load on the first run
 
-When there is no successful run of a type yet, the synchronization SHALL read every page of clients (or products) from the ERP without a change filter and write them all. A client or product that exists in the portal but is not in that full load SHALL become inactive (client status `INATIVO`, product `ativo = false`) and MUST NOT be deleted. Items SHALL be made inactive only when the full load read at least one item and exactly as many distinct items as the ERP's total, and that total did not change between pages; otherwise nothing is made inactive and the run is recorded as `FALHA`, so the next run repeats the full load.
+When there is no `SUCESSO` run of a type yet, the synchronization SHALL read every page of clients (or products) from the ERP without a change filter and write them all. A client or product that exists in the portal but is not in that full load SHALL become inactive (client status `INATIVO`, product `ativo = false`) and MUST NOT be deleted. Items SHALL be made inactive only when the full load read at least one item and exactly as many distinct items as the ERP's total, and that total did not change between pages; otherwise nothing is made inactive and the run is recorded as `FALHA`, so the next run repeats the full load.
 
 #### Scenario: Empty portal
 
@@ -21,12 +21,17 @@ When there is no successful run of a type yet, the synchronization SHALL read ev
 
 ### Requirement: Incremental runs
 
-After a successful run of a type, the next run of that type SHALL ask the ERP only for what changed since the start of the last successful run (`atualizadoDesde`), 50 items per page, and SHALL read every page of the answer.
+After a `SUCESSO` run of a type, the next run of that type SHALL ask the ERP only for what changed since 5 minutes before the start of the last `SUCESSO` run of that type (`atualizadoDesde`), 50 items per page, and SHALL read every page of the answer. A `PARCIAL` or `FALHA` run MUST NOT move that start.
 
 #### Scenario: Only changes are requested
 
 - **WHEN** the last successful client run started at 2026-11-27T10:00:00Z
-- **THEN** the next client run asks the ERP for clients changed since 2026-11-27T10:00:00Z, page by page with 50 items per page
+- **THEN** the next client run asks the ERP for clients changed since 2026-11-27T09:55:00Z, page by page with 50 items per page
+
+#### Scenario: Partial run does not move the start
+
+- **WHEN** the last `SUCESSO` client run started at 2026-11-27T10:00:00Z and a later client run at 11:00 ended `PARCIAL`
+- **THEN** the next client run still asks for clients changed since 2026-11-27T09:55:00Z
 
 #### Scenario: Change reaches the portal
 
@@ -40,7 +45,7 @@ Clients and products SHALL be written by their ERP code, so that running the syn
 #### Scenario: Running twice
 
 - **WHEN** the same full load runs twice in a row
-- **THEN** the number of clients and products is the same after both runs, and the second run reports 0 changed items
+- **THEN** the number of clients and products is the same after both runs, and the second run rewrites no row
 
 #### Scenario: Blocked client keeps its status
 
@@ -49,12 +54,12 @@ Clients and products SHALL be written by their ERP code, so that running the syn
 
 ### Requirement: An item that cannot be written does not block the others
 
-When a page cannot be written as a whole because of an item's own data (a value already used by another row, such as the CNPJ; a text longer than its column; a number out of its column's range), the synchronization SHALL write its items one by one, skip only the items that fail for one of those reasons, and go on with the next pages. The run SHALL be recorded as `PARCIAL`, with the number of skipped items in `erros` and `pendencias` and each skipped ERP code with the reason in the report, without personal data. A `PARCIAL` run moves the incremental start like a successful one, so later changes keep arriving; a skipped item is tried again when it changes in the ERP. Any other write failure, including a temporary database failure (no free connection, transaction timeout, write conflict or deadlock) or an unknown one, SHALL stop the run as `FALHA` without skipping items, so the next run asks for the same changes again.
+When a page cannot be written as a whole because of an item's own data (a value already used by another row, such as the CNPJ; a text longer than its column; a number out of its column's range), the synchronization SHALL write its items one by one, skip only the items that fail for one of those reasons, and go on with the next pages. The run SHALL be recorded as `PARCIAL`, with the number of skipped items in `erros` and `pendencias` and each skipped ERP code with the reason in the report, without personal data. A `PARCIAL` run does not move the incremental start, so the next run asks for the same changes again and tries the skipped item again, while every other item keeps being written. Any other write failure, including a temporary database failure (no free connection, transaction timeout, write conflict or deadlock) or an unknown one, SHALL stop the run as `FALHA` without skipping items, so the next run asks for the same changes again.
 
 #### Scenario: Two clients with the same CNPJ
 
 - **WHEN** the first page has two clients with the same CNPJ and the run is repeated on later hours
-- **THEN** every other client of every page is written, the second of the two is skipped and recorded with its ERP code, each run is `PARCIAL`, and the next run asks for changes since the start of the previous one
+- **THEN** every other client of every page is written, the second of the two is skipped and recorded with its ERP code, each run is `PARCIAL`, and, because no client run ended `SUCESSO`, every one of them is a full load
 
 #### Scenario: Temporary database failure while writing
 
@@ -82,12 +87,12 @@ Each page SHALL be written in its own transaction. When the ERP is unavailable o
 
 ### Requirement: Run record
 
-Every scheduled run SHALL write one `RegistroSincronizacao` row for clients and one for products. The row is created as `EM_ANDAMENTO` when the run starts and ends with the type, start, end, result (`SUCESSO`, `PARCIAL`, or `FALHA`), the items read from the ERP (counted even when their page could not be written), the number of errors, a safe error detail when it fails, and the number of changed items in the row's report. The detail MUST NOT contain the ERP key or response bodies. Each finished type SHALL also be logged with its result, counts, duration, and safe detail.
+Every scheduled run SHALL write one `RegistroSincronizacao` row for clients and one for products. The row is created as `EM_ANDAMENTO` when the run starts and ends with the type, start, end, result (`SUCESSO`, `PARCIAL`, or `FALHA`), the items read from the ERP (counted even when their page could not be written), the number of errors, a safe error detail when it fails, and, for a `PARCIAL` run, each skipped ERP code with its reason in the row's report. The number of changed items and the complete report belong to BACK-04. The detail MUST NOT contain the ERP key or response bodies. Each finished type SHALL also be logged with its result, counts, duration, and safe detail.
 
 #### Scenario: Successful run
 
-- **WHEN** a client run reads 120 clients and 4 of them changed
-- **THEN** its row has type `SINCRONIZACAO_CLIENTES`, a start and an end, result `SUCESSO`, 120 items read, 0 errors, and 4 changed items in the report
+- **WHEN** a client run reads 120 clients and writes them without errors
+- **THEN** its row has type `SINCRONIZACAO_CLIENTES`, a start and an end, result `SUCESSO`, 120 items read, 0 errors, no detail, and no changed-item count
 
 #### Scenario: Failed run
 
@@ -120,7 +125,7 @@ The synchronization SHALL run when the application starts and then at least ever
 
 ### Requirement: Synchronization status
 
-`GET /sync/status` SHALL return `{ ultimaSincronizacaoOk, ultimoResultado }` to any signed-in user. `ultimaSincronizacaoOk` is the end time of the older of the last successful (`SUCESSO` or `PARCIAL`) client and product runs, or `null` when either type has never succeeded; `ultimoResultado` is the worse of the latest client and product results (`FALHA` worse than `EM_ANDAMENTO`, worse than `PARCIAL`, worse than `SUCESSO`), or `null` when nothing ran yet.
+`GET /sync/status` SHALL return `{ ultimaSincronizacaoOk, ultimoResultado }` to any signed-in user. `ultimaSincronizacaoOk` is the end time of the older of the last `SUCESSO` client and product runs, or `null` when either type has never ended `SUCESSO` (a `PARCIAL` run does not count); `ultimoResultado` is the worse of the latest client and product results (`FALHA` worse than `EM_ANDAMENTO`, worse than `PARCIAL`, worse than `SUCESSO`), or `null` when nothing ran yet.
 
 #### Scenario: Both types succeeded
 
@@ -131,6 +136,11 @@ The synchronization SHALL run when the application starts and then at least ever
 
 - **WHEN** the latest client run succeeded and the latest product run failed
 - **THEN** `ultimoResultado` is `FALHA`
+
+#### Scenario: Latest client run was partial
+
+- **WHEN** the last `SUCESSO` client run ended at 10:05, a later client run ended `PARCIAL` at 11:05, and the last `SUCESSO` product run ended at 11:03
+- **THEN** `ultimaSincronizacaoOk` is 10:05 and `ultimoResultado` is `PARCIAL`
 
 #### Scenario: Without a session
 
