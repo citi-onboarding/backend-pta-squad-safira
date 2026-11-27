@@ -22,13 +22,12 @@
 
 ## Refactor
 
-- [ ] Review names and duplication, and confirm that no cell value is logged; run the tests again.
+- [x] Review names and duplication, and confirm that no cell value is logged; run the tests again.
 
 ## Consolidation
 
 - [x] Run `pnpm data:diagnose` on the real files twice and confirm byte-identical output; commit `docs/data/diagnostico-planilhas.md`.
 - [x] Check the generated document for personal data before committing it.
-- [ ] Document how to run the command in the README.
-- [ ] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`, and `openspec validate diagnose-legacy-spreadsheets --strict`.
-- [ ] Write `docs/changes/diagnose-legacy-spreadsheets.md` from the template and evaluate the ADR.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`, and `openspec validate diagnose-legacy-spreadsheets --strict`.
+- [x] Write `docs/changes/diagnose-legacy-spreadsheets.md` from the template and evaluate the ADR.
 - [ ] Open the pull request to `develop`, noting the base on `feat/prismaSchema`, the dependency review, and the provisional decisions.

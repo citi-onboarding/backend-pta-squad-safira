@@ -20,7 +20,7 @@ The history load (F11) needs to know what is actually inside the spreadsheets th
 - API: none.
 - Security and privacy: the spreadsheets contain client names, CNPJs, phone numbers, and amounts. They stay outside the repository; the generated document contains only aggregated numbers and masked examples. The command never logs cell values.
 - Observability: the command prints only progress and totals.
-- Documentation: `docs/data/diagnostico-planilhas.md` (generated), the change summary, and the README section on how to run the command.
+- Documentation: `docs/data/diagnostico-planilhas.md` (generated, and it states how to run the command again) and the change summary.
 - Dependencies: `exceljs@4.4.0`, reviewed in the pull request (see design).
 
 ## In scope
