@@ -22,6 +22,10 @@ const PROBLEM_TITLES: Record<ProblemId, string> = {
   "wrong-quantities": "quantities typed wrong",
   "total-lines": "total lines",
   "outdated-status": "outdated status",
+  "status-written-differently": "status written in different ways",
+  "salespeople-identified-by-name": "salespeople identified by name",
+  "missing-required-values": "missing required values",
+  "cnpj-different-formats": "CNPJ in different formats",
 };
 
 // Proposed rules for DATA-03. They follow RN-09 (the ERP wins) and RN-16 (a
@@ -47,6 +51,14 @@ export const CLEANING_RULES: Record<ProblemId, string> = {
   "total-lines": "Discard the row, recording the reason 'total line' (RN-16).",
   "outdated-status":
     "When the receivable exists in the ERP, use the ERP status (RN-09). Otherwise, a receivable with a payment date is paid, and a paid status without a payment date goes to the pending list.",
+  "status-written-differently":
+    "Trim spaces and ignore letter case and accents, then map each spelling to a portal status; a spelling that maps to no known status goes to the pending list. A receivable that exists in the ERP takes the ERP status (RN-09).",
+  "salespeople-identified-by-name":
+    "Link each spelling to an ERP salesperson code through a correspondence table confirmed by the squad manager; never guess. A spelling with no correspondence goes to the pending list. Without this link, the salesperson portfolio (RN-08) does not work for historical clients.",
+  "missing-required-values":
+    "A client without a code is linked to the ERP by CNPJ. A receivable without a client takes the ERP receivable with the same number when it exists; otherwise it goes to the pending list. An order item without a product goes to the pending list.",
+  "cnpj-different-formats":
+    "Normalize every CNPJ to 14 digits (remove the mask and add the leading zeros an Excel number loses) before comparing it with the ERP.",
 };
 
 const SHEET_ORDER: SpreadsheetName[] = ["clientes", "pedidos", "titulos"];
@@ -116,6 +128,15 @@ function problemSection(problem: ProblemResult): string[] {
         `| ${code(entry.file)} | ${formatNumber(entry.rows)} | ${entry.exampleRows.join(", ")} |`,
     ),
     "",
+    ...problem.byFile
+      .filter((entry) => entry.distinctValues !== undefined)
+      .map(
+        (entry) =>
+          `Distinct spellings in ${code(entry.file)}: ${formatNumber(entry.distinctValues ?? 0)}.`,
+      ),
+    ...(problem.byFile.some((entry) => entry.distinctValues !== undefined)
+      ? [""]
+      : []),
     `**Proposed cleaning rule:** ${CLEANING_RULES[problem.id]}`,
     "",
   ];
@@ -125,7 +146,14 @@ function notes(diagnosis: Diagnosis): string[] {
   const totalFormulas =
     diagnosis.profiles.pedidos.columns.find((column) => column.name === "Total")
       ?.formulas ?? 0;
-  const lines = ["## Notes for DATA-03", ""];
+  const { clientes, pedidos, titulos } = diagnosis.profiles;
+  const lines = [
+    "## Notes for DATA-03",
+    "",
+    `- Volumes: the task expects 135 clients; the file has ${formatNumber(clientes.contentRows)} client rows, plus ${formatNumber(clientes.blankRows)} blank rows and ${formatNumber(clientes.totalLines)} total lines below the header.`,
+    `- Volumes: the task expects about 9,700 orders; the file has one row per item, so it has ${formatNumber(pedidos.contentRows)} item rows for ${formatNumber(pedidos.distinctOrders ?? 0)} distinct orders.`,
+    `- Volumes: the task expects about 6,500 receivables; the file has ${formatNumber(titulos.contentRows)} receivable rows.`,
+  ];
   if (totalFormulas > 0) {
     lines.push(
       `- ${formatNumber(totalFormulas)} cells in ${code("Total")} are a formula without a saved value, so the file holds no total to read. Proposed: compute the total as ${code("Qtd")} times ${code("Preço Unit.")} in integer cents (RN-13).`,
@@ -139,7 +167,7 @@ function notes(diagnosis: Diagnosis): string[] {
 }
 
 function matchRow(match: ColumnMatch): string {
-  return `| ${match.column} | ${match.portalField ?? "no match"} | ${match.erpField ?? "no match"} |`;
+  return `| ${match.column} | ${match.portalField ?? "no match"} | ${match.erpField ?? "no match"} | ${match.conversion ?? "—"} |`;
 }
 
 function columnMatch(diagnosis: Diagnosis): string[] {
@@ -151,8 +179,8 @@ function columnMatch(diagnosis: Diagnosis): string[] {
     ...SHEET_ORDER.flatMap((name) => [
       `### ${diagnosis.profiles[name].file}`,
       "",
-      "| Column | Portal field (DATA-01) | ERP field (BACK-02) |",
-      "| --- | --- | --- |",
+      "| Column | Portal field (DATA-01) | ERP field (BACK-02) | Conversion |",
+      "| --- | --- | --- | --- |",
       ...COLUMN_MATCHES[name].map(matchRow),
       "",
     ]),

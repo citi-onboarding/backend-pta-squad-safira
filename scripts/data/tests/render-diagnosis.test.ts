@@ -87,8 +87,10 @@ describe("renderDiagnosis", () => {
   it("lists the column match with the ERP", async () => {
     const document = await sampleDocument();
 
-    expect(document).toContain("| CNPJ | Cliente.cnpj | cliente.cnpj |");
-    expect(document).toContain("| Telefone | no match | no match |");
+    expect(document).toContain(
+      "| CNPJ | Cliente.cnpj | cliente.cnpj | normalize to 14 digits |",
+    );
+    expect(document).toContain("| Telefone | no match | no match | — |");
   });
 
   it("contains no client names, contacts, phones, or full CNPJs", async () => {
@@ -112,5 +114,14 @@ describe("renderDiagnosis", () => {
 
   it("produces the same text when rendered twice", async () => {
     expect(await sampleDocument()).toBe(await sampleDocument());
+  });
+
+  it("compares the row counts with the volumes the task expects", async () => {
+    const document = await sampleDocument();
+
+    for (const expected of ["135", "9,700", "6,500"]) {
+      expect(document).toContain(expected);
+    }
+    expect(document).toMatch(/one row per item/i);
   });
 });

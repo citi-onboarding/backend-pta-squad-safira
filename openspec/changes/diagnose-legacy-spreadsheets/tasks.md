@@ -31,3 +31,10 @@
 - [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`, and `openspec validate diagnose-legacy-spreadsheets --strict`.
 - [x] Write `docs/changes/diagnose-legacy-spreadsheets.md` from the template and evaluate the ADR.
 - [ ] Open the pull request to `develop`, noting the base on `feat/prismaSchema`, the dependency review, and the provisional decisions.
+
+## Review of the first diagnosis
+
+- [x] Specify four more problems found in the real files (status written in different ways, salespeople identified by name, missing required values, CNPJ in different formats), the volume comparison with the task, and the conversion column of the ERP match.
+- [x] Red: developer writes the failing tests for each new scenario and runs them.
+- [x] Green: implement the detections, rules, volume note, and conversion column; regenerate the document and check it for personal data.
+- [x] Refactor and run all gates again.

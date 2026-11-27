@@ -60,6 +60,8 @@ Exactly as listed in the spec requirement "Detection of data problems". Supporti
 
 ### Column match with the ERP
 
+Each row also states the conversion the column needs (for example, salesperson name to ERP code, reais to integer cents, or client code to `Cliente.id`), so DATA-03 does not read a name-to-code link as a direct copy.
+
 A fixed table in `diagnose-spreadsheets.ts` maps each spreadsheet column to the DATA-01 Prisma field (`Cliente`, `PedidoHistorico`, `Titulo`) and to the BACK-02 ERP field (`erpClienteSchema`, `erpPedidoSchema`, `erpTituloSchema`). It is written by hand, because BACK-02 (PR #12) is not merged into this branch's base and scripts must not depend on unmerged code. A test checks that every expected column of the three files appears in the table.
 
 ### Repeatable and private output

@@ -59,6 +59,7 @@ const validOrder = {
   "Nº Pedido": 1001,
   Data: day(2025, 2, 3),
   Cliente: "C001",
+  Produto: "P10",
   Qtd: 10,
   "Preço Unit.": 2.5,
   Total: 25,
@@ -204,7 +205,7 @@ describe("detection of data problems", () => {
     expect(
       diagnose(spreadsheets({})).problems.map((entry) => entry.id),
     ).toEqual(PROBLEM_IDS);
-    expect(PROBLEM_IDS).toHaveLength(10);
+    expect(PROBLEM_IDS).toHaveLength(14);
   });
 
   it("reports nothing found for clean sample files", () => {
@@ -422,6 +423,100 @@ describe("detection of data problems", () => {
   });
 });
 
+describe("problems found after the first review", () => {
+  it("finds status written in different ways", () => {
+    const result = problem(
+      spreadsheets({
+        titulos: [
+          validReceivable,
+          { ...validReceivable, id_titulo: "T2" },
+          { ...validReceivable, id_titulo: "T3", status: "pago " },
+        ],
+      }),
+      "status-written-differently",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 1,
+      byFile: [{ file: SPREADSHEETS.titulos.file, rows: 1, exampleRows: [4] }],
+    });
+  });
+
+  it("finds salespeople identified by name and counts the spellings without the names", () => {
+    const result = problem(
+      spreadsheets({
+        pedidos: [
+          { ...validOrder, Vendedor: "Vendedora Exemplo" },
+          { ...validOrder, Vendedor: "Vendedora Exemplo" },
+          { ...validOrder, Vendedor: "Vend. Exemplo" },
+        ],
+      }),
+      "salespeople-identified-by-name",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 3,
+      byFile: [
+        {
+          file: SPREADSHEETS.pedidos.file,
+          rows: 3,
+          exampleRows: [5, 6, 7],
+          distinctValues: 2,
+        },
+      ],
+    });
+    expect(JSON.stringify(result)).not.toContain("Exemplo");
+  });
+
+  it("finds missing required values in each file", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [validClient, { ...validClient, "Cód.": null }],
+        pedidos: [validOrder, { ...validOrder, Produto: null }],
+        titulos: [
+          validReceivable,
+          { ...validReceivable, id_titulo: "T2", id_cliente: null },
+        ],
+      }),
+      "missing-required-values",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 3,
+      byFile: [
+        { file: SPREADSHEETS.clientes.file, rows: 1, exampleRows: [5] },
+        { file: SPREADSHEETS.pedidos.file, rows: 1, exampleRows: [6] },
+        { file: SPREADSHEETS.titulos.file, rows: 1, exampleRows: [3] },
+      ],
+    });
+  });
+
+  it("finds CNPJs written in different formats", () => {
+    const result = problem(
+      spreadsheets({
+        clientes: [
+          validClient,
+          { ...validClient, "Cód.": "C002", CNPJ: "45.723.174/0001-10" },
+          { ...validClient, "Cód.": "C003", CNPJ: "11222333000181" },
+          { ...validClient, "Cód.": "C004", CNPJ: 45723174000110 },
+        ],
+      }),
+      "cnpj-different-formats",
+    );
+
+    expect(result).toMatchObject({
+      found: true,
+      rows: 2,
+      byFile: [
+        { file: SPREADSHEETS.clientes.file, rows: 2, exampleRows: [6, 7] },
+      ],
+    });
+  });
+});
+
 describe("receivables that will come from the ERP", () => {
   it("names Excel serial numbers and reads them as dates", () => {
     const sheets = spreadsheets({
@@ -476,11 +571,17 @@ describe("column match with the ERP", () => {
       column: "CNPJ",
       portalField: "Cliente.cnpj",
       erpField: "cliente.cnpj",
+      conversion: "normalize to 14 digits",
     });
     expect(phone).toEqual({
       column: "Telefone",
       portalField: null,
       erpField: null,
+      conversion: null,
     });
+    expect(
+      COLUMN_MATCHES.clientes.find((match) => match.column === "Vendedor")
+        ?.conversion,
+    ).toMatch(/name.*ERP salesperson code/);
   });
 });

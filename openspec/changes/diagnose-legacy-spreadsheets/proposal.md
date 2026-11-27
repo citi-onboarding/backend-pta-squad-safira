@@ -9,6 +9,7 @@ The history load (F11) needs to know what is actually inside the spreadsheets th
 - Add a read-only command that reads `Clientes - Comercial.xlsx`, `Pedidos 2025-2026 - Comercial.xlsx`, and `titulos.csv` from a folder given on the command line and never changes them.
 - For each file, report columns and inferred types, row counts (data rows, blank rows, total lines), empty values per column, duplicates, and the date and value formats found.
 - Detect the problems named by task DATA-02 and PRD 7.4: clients written in different ways, invalid CNPJs, dates in different formats, values with a decimal comma, duplicates, orders without a client, outdated statuses, quantities typed wrong, and total lines; report which ones occur and how often.
+- After the first review, also detect what the real files showed as dirty or missing, within the F11 criterion that dates, values, codes, and statuses end in one format: statuses written in different ways, salespeople identified by name, missing required values, and CNPJs in different formats.
 - Compare each spreadsheet column with the ERP fields, using both the DATA-01 Prisma schema and the BACK-02 ERP client schemas, and report which columns match.
 - Generate `docs/data/diagnostico-planilhas.md` with the numbers and one proposed cleaning rule per problem found, for DATA-03 to apply, following RN-09 (the ERP is the reference) and the rule that receivables from 2026-10-01 come from the ERP.
 - Add the `exceljs` dependency (pinned to 4.4.0) to read both the `.xlsx` files and the `;`-separated CSV.

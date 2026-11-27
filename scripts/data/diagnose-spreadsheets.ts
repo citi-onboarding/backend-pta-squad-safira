@@ -20,6 +20,10 @@ export const PROBLEM_IDS = [
   "wrong-quantities",
   "total-lines",
   "outdated-status",
+  "status-written-differently",
+  "salespeople-identified-by-name",
+  "missing-required-values",
+  "cnpj-different-formats",
 ] as const;
 
 export type ProblemId = (typeof PROBLEM_IDS)[number];
@@ -28,6 +32,8 @@ export interface FileOccurrence {
   file: string;
   rows: number;
   exampleRows: number[];
+  /** Number of distinct spellings; only for salespeople identified by name. */
+  distinctValues?: number;
 }
 
 export interface ProblemResult {
@@ -60,6 +66,8 @@ export interface ColumnMatch {
   column: string;
   portalField: string | null;
   erpField: string | null;
+  /** What has to change before the value can be loaded, if anything. */
+  conversion: string | null;
 }
 
 export interface Diagnosis {
@@ -90,51 +98,124 @@ export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
   clientes: [
     match("Cód.", "Cliente.codigoErp", "cliente.codigo"),
     match("Razão Social", "Cliente.razaoSocial", "cliente.razaoSocial"),
-    match("CNPJ", "Cliente.cnpj", "cliente.cnpj"),
+    match("CNPJ", "Cliente.cnpj", "cliente.cnpj", "normalize to 14 digits"),
     match(
       "Cidade/UF",
       "Cliente.cidade + Cliente.uf",
       "cliente.cidade + cliente.uf",
+      "split into city and UF",
     ),
     match("Segmento", "Cliente.segmento", "cliente.segmento"),
-    match("Vendedor", "Cliente.codigoVendedor", "cliente.vendedor"),
+    match(
+      "Vendedor",
+      "Cliente.codigoVendedor",
+      "cliente.vendedor",
+      "salesperson name to ERP salesperson code",
+    ),
     match(
       "Limite",
       "Cliente.limiteCreditoCentavos",
       "cliente.limiteCreditoCentavos",
+      "reais to integer cents",
     ),
-    match("Situação", "Cliente.status", "cliente.status"),
+    match(
+      "Situação",
+      "Cliente.status",
+      "cliente.status",
+      "text to ATIVO, BLOQUEADO, or INATIVO",
+    ),
     match("Contato", null, null),
     match("Telefone", null, null),
     match("Últ. atualização", "Cliente.atualizadoEm", "cliente.atualizadoEm"),
   ],
   pedidos: [
     match("Nº Pedido", "PedidoHistorico.numero", "pedido.numero"),
-    match("Data", "PedidoHistorico.data", "pedido.criadoEm"),
-    match("Cliente", "PedidoHistorico.clienteId", "pedido.cliente"),
+    match(
+      "Data",
+      "PedidoHistorico.data",
+      "pedido.criadoEm",
+      "date in one format",
+    ),
+    match(
+      "Cliente",
+      "PedidoHistorico.clienteId",
+      "pedido.cliente",
+      "client code or name to Cliente.id",
+    ),
     match("Vendedor", "PedidoHistorico.vendedorNome", null),
-    match("Produto", "PedidoHistorico.produtoId", "pedido.itens.produto"),
+    match(
+      "Produto",
+      "PedidoHistorico.produtoId",
+      "pedido.itens.produto",
+      "product code to Produto.id",
+    ),
     match("Descrição", "Produto.descricao", "pedido.itens.descricao"),
-    match("Qtd", "PedidoHistorico.quantidade", "pedido.itens.quantidade"),
+    match(
+      "Qtd",
+      "PedidoHistorico.quantidade",
+      "pedido.itens.quantidade",
+      "positive whole number",
+    ),
     match("Un", "Produto.unidade", "produto.unidade"),
     match(
       "Preço Unit.",
       "PedidoHistorico.precoUnitarioCentavos",
       "pedido.itens.precoUnitarioCentavos",
+      "reais to integer cents",
     ),
-    match("Total", null, "pedido.itens.subtotalCentavos"),
-    match("Status", "PedidoHistorico.status", "pedido.status"),
+    match(
+      "Total",
+      null,
+      "pedido.itens.subtotalCentavos",
+      "computed as Qtd times Preço Unit.",
+    ),
+    match(
+      "Status",
+      "PedidoHistorico.status",
+      "pedido.status",
+      "one spelling per status",
+    ),
   ],
   titulos: [
     match("id_titulo", "Titulo.numero", "titulo.numero"),
-    match("id_cliente", "Titulo.clienteId", "titulo.cliente"),
+    match(
+      "id_cliente",
+      "Titulo.clienteId",
+      "titulo.cliente",
+      "client code to Cliente.id",
+    ),
     match("num_pedido", "Titulo.pedidoErp", "titulo.pedidoErp"),
-    match("parcela", "Titulo.parcela", "titulo.parcela"),
-    match("valor", "Titulo.valorCentavos", "titulo.valorCentavos"),
-    match("data_emissao", "Titulo.emissao", "titulo.emissao"),
-    match("data_vencimento", "Titulo.vencimento", "titulo.vencimento"),
-    match("data_pagamento", "Titulo.pagamento", "titulo.pagamento"),
-    match("status", "Titulo.status", "titulo.status"),
+    match("parcela", "Titulo.parcela", "titulo.parcela", "text to integer"),
+    match(
+      "valor",
+      "Titulo.valorCentavos",
+      "titulo.valorCentavos",
+      "reais to integer cents",
+    ),
+    match(
+      "data_emissao",
+      "Titulo.emissao",
+      "titulo.emissao",
+      "date in one format",
+    ),
+    match(
+      "data_vencimento",
+      "Titulo.vencimento",
+      "titulo.vencimento",
+      "date in one format",
+    ),
+    match(
+      "data_pagamento",
+      "Titulo.pagamento",
+      "titulo.pagamento",
+      "date in one format",
+    ),
+    match(
+      "status",
+      "Titulo.status",
+      "titulo.status",
+      "text to EM_ABERTO, VENCIDO, or PAGO",
+    ),
   ],
 };
 
@@ -142,8 +223,9 @@ function match(
   column: string,
   portalField: string | null,
   erpField: string | null,
+  conversion: string | null = null,
 ): ColumnMatch {
-  return { column, portalField, erpField };
+  return { column, portalField, erpField, conversion };
 }
 
 // ---------- cell helpers ----------
@@ -331,18 +413,24 @@ function profileOf(name: SpreadsheetName, sheet: Sheet): SheetProfile {
 
 type RowsByFile = Partial<Record<SpreadsheetName, number[]>>;
 
-function result(id: ProblemId, rowsByFile: RowsByFile): ProblemResult {
+type DistinctByFile = Partial<Record<SpreadsheetName, number>>;
+
+function result(
+  id: ProblemId,
+  rowsByFile: RowsByFile,
+  distinctByFile: DistinctByFile = {},
+): ProblemResult {
   const byFile = SHEET_ORDER.flatMap((name): FileOccurrence[] => {
     const rows = [...new Set(rowsByFile[name] ?? [])].sort((a, b) => a - b);
-    return rows.length === 0
-      ? []
-      : [
-          {
-            file: SPREADSHEETS[name].file,
-            rows: rows.length,
-            exampleRows: rows.slice(0, MAX_EXAMPLES),
-          },
-        ];
+    if (rows.length === 0) return [];
+    const occurrence: FileOccurrence = {
+      file: SPREADSHEETS[name].file,
+      rows: rows.length,
+      exampleRows: rows.slice(0, MAX_EXAMPLES),
+    };
+    const distinct = distinctByFile[name];
+    if (distinct !== undefined) occurrence.distinctValues = distinct;
+    return [occurrence];
   });
   const rows = byFile.reduce((total, entry) => total + entry.rows, 0);
   return { id, found: rows > 0, rows, byFile };
@@ -516,6 +604,104 @@ function outdatedStatus(sheets: Spreadsheets): RowsByFile {
   };
 }
 
+function rawText(cell: Cell | undefined): string {
+  return cell?.kind === "text" ? cell.value : text(cell);
+}
+
+// Rows whose value is not the most common spelling of the same normalized
+// value (ties go to the first spelling in alphabetical order).
+function offSpellingRows(rows: SheetRow[], column: string): number[] {
+  const groups = new Map<string, Map<string, number[]>>();
+  for (const row of rows) {
+    const spelling = rawText(row.cells[column]);
+    if (spelling.trim() === "") continue;
+    const key = normalizeName(spelling);
+    const group = groups.get(key) ?? new Map<string, number[]>();
+    group.set(spelling, [...(group.get(spelling) ?? []), row.rowNumber]);
+    groups.set(key, group);
+  }
+  return [...groups.values()].flatMap((group) => {
+    const [, ...others] = [...group.entries()].sort(
+      (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+    );
+    return others.flatMap(([, rowNumbers]) => rowNumbers);
+  });
+}
+
+function statusWrittenDifferently(sheets: Spreadsheets): RowsByFile {
+  return {
+    pedidos: offSpellingRows(contentRows(sheets.pedidos), "Status"),
+    titulos: offSpellingRows(contentRows(sheets.titulos), "status"),
+  };
+}
+
+const SALESPERSON_FILES = ["clientes", "pedidos"] as const;
+
+function salespeopleIdentifiedByName(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SALESPERSON_FILES) {
+    found[name] = contentRows(sheets[name])
+      .filter((row) => !isEmpty(row.cells.Vendedor))
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function salespersonSpellings(sheets: Spreadsheets): DistinctByFile {
+  const distinct: DistinctByFile = {};
+  for (const name of SALESPERSON_FILES) {
+    distinct[name] = new Set(
+      contentRows(sheets[name])
+        .map((row) => text(row.cells.Vendedor))
+        .filter((value) => value !== ""),
+    ).size;
+  }
+  return distinct;
+}
+
+const REQUIRED_COLUMNS: Record<SpreadsheetName, string> = {
+  clientes: "Cód.",
+  pedidos: "Produto",
+  titulos: "id_cliente",
+};
+
+function missingRequiredValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    found[name] = contentRows(sheets[name])
+      .filter((row) => isEmpty(row.cells[REQUIRED_COLUMNS[name]]))
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function cnpjFormat(cell: Cell): string {
+  if (cell.kind === "number") return "Excel number";
+  return /^\d+$/.test(text(cell)) ? "digits only" : "masked";
+}
+
+function cnpjDifferentFormats(sheets: Spreadsheets): RowsByFile {
+  const cells = contentRows(sheets.clientes)
+    .map((row) => ({ row: row.rowNumber, cell: row.cells.CNPJ }))
+    .filter((entry): entry is { row: number; cell: Cell } =>
+      Boolean(entry.cell && !isEmpty(entry.cell)),
+    );
+  const counts = new Map<string, number>();
+  for (const { cell } of cells) {
+    const format = cnpjFormat(cell);
+    counts.set(format, (counts.get(format) ?? 0) + 1);
+  }
+  if (counts.size < 2) return {};
+  const dominant = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+  )[0]?.[0];
+  return {
+    clientes: cells
+      .filter(({ cell }) => cnpjFormat(cell) !== dominant)
+      .map(({ row }) => row),
+  };
+}
+
 const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "clients-written-differently": clientsWrittenDifferently,
   "invalid-cnpj": invalidCnpj,
@@ -527,6 +713,10 @@ const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
   "wrong-quantities": wrongQuantities,
   "total-lines": totalLines,
   "outdated-status": outdatedStatus,
+  "status-written-differently": statusWrittenDifferently,
+  "salespeople-identified-by-name": salespeopleIdentifiedByName,
+  "missing-required-values": missingRequiredValues,
+  "cnpj-different-formats": cnpjDifferentFormats,
 };
 
 export function diagnose(sheets: Spreadsheets): Diagnosis {
@@ -541,7 +731,15 @@ export function diagnose(sheets: Spreadsheets): Diagnosis {
 
   return {
     profiles,
-    problems: PROBLEM_IDS.map((id) => result(id, DETECTORS[id](sheets))),
+    problems: PROBLEM_IDS.map((id) =>
+      result(
+        id,
+        DETECTORS[id](sheets),
+        id === "salespeople-identified-by-name"
+          ? salespersonSpellings(sheets)
+          : {},
+      ),
+    ),
     receivablesFromErp,
   };
 }
