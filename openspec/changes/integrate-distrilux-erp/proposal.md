@@ -29,7 +29,9 @@ duplicate work (RN-15).
   example file lists them without values.
 - Inject the ERP client into the application composition.
 - Housekeeping without behavior change: rename the local database from
-  `node_boilerplate` in Compose and the example environment, replace the README
+  `node_boilerplate` in Compose, the example environment, CI, `prisma.config.ts`,
+  the test setup, and the container smoke test, align the validation Problem
+  type URL with `https://distrilux.dev/problems/`, replace the README
   template title and text, and describe the DistriLux domain in
   `openspec/config.yaml` context.
 
@@ -89,6 +91,3 @@ environment variables are covered by `erp-integration`.
   RN-07).
 - `GET /v1/pedidos` listing and `GET /v1/produtos/{codigo}`; not needed yet.
 - Circuit breaker, caching, or rate-limit budgeting across requests.
-- Renaming `node_boilerplate` outside Compose and `.env.example` (CI,
-  `prisma.config.ts`, test setup database URL, container smoke test, Problem
-  type URL).

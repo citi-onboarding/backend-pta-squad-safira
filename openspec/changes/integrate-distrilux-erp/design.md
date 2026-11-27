@@ -39,8 +39,10 @@ Options accept `fetch: typeof globalThis.fetch` (default the global), a
 logger, `timeoutMs` (30 000), and `retryBaseDelayMs` (500). Waits use
 `setTimeout`, so tests inject a fake `fetch` and use fake timers; no injectable
 `sleep` was needed.
-Rejected: MSW or nock — new dependencies the task explicitly excludes, and
-injection keeps the client honest about its seams.
+Rejected: MSW or nock, which the task suggested for the fake ERP. An injected
+`fetch` covers the same five scenarios (200, 503, 429, timeout, refusal) without
+a new dependency and keeps the client honest about its seams; accepted in the
+PR #12 review.
 
 ### Errors extend `HttpProblem`
 
@@ -127,6 +129,17 @@ the source; `formatarReais` uses a cached `Intl.NumberFormat("pt-BR", BRL)`.
 
 - [Retry-After waits hold a sync job for up to 3 × 60 s] → bounded by the
   waits counter and the 60 s cap; synchronizers run outside request handling.
+- [ERP usage limit] → measured on 2026-11-27 with one real read: the ERP
+  answers `RateLimit-Limit: 20`, `RateLimit-Remaining: 19`, and
+  `RateLimit-Reset: 31`, so the key allows 20 requests per window of at most
+  60 s. The 60 s `Retry-After` cap fits that window. A full sync of 120
+  customers and 60 products at size 50 takes 5 requests plus the receivables
+  pages, well under the limit; synchronizers should still read pages
+  sequentially.
+- [A malformed ERP answer is reported as `ErpIndisponivelError`] → the task
+  lists three typed errors, so there is no separate invalid-response error; the
+  log records the validation failure, and synchronizers treat both cases as
+  "try again later".
 - [Reads retried after an ambiguous timeout] → reads are idempotent; submission
   never retries.
 - [Required ERP variables break existing local `.env` files and the container
@@ -135,6 +148,10 @@ the source; `formatarReais` uses a cached `Intl.NumberFormat("pt-BR", BRL)`.
   the PM for the key.
 - [Renaming the Compose database leaves old volumes with `node_boilerplate`] →
   documented in the change summary; recreate the local volume.
+- [Refusals reach clients with the fixed English detail
+  `The ERP refused the request.`] → US-007 asks the salesperson to see the
+  refusal reason in Portuguese. `ErpRecusouError` keeps `erpDetail` and
+  `erros` for server code; BACK-08 owns translating them for the user.
 
 ## Migration Plan
 

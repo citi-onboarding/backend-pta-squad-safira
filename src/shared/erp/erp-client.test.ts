@@ -256,6 +256,30 @@ describe("ERP client", () => {
       expect(titulos.dados).toEqual([titulo]);
     });
 
+    it("reads the receivables of one customer", async () => {
+      const { client, fetch } = setup();
+      fetch.mockResolvedValueOnce(jsonResponse(page([titulo], 1, 50)));
+
+      const result = await client.listTitulos({
+        cliente: "C0001",
+        tamanho: 50,
+      });
+
+      const sent = sentRequest(fetch, 0);
+      expect(sent.url.pathname).toBe("/v1/titulos");
+      expect(sent.url.searchParams.get("cliente")).toBe("C0001");
+      expect(result.dados).toEqual([titulo]);
+    });
+
+    it("rejects an empty customer filter without calling the ERP", async () => {
+      const { client, fetch } = setup();
+
+      await expect(client.listTitulos({ cliente: "" })).rejects.toThrow(
+        ZodError,
+      );
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
     it.each([0, 51])(
       "rejects page size %i without calling the ERP",
       async (tamanho) => {

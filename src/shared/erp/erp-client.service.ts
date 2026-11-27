@@ -11,6 +11,7 @@ import {
   erpPedidoSchema,
   erpProblemSchema,
   erpProdutoSchema,
+  erpTituloPageQuerySchema,
   erpTituloSchema,
 } from "./erp-client.schemas.js";
 import type {
@@ -22,6 +23,7 @@ import type {
   ErpPedido,
   ErpProduto,
   ErpTitulo,
+  ErpTituloPageQuery,
 } from "./erp-client.schemas.js";
 
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -44,7 +46,7 @@ export interface ErpClientOptions {
 export interface ErpClient {
   listClientes(query?: ErpPageQuery): Promise<ErpPage<ErpCliente>>;
   listProdutos(query?: ErpPageQuery): Promise<ErpPage<ErpProduto>>;
-  listTitulos(query?: ErpPageQuery): Promise<ErpPage<ErpTitulo>>;
+  listTitulos(query?: ErpTituloPageQuery): Promise<ErpPage<ErpTitulo>>;
   getCliente(codigo: string): Promise<ErpCliente>;
   criarPedido(payload: ErpNovoPedido, chaveDeEnvio: string): Promise<ErpPedido>;
   consultarPedido(numero: number): Promise<ErpPedido>;
@@ -345,11 +347,12 @@ export function createErpClient(options: ErpClientOptions): ErpClient {
   function listPage<T>(
     path: string,
     item: z.ZodType<T>,
-    query?: ErpPageQuery,
+    query?: ErpTituloPageQuery,
+    querySchema: z.ZodType<ErpTituloPageQuery> = erpPageQuerySchema,
   ): Promise<ErpPage<T>> {
     return read(erpPageSchema(item) as z.ZodType<ErpPage<T>>, {
       path,
-      query: erpPageQuerySchema.parse(query ?? {}),
+      query: querySchema.parse(query ?? {}),
     });
   }
 
@@ -359,7 +362,7 @@ export function createErpClient(options: ErpClientOptions): ErpClient {
     listProdutos: async (query) =>
       listPage("/v1/produtos", erpProdutoSchema, query),
     listTitulos: async (query) =>
-      listPage("/v1/titulos", erpTituloSchema, query),
+      listPage("/v1/titulos", erpTituloSchema, query, erpTituloPageQuerySchema),
     getCliente: async (codigo) =>
       read(erpClienteSchema, {
         path: `/v1/clientes/${encodeURIComponent(codigo)}`,

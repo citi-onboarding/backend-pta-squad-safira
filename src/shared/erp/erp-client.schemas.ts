@@ -77,6 +77,10 @@ export const erpPageQuerySchema = z.object({
     .optional(),
 });
 
+export const erpTituloPageQuerySchema = erpPageQuerySchema.extend({
+  cliente: z.string().min(1).optional(),
+});
+
 export const erpNovoPedidoSchema = z.strictObject({
   cliente: z.string().min(1),
   itens: z
@@ -107,6 +111,7 @@ export type ErpTitulo = z.infer<typeof erpTituloSchema>;
 export type ErpPedido = z.infer<typeof erpPedidoSchema>;
 export type ErpNovoPedido = z.infer<typeof erpNovoPedidoSchema>;
 export type ErpPageQuery = z.input<typeof erpPageQuerySchema>;
+export type ErpTituloPageQuery = z.input<typeof erpTituloPageQuerySchema>;
 export interface ErpFieldError {
   campo: string;
   mensagem: string;

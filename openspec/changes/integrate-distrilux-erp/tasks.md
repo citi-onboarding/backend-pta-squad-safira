@@ -41,3 +41,12 @@
 - [x] 6.4 Spec scenario for rate limit waits not spending 5xx attempts: confirm the existing test covers it.
 - [x] 6.5 Empty submission key rejected before any request: Red, Green, Refactor.
 - [x] 6.6 Run `pnpm verify`, `pnpm format:check`, `pnpm test:coverage`, and `pnpm build`; update `docs/changes/integrate-distrilux-erp.md`.
+
+## 7. PR #12 approval fixes
+
+- [x] 7.1 Merge `develop` (Prisma schema, PR #11) into the branch.
+- [x] 7.2 Measure the ERP usage limit with one real read and record it in the design and the change summary.
+- [x] 7.3 Customer filter on `listTitulos` (US-003): Red, Green, Refactor.
+- [x] 7.4 Rename the remaining `node_boilerplate` references and align the validation Problem type URL.
+- [x] 7.5 Record the pending Portuguese refusal message (BACK-08), the injected `fetch` instead of MSW/nock, and the owners.
+- [x] 7.6 Run `pnpm verify`, `pnpm format:check`, `pnpm test:coverage`, `pnpm build`, and `pnpm test:container`.

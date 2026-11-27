@@ -47,7 +47,8 @@ response, including error responses (RN-14).
 
 The service SHALL read customers, products, and receivables from the ERP one
 page at a time, accepting a page number, a page size from 1 to 50, and an
-optional "updated since" instant, and SHALL return the page items together
+optional "updated since" instant (receivables also accept an optional customer
+code), and SHALL return the page items together
 with `pagina`, `tamanho`, `total`, and `totalPaginas`. Monetary values MUST be
 returned as the ERP integer cents (RN-13).
 
@@ -61,6 +62,12 @@ returned as the ERP integer cents (RN-13).
 
 - **WHEN** products or receivables are requested with a page and size
 - **THEN** the ERP receives `GET /v1/produtos` or `GET /v1/titulos` with those parameters and the validated page is returned
+
+#### Scenario: Receivables of one customer are read
+
+- **WHEN** receivables are requested for customer `C0001`
+- **THEN** the ERP receives `GET /v1/titulos` with `cliente=C0001` and the validated page is returned
+- **AND** an empty customer filter fails before any ERP request is sent
 
 #### Scenario: Page size is out of range
 

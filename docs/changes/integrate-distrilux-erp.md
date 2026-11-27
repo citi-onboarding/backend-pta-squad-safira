@@ -2,7 +2,7 @@
 change_id: integrate-distrilux-erp
 date: 2026-11-25
 status: in-progress
-owners: []
+owners: [Gabriel Freitas de Albuquerque]
 tags: [erp, integration, security, money, configuration]
 related_adrs: [ADR-0001]
 openspec_change: openspec/changes/integrate-distrilux-erp/
@@ -24,7 +24,7 @@ duplicate work (RN-15). Task: BACK-02.
   `createErpClient` factory, and the errors `ErpIndisponivelError`,
   `ErpLimiteDeUsoError`, and `ErpRecusouError`, all extending `HttpProblem`.
   Operations: `listClientes`, `listProdutos`, `listTitulos` (page, size 1–50,
-  `atualizadoDesde`), `getCliente`, `criarPedido(payload, chaveDeEnvio)`, and
+  `atualizadoDesde`; `listTitulos` also filters by `cliente`), `getCliente`, `criarPedido(payload, chaveDeEnvio)`, and
   `consultarPedido`.
 - `src/shared/erp/erp-client.schemas.ts`: Zod schemas and types mirroring ERP
   API v3.3.0 for records, pages, page queries, order payloads, and ERP problems.
@@ -35,8 +35,10 @@ duplicate work (RN-15). Task: BACK-02.
 - `createApp` receives `erpClient`; `src/server.ts` builds the real client.
 - Logger redaction also covers `apiKey`, `ERP_API_KEY`, and
   `headers["x-api-key"]`.
-- Housekeeping: the Compose and `.env.example` database is now
-  `distrilux_portal`; README title and template text describe the DistriLux
+- Housekeeping: the Compose, `.env.example`, CI, `prisma.config.ts`, test
+  setup, and container smoke test database is now `distrilux_portal`
+  (`distrilux_portal_test` for tests); the validation Problem type is
+  `https://distrilux.dev/problems/validation-error`; README title and template text describe the DistriLux
   portal; `openspec/config.yaml` context describes the DistriLux domain.
 
 Implementation detail beyond the spec: each attempt is one `send` (HTTP
@@ -52,7 +54,8 @@ classification into success, transient, rate-limited, or failure; a single
   `ERP_API_KEY`.
 - Paginated reads send `pagina`, `tamanho`, and `atualizadoDesde` and return the
   validated items with pagination metadata; a size outside 1–50 fails before any
-  request.
+  request. `listTitulos({ cliente })` reads the receivables of one customer
+  (US-003); an empty customer code fails before any request.
 - Every request is aborted after 30 seconds by default; slower cold starts up
   to that limit are kept.
 - Reads retry on `5xx`, timeouts, and network errors up to 3 attempts with
@@ -96,6 +99,9 @@ classification into success, transient, rate-limited, or failure; a single
   redaction gained ERP key paths.
 - **Architecture:** `src/shared/erp` is the single ERP entry point for all
   modules (ADR-0001).
+- **Validation Problem type:** `type` of validation errors changes from
+  `https://node-boilerplate.dev/problems/validation-error` to
+  `https://distrilux.dev/problems/validation-error`; no client reads it yet.
 - **Database migration:** none.
 - **Dependencies:** none added.
 
@@ -158,6 +164,23 @@ PR #12 review fixes (2026-11-27), one cycle per point after updating the spec:
 - `pnpm build` → exit code 0. `pnpm test:container` not re-run: runtime
   delivery did not change.
 
+PR #12 approval fixes (2026-11-27), after merging `develop`:
+
+- Customer filter on `listTitulos` — Red:
+  `vitest run src/shared/erp/erp-client.test.ts -t "customer filter|receivables of one customer"`
+  → `Tests 2 failed | 44 skipped (46)` (`expected null to be 'C0001'`). Green
+  and Refactor: `Tests 46 passed (46)`.
+- `pnpm format:check` → `All matched files use Prettier code style!`
+- `pnpm verify` → exit code 0: `Test Files 13 passed (13)` /
+  `Tests 99 passed (99)`, architecture `Tests 3 passed (3)`,
+  `Totals: 3 passed, 0 failed`, `openapi:check` and `skills:check` passed.
+- `pnpm test:coverage` → `Tests 99 passed (99)`; all files 99.45 % statements,
+  93.81 % branches, 100 % functions, 100 % lines (`shared/erp` 92.3 % branches).
+- `pnpm build` → exit code 0.
+- `pnpm test:container` → `Production container smoke test passed.` (renamed
+  smoke database and containers).
+- `pnpm test:integration` → exit code 0 with `No test files found`.
+
 ## Related artifacts
 
 - Proposal: `openspec/changes/integrate-distrilux-erp/proposal.md`
@@ -196,8 +219,19 @@ them to decide what a synchronizer does next.
 - Retry waits use `setTimeout`; a read can hold a synchronizer for up to
   3 × 60 seconds under rate limiting.
 - `GET /v1/pedidos` listing and `GET /v1/produtos/{codigo}` are not wrapped yet.
-- `node_boilerplate` remains in CI, `prisma.config.ts`, the test setup database
-  URL, the container smoke test, and the Problem type URL in `problem.ts`; out
-  of scope for this change.
+- ERP usage limit, measured on 2026-11-27 with one real read
+  (`GET /v1/clientes?tamanho=1`): `RateLimit-Limit: 20`,
+  `RateLimit-Remaining: 19`, `RateLimit-Reset: 31`. The key allows 20 requests
+  per window of at most 60 s, which fits the 60 s `Retry-After` cap. It was not
+  load-tested, to avoid stressing the ERP; synchronizers should read pages
+  sequentially.
+- Refusals reach clients with the fixed English detail
+  `The ERP refused the request.`. US-007 asks the salesperson to see the reason
+  in Portuguese: BACK-08 must translate `erpDetail` and `erros` from
+  `ErpRecusouError`.
+- A malformed ERP answer becomes `ErpIndisponivelError`, as the task lists only
+  three typed errors; the log records the validation failure.
+- The fake ERP is an injected `fetch` instead of MSW or nock (ADR-0001,
+  `design.md`); it covers the 200, 503, 429, timeout, and refusal scenarios.
 - The OpenSpec change stays active until the pull request is approved; archiving
   is a separate step with its own confirmation.

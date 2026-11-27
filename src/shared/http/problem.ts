@@ -35,7 +35,7 @@ export const problemHandler: ErrorRequestHandler = (
       .status(400)
       .type("application/problem+json")
       .json({
-        type: "https://node-boilerplate.dev/problems/validation-error",
+        type: "https://distrilux.dev/problems/validation-error",
         title: "Validation Error",
         status: 400,
         detail: "The request did not satisfy the expected contract.",

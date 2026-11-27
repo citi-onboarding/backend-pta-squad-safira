@@ -1,8 +1,8 @@
 ---
 title: ADR-0001
-status: proposed
+status: accepted
 date: 2026-11-25
-owners: []
+owners: [Gabriel Freitas de Albuquerque]
 tags: [erp, integration, security, architecture]
 supersedes: null
 superseded_by: null
@@ -82,8 +82,10 @@ leak.
 
 ### HTTP mocking library (MSW or nock) instead of an injected `fetch`
 
-Would let the client call the global `fetch` directly, but adds a dependency
-and hides the seam that the architecture rules ask to be explicit.
+The task suggested MSW or nock for the fake ERP. It would let the client call
+the global `fetch` directly, but adds a dependency and hides the seam that the
+architecture rules ask to be explicit. The injected `fetch` covers the same
+scenarios.
 
 ## References
 
