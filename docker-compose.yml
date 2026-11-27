@@ -10,6 +10,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/distrilux_portal?schema=public
       ERP_API_URL: ${ERP_API_URL:-}
       ERP_API_KEY: ${ERP_API_KEY:-}
+      SESSION_SECRET: ${SESSION_SECRET}
+      TRUST_PROXY: ${TRUST_PROXY:-0}
     ports:
       - "3001:3001"
     depends_on:

@@ -93,6 +93,9 @@ try {
     "ERP_API_URL=https://erp.invalid",
     "--env",
     "ERP_API_KEY=smoke-test-key",
+    // Required since BACK-01; a test-only value of at least 32 characters.
+    "--env",
+    "SESSION_SECRET=smoke-test-session-secret-of-32-characters",
     image,
   ]);
   for (let attempt = 0; attempt < 30; attempt += 1) {

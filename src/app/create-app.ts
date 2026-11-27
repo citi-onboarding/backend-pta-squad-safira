@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 import type { Express } from "express";
@@ -9,29 +10,58 @@ import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 import swaggerUi from "swagger-ui-express";
 
+import { PrismaAuthRepository } from "../modules/auth/auth.repository.js";
+import { createAuthRouter } from "../modules/auth/auth.router.js";
+import { AuthService } from "../modules/auth/auth.service.js";
+import { PrismaSyncRepository } from "../modules/sync/sync.repository.js";
+import { createSyncRouter } from "../modules/sync/sync.router.js";
+import { startSyncSchedule } from "../modules/sync/sync.schedule.js";
+import type { SyncSchedule } from "../modules/sync/sync.schedule.js";
+import { SyncService } from "../modules/sync/sync.service.js";
+import { PrismaUsersRepository } from "../modules/users/users.repository.js";
+import { createUsersRouter } from "../modules/users/users.router.js";
+import { UsersService } from "../modules/users/users.service.js";
 import type { Environment } from "../shared/config/env.js";
 import type { Database } from "../shared/database/create-database.js";
 import type { ErpClient } from "../shared/erp/erp-client.service.js";
 import { createOpenApiDocument } from "../shared/http/openapi.js";
 import { notFoundHandler, problemHandler } from "../shared/http/problem.js";
+import { createAuthenticate } from "../shared/http/require-role.js";
 import { createLogger } from "../shared/logging/logger.js";
+import { hashPassword, verifyPassword } from "../shared/security/password.js";
+
+// The schedule each app started, so the server can stop it on shutdown.
+const syncSchedules = new WeakMap<Express, SyncSchedule>();
+
+export function syncScheduleOf(app: Express): SyncSchedule | undefined {
+  return syncSchedules.get(app);
+}
 
 interface CreateAppOptions {
   /** Injected for upcoming synchronizers and order submission routes. */
   database: Database;
   environment: Environment;
+  signInAttemptsPerMinute?: number | undefined;
   erpClient: ErpClient;
+  /** Starts the ERP synchronization schedule; left out in tests. */
+  syncSchedule?: { intervalMs: number } | undefined;
 }
 
 export function createApp({
   database,
   environment,
+  signInAttemptsPerMinute,
+  erpClient,
+  syncSchedule,
 }: CreateAppOptions): Express {
   const app = express();
   const logger = createLogger(environment);
   const openApiDocument = createOpenApiDocument();
 
   app.disable("x-powered-by");
+  // Number of reverse proxies in front of the API. The sign-in limit counts
+  // the client address, which is read from X-Forwarded-For only behind them.
+  app.set("trust proxy", environment.TRUST_PROXY);
   app.use(helmet());
   app.use(
     pinoHttp({
@@ -63,6 +93,7 @@ export function createApp({
     }),
   );
   app.use(express.json({ limit: "1mb" }));
+  app.use(cookieParser());
   if (environment.NODE_ENV !== "test") {
     app.use(
       rateLimit({
@@ -90,8 +121,52 @@ export function createApp({
   );
   app.use("/docs", swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
+  const secureCookie = environment.NODE_ENV === "production";
+  const authRepository = new PrismaAuthRepository(database);
+  const authenticate = createAuthenticate({
+    secret: environment.SESSION_SECRET,
+    secureCookie,
+    findUserById: (id) => authRepository.findSessionUser(id),
+  });
+  app.use(
+    "/auth",
+    createAuthRouter({
+      authService: new AuthService(authRepository, verifyPassword),
+      authenticate,
+      sessionSecret: environment.SESSION_SECRET,
+      secureCookie,
+      signInAttemptsPerMinute,
+    }),
+  );
+  app.use(
+    "/users",
+    createUsersRouter({
+      usersService: new UsersService(
+        new PrismaUsersRepository(database),
+        hashPassword,
+      ),
+      authenticate,
+    }),
+  );
+  const syncService = new SyncService({
+    erpClient,
+    repository: new PrismaSyncRepository(database),
+    logger,
+  });
+  app.use("/sync", createSyncRouter({ syncService, authenticate }));
   app.use(notFoundHandler);
   app.use(problemHandler);
+
+  if (syncSchedule) {
+    const schedule = startSyncSchedule({
+      run: () => syncService.runOnce(),
+      intervalMs: syncSchedule.intervalMs,
+      onError: (error) => {
+        logger.error({ err: error }, "ERP synchronization run failed");
+      },
+    });
+    syncSchedules.set(app, schedule);
+  }
 
   return app;
 }

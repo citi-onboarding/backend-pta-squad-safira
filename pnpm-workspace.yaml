@@ -41,3 +41,5 @@ allowBuilds:
   cpu-features: false
   ssh2: false
   protobufjs: false
+  # Ships prebuilt binaries for Windows x64, Linux x64 (glibc and musl), and macOS arm64; the script only compiles from source when none matches.
+  argon2: false

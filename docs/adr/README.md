@@ -21,9 +21,11 @@ Skip it for routine implementation details, formatting choices, or a local and r
 
 ## Index
 
-| Number                                                    | Title                                     | Status   | Superseded by |
-| --------------------------------------------------------- | ----------------------------------------- | -------- | ------------- |
-| [0001](0001-erp-access-through-a-single-shared-client.md) | ERP access through a single shared client | Accepted | —             |
+| Number                                                          | Title                                                          | Status   | Superseded by |
+| --------------------------------------------------------------- | -------------------------------------------------------------- | -------- | ------------- |
+| [0003](0003-in-process-erp-sync-schedule-with-database-lock.md) | In-process ERP sync schedule with a database lock              | Proposed | —             |
+| [0002](0002-signed-session-token-and-argon2id.md)               | Signed session token in a cookie and argon2id password hashing | Accepted | —             |
+| [0001](0001-erp-access-through-a-single-shared-client.md)       | ERP access through a single shared client                      | Accepted | —             |
 
 <!--
 Add one row per ADR, newest first.

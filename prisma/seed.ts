@@ -1,17 +1,11 @@
-import { randomBytes, scryptSync } from "node:crypto";
-
 import { createDatabase } from "../src/shared/database/create-database.js";
+import { hashPassword } from "../src/shared/security/password.js";
 
-// Development-only password shared by every seeded user.
-// Override it with SEED_PASSWORD; never use these users in production.
-const seedPassword = process.env.SEED_PASSWORD ?? "distrilux-dev";
-
-// Temporary scrypt hash ("scrypt$salt$hash"). BACK-01 owns password hashing:
-// align this helper with the auth module once it lands.
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `scrypt$${salt}$${hash}`;
+// Development-only password shared by every seeded user. It comes only from
+// SEED_PASSWORD in .env; never use these users in production.
+const seedPassword = process.env.SEED_PASSWORD;
+if (!seedPassword) {
+  throw new Error("Set SEED_PASSWORD in .env before running the seed.");
 }
 
 const users = [
@@ -89,11 +83,13 @@ const database = createDatabase();
 
 try {
   // Every seed uses upsert on a unique key, so running it twice creates nothing new.
+  // The password hash is updated too, so a changed SEED_PASSWORD takes effect.
+  const senhaHash = await hashPassword(seedPassword);
   for (const user of users) {
     await database.usuario.upsert({
       where: { email: user.email },
-      update: { nome: user.nome, papel: user.papel },
-      create: { ...user, senhaHash: hashPassword(seedPassword) },
+      update: { nome: user.nome, papel: user.papel, senhaHash },
+      create: { ...user, senhaHash },
     });
   }
 
