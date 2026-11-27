@@ -1456,6 +1456,7 @@ export const ClienteScalarFieldEnum = {
   codigoVendedor: 'codigoVendedor',
   limiteCreditoCentavos: 'limiteCreditoCentavos',
   status: 'status',
+  atualizadoNoErpEm: 'atualizadoNoErpEm',
   atualizadoEm: 'atualizadoEm'
 } as const
 
@@ -1470,6 +1471,7 @@ export const ProdutoScalarFieldEnum = {
   unidade: 'unidade',
   precoTabelaCentavos: 'precoTabelaCentavos',
   ativo: 'ativo',
+  atualizadoNoErpEm: 'atualizadoNoErpEm',
   atualizadoEm: 'atualizadoEm'
 } as const
 
@@ -1488,6 +1490,7 @@ export const TituloScalarFieldEnum = {
   pagamento: 'pagamento',
   status: 'status',
   origem: 'origem',
+  atualizadoNoErpEm: 'atualizadoNoErpEm',
   atualizadoEm: 'atualizadoEm'
 } as const
 
@@ -1508,6 +1511,8 @@ export const ContratoScalarFieldEnum = {
   dataLimiteAviso: 'dataLimiteAviso',
   arquivo: 'arquivo',
   documentoId: 'documentoId',
+  avisoTratadoPorId: 'avisoTratadoPorId',
+  avisoTratadoEm: 'avisoTratadoEm',
   criadoEm: 'criadoEm'
 } as const
 
@@ -1583,7 +1588,9 @@ export const DocumentoScalarFieldEnum = {
   enviadoEm: 'enviadoEm',
   situacao: 'situacao',
   confirmadoPorId: 'confirmadoPorId',
-  confirmadoEm: 'confirmadoEm'
+  confirmadoEm: 'confirmadoEm',
+  resumo: 'resumo',
+  encaminhadoPara: 'encaminhadoPara'
 } as const
 
 export type DocumentoScalarFieldEnum = (typeof DocumentoScalarFieldEnum)[keyof typeof DocumentoScalarFieldEnum]
@@ -1597,7 +1604,7 @@ export const ExecucaoAgenteScalarFieldEnum = {
   resultado: 'resultado',
   erro: 'erro',
   duracaoMs: 'duracaoMs',
-  custoEstimadoCentavos: 'custoEstimadoCentavos',
+  custoEstimadoMicrodolares: 'custoEstimadoMicrodolares',
   criadoEm: 'criadoEm'
 } as const
 
@@ -1612,7 +1619,8 @@ export const RiscoChurnScalarFieldEnum = {
   faixa: 'faixa',
   motivoPrincipal: 'motivoPrincipal',
   versaoModelo: 'versaoModelo',
-  contatoRegistradoEm: 'contatoRegistradoEm'
+  contatoRegistradoEm: 'contatoRegistradoEm',
+  contatoRegistradoPorId: 'contatoRegistradoPorId'
 } as const
 
 export type RiscoChurnScalarFieldEnum = (typeof RiscoChurnScalarFieldEnum)[keyof typeof RiscoChurnScalarFieldEnum]

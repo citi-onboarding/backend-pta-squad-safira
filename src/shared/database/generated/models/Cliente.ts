@@ -45,6 +45,7 @@ export type ClienteMinAggregateOutputType = {
   codigoVendedor: string | null
   limiteCreditoCentavos: number | null
   status: $Enums.StatusCliente | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -59,6 +60,7 @@ export type ClienteMaxAggregateOutputType = {
   codigoVendedor: string | null
   limiteCreditoCentavos: number | null
   status: $Enums.StatusCliente | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -73,6 +75,7 @@ export type ClienteCountAggregateOutputType = {
   codigoVendedor: number
   limiteCreditoCentavos: number
   status: number
+  atualizadoNoErpEm: number
   atualizadoEm: number
   _all: number
 }
@@ -97,6 +100,7 @@ export type ClienteMinAggregateInputType = {
   codigoVendedor?: true
   limiteCreditoCentavos?: true
   status?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -111,6 +115,7 @@ export type ClienteMaxAggregateInputType = {
   codigoVendedor?: true
   limiteCreditoCentavos?: true
   status?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -125,6 +130,7 @@ export type ClienteCountAggregateInputType = {
   codigoVendedor?: true
   limiteCreditoCentavos?: true
   status?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
   _all?: true
 }
@@ -222,10 +228,11 @@ export type ClienteGroupByOutputType = {
   cnpj: string
   cidade: string
   uf: string
-  segmento: string | null
-  codigoVendedor: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date
   atualizadoEm: Date
   _count: ClienteCountAggregateOutputType | null
   _avg: ClienteAvgAggregateOutputType | null
@@ -259,10 +266,11 @@ export type ClienteWhereInput = {
   cnpj?: Prisma.StringFilter<"Cliente"> | string
   cidade?: Prisma.StringFilter<"Cliente"> | string
   uf?: Prisma.StringFilter<"Cliente"> | string
-  segmento?: Prisma.StringNullableFilter<"Cliente"> | string | null
-  codigoVendedor?: Prisma.StringNullableFilter<"Cliente"> | string | null
+  segmento?: Prisma.StringFilter<"Cliente"> | string
+  codigoVendedor?: Prisma.StringFilter<"Cliente"> | string
   limiteCreditoCentavos?: Prisma.IntFilter<"Cliente"> | number
   status?: Prisma.EnumStatusClienteFilter<"Cliente"> | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFilter<"Cliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Cliente"> | Date | string
   titulos?: Prisma.TituloListRelationFilter
   pedidos?: Prisma.PedidoListRelationFilter
@@ -279,10 +287,11 @@ export type ClienteOrderByWithRelationInput = {
   cnpj?: Prisma.SortOrder
   cidade?: Prisma.SortOrder
   uf?: Prisma.SortOrder
-  segmento?: Prisma.SortOrderInput | Prisma.SortOrder
-  codigoVendedor?: Prisma.SortOrderInput | Prisma.SortOrder
+  segmento?: Prisma.SortOrder
+  codigoVendedor?: Prisma.SortOrder
   limiteCreditoCentavos?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   titulos?: Prisma.TituloOrderByRelationAggregateInput
   pedidos?: Prisma.PedidoOrderByRelationAggregateInput
@@ -302,10 +311,11 @@ export type ClienteWhereUniqueInput = Prisma.AtLeast<{
   razaoSocial?: Prisma.StringFilter<"Cliente"> | string
   cidade?: Prisma.StringFilter<"Cliente"> | string
   uf?: Prisma.StringFilter<"Cliente"> | string
-  segmento?: Prisma.StringNullableFilter<"Cliente"> | string | null
-  codigoVendedor?: Prisma.StringNullableFilter<"Cliente"> | string | null
+  segmento?: Prisma.StringFilter<"Cliente"> | string
+  codigoVendedor?: Prisma.StringFilter<"Cliente"> | string
   limiteCreditoCentavos?: Prisma.IntFilter<"Cliente"> | number
   status?: Prisma.EnumStatusClienteFilter<"Cliente"> | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFilter<"Cliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Cliente"> | Date | string
   titulos?: Prisma.TituloListRelationFilter
   pedidos?: Prisma.PedidoListRelationFilter
@@ -322,10 +332,11 @@ export type ClienteOrderByWithAggregationInput = {
   cnpj?: Prisma.SortOrder
   cidade?: Prisma.SortOrder
   uf?: Prisma.SortOrder
-  segmento?: Prisma.SortOrderInput | Prisma.SortOrder
-  codigoVendedor?: Prisma.SortOrderInput | Prisma.SortOrder
+  segmento?: Prisma.SortOrder
+  codigoVendedor?: Prisma.SortOrder
   limiteCreditoCentavos?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   _count?: Prisma.ClienteCountOrderByAggregateInput
   _avg?: Prisma.ClienteAvgOrderByAggregateInput
@@ -344,10 +355,11 @@ export type ClienteScalarWhereWithAggregatesInput = {
   cnpj?: Prisma.StringWithAggregatesFilter<"Cliente"> | string
   cidade?: Prisma.StringWithAggregatesFilter<"Cliente"> | string
   uf?: Prisma.StringWithAggregatesFilter<"Cliente"> | string
-  segmento?: Prisma.StringNullableWithAggregatesFilter<"Cliente"> | string | null
-  codigoVendedor?: Prisma.StringNullableWithAggregatesFilter<"Cliente"> | string | null
+  segmento?: Prisma.StringWithAggregatesFilter<"Cliente"> | string
+  codigoVendedor?: Prisma.StringWithAggregatesFilter<"Cliente"> | string
   limiteCreditoCentavos?: Prisma.IntWithAggregatesFilter<"Cliente"> | number
   status?: Prisma.EnumStatusClienteWithAggregatesFilter<"Cliente"> | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeWithAggregatesFilter<"Cliente"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Cliente"> | Date | string
 }
 
@@ -358,10 +370,11 @@ export type ClienteCreateInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
@@ -378,10 +391,11 @@ export type ClienteUncheckedCreateInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
@@ -398,10 +412,11 @@ export type ClienteUpdateInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
@@ -418,10 +433,11 @@ export type ClienteUncheckedUpdateInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
@@ -438,10 +454,11 @@ export type ClienteCreateManyInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
 }
 
@@ -452,10 +469,11 @@ export type ClienteUpdateManyMutationInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -466,10 +484,11 @@ export type ClienteUncheckedUpdateManyInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -484,6 +503,7 @@ export type ClienteCountOrderByAggregateInput = {
   codigoVendedor?: Prisma.SortOrder
   limiteCreditoCentavos?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -502,6 +522,7 @@ export type ClienteMaxOrderByAggregateInput = {
   codigoVendedor?: Prisma.SortOrder
   limiteCreditoCentavos?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -516,6 +537,7 @@ export type ClienteMinOrderByAggregateInput = {
   codigoVendedor?: Prisma.SortOrder
   limiteCreditoCentavos?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -593,12 +615,10 @@ export type ClienteCreateNestedOneWithoutPedidosHistoricoInput = {
   connect?: Prisma.ClienteWhereUniqueInput
 }
 
-export type ClienteUpdateOneWithoutPedidosHistoricoNestedInput = {
+export type ClienteUpdateOneRequiredWithoutPedidosHistoricoNestedInput = {
   create?: Prisma.XOR<Prisma.ClienteCreateWithoutPedidosHistoricoInput, Prisma.ClienteUncheckedCreateWithoutPedidosHistoricoInput>
   connectOrCreate?: Prisma.ClienteCreateOrConnectWithoutPedidosHistoricoInput
   upsert?: Prisma.ClienteUpsertWithoutPedidosHistoricoInput
-  disconnect?: Prisma.ClienteWhereInput | boolean
-  delete?: Prisma.ClienteWhereInput | boolean
   connect?: Prisma.ClienteWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ClienteUpdateToOneWithWhereWithoutPedidosHistoricoInput, Prisma.ClienteUpdateWithoutPedidosHistoricoInput>, Prisma.ClienteUncheckedUpdateWithoutPedidosHistoricoInput>
 }
@@ -640,10 +660,11 @@ export type ClienteCreateWithoutTitulosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
   contratos?: Prisma.ContratoCreateNestedManyWithoutClienteInput
@@ -659,10 +680,11 @@ export type ClienteUncheckedCreateWithoutTitulosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutClienteInput
@@ -694,10 +716,11 @@ export type ClienteUpdateWithoutTitulosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
   contratos?: Prisma.ContratoUpdateManyWithoutClienteNestedInput
@@ -713,10 +736,11 @@ export type ClienteUncheckedUpdateWithoutTitulosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutClienteNestedInput
@@ -732,10 +756,11 @@ export type ClienteCreateWithoutContratosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
@@ -751,10 +776,11 @@ export type ClienteUncheckedCreateWithoutContratosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
@@ -786,10 +812,11 @@ export type ClienteUpdateWithoutContratosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
@@ -805,10 +832,11 @@ export type ClienteUncheckedUpdateWithoutContratosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
@@ -824,10 +852,11 @@ export type ClienteCreateWithoutPedidosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   contratos?: Prisma.ContratoCreateNestedManyWithoutClienteInput
@@ -843,10 +872,11 @@ export type ClienteUncheckedCreateWithoutPedidosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutClienteInput
@@ -878,10 +908,11 @@ export type ClienteUpdateWithoutPedidosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   contratos?: Prisma.ContratoUpdateManyWithoutClienteNestedInput
@@ -897,10 +928,11 @@ export type ClienteUncheckedUpdateWithoutPedidosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutClienteNestedInput
@@ -916,10 +948,11 @@ export type ClienteCreateWithoutPedidosHistoricoInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
@@ -935,10 +968,11 @@ export type ClienteUncheckedCreateWithoutPedidosHistoricoInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
@@ -970,10 +1004,11 @@ export type ClienteUpdateWithoutPedidosHistoricoInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
@@ -989,10 +1024,11 @@ export type ClienteUncheckedUpdateWithoutPedidosHistoricoInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
@@ -1008,10 +1044,11 @@ export type ClienteCreateWithoutDocumentosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
@@ -1027,10 +1064,11 @@ export type ClienteUncheckedCreateWithoutDocumentosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
@@ -1062,10 +1100,11 @@ export type ClienteUpdateWithoutDocumentosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
@@ -1081,10 +1120,11 @@ export type ClienteUncheckedUpdateWithoutDocumentosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
@@ -1100,10 +1140,11 @@ export type ClienteCreateWithoutRiscosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoCreateNestedManyWithoutClienteInput
@@ -1119,10 +1160,11 @@ export type ClienteUncheckedCreateWithoutRiscosInput = {
   cnpj: string
   cidade: string
   uf: string
-  segmento?: string | null
-  codigoVendedor?: string | null
+  segmento: string
+  codigoVendedor: string
   limiteCreditoCentavos: number
   status: $Enums.StatusCliente
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   titulos?: Prisma.TituloUncheckedCreateNestedManyWithoutClienteInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutClienteInput
@@ -1154,10 +1196,11 @@ export type ClienteUpdateWithoutRiscosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUpdateManyWithoutClienteNestedInput
@@ -1173,10 +1216,11 @@ export type ClienteUncheckedUpdateWithoutRiscosInput = {
   cnpj?: Prisma.StringFieldUpdateOperationsInput | string
   cidade?: Prisma.StringFieldUpdateOperationsInput | string
   uf?: Prisma.StringFieldUpdateOperationsInput | string
-  segmento?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  segmento?: Prisma.StringFieldUpdateOperationsInput | string
+  codigoVendedor?: Prisma.StringFieldUpdateOperationsInput | string
   limiteCreditoCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumStatusClienteFieldUpdateOperationsInput | $Enums.StatusCliente
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   titulos?: Prisma.TituloUncheckedUpdateManyWithoutClienteNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutClienteNestedInput
@@ -1272,6 +1316,7 @@ export type ClienteSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   codigoVendedor?: boolean
   limiteCreditoCentavos?: boolean
   status?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
   titulos?: boolean | Prisma.Cliente$titulosArgs<ExtArgs>
   pedidos?: boolean | Prisma.Cliente$pedidosArgs<ExtArgs>
@@ -1293,6 +1338,7 @@ export type ClienteSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   codigoVendedor?: boolean
   limiteCreditoCentavos?: boolean
   status?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }, ExtArgs["result"]["cliente"]>
 
@@ -1307,6 +1353,7 @@ export type ClienteSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   codigoVendedor?: boolean
   limiteCreditoCentavos?: boolean
   status?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }, ExtArgs["result"]["cliente"]>
 
@@ -1321,10 +1368,11 @@ export type ClienteSelectScalar = {
   codigoVendedor?: boolean
   limiteCreditoCentavos?: boolean
   status?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type ClienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigoErp" | "razaoSocial" | "cnpj" | "cidade" | "uf" | "segmento" | "codigoVendedor" | "limiteCreditoCentavos" | "status" | "atualizadoEm", ExtArgs["result"]["cliente"]>
+export type ClienteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigoErp" | "razaoSocial" | "cnpj" | "cidade" | "uf" | "segmento" | "codigoVendedor" | "limiteCreditoCentavos" | "status" | "atualizadoNoErpEm" | "atualizadoEm", ExtArgs["result"]["cliente"]>
 export type ClienteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   titulos?: boolean | Prisma.Cliente$titulosArgs<ExtArgs>
   pedidos?: boolean | Prisma.Cliente$pedidosArgs<ExtArgs>
@@ -1354,10 +1402,11 @@ export type $ClientePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     cnpj: string
     cidade: string
     uf: string
-    segmento: string | null
-    codigoVendedor: string | null
+    segmento: string
+    codigoVendedor: string
     limiteCreditoCentavos: number
     status: $Enums.StatusCliente
+    atualizadoNoErpEm: Date
     atualizadoEm: Date
   }, ExtArgs["result"]["cliente"]>
   composites: {}
@@ -1798,6 +1847,7 @@ export interface ClienteFieldRefs {
   readonly codigoVendedor: Prisma.FieldRef<"Cliente", 'String'>
   readonly limiteCreditoCentavos: Prisma.FieldRef<"Cliente", 'Int'>
   readonly status: Prisma.FieldRef<"Cliente", 'StatusCliente'>
+  readonly atualizadoNoErpEm: Prisma.FieldRef<"Cliente", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Cliente", 'DateTime'>
 }
     

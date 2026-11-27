@@ -42,6 +42,7 @@ export type ProdutoMinAggregateOutputType = {
   unidade: string | null
   precoTabelaCentavos: number | null
   ativo: boolean | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -53,6 +54,7 @@ export type ProdutoMaxAggregateOutputType = {
   unidade: string | null
   precoTabelaCentavos: number | null
   ativo: boolean | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -64,6 +66,7 @@ export type ProdutoCountAggregateOutputType = {
   unidade: number
   precoTabelaCentavos: number
   ativo: number
+  atualizadoNoErpEm: number
   atualizadoEm: number
   _all: number
 }
@@ -85,6 +88,7 @@ export type ProdutoMinAggregateInputType = {
   unidade?: true
   precoTabelaCentavos?: true
   ativo?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -96,6 +100,7 @@ export type ProdutoMaxAggregateInputType = {
   unidade?: true
   precoTabelaCentavos?: true
   ativo?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -107,6 +112,7 @@ export type ProdutoCountAggregateInputType = {
   unidade?: true
   precoTabelaCentavos?: true
   ativo?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
   _all?: true
 }
@@ -201,10 +207,11 @@ export type ProdutoGroupByOutputType = {
   id: string
   codigoErp: string
   descricao: string
-  categoria: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date
   atualizadoEm: Date
   _count: ProdutoCountAggregateOutputType | null
   _avg: ProdutoAvgAggregateOutputType | null
@@ -235,10 +242,11 @@ export type ProdutoWhereInput = {
   id?: Prisma.StringFilter<"Produto"> | string
   codigoErp?: Prisma.StringFilter<"Produto"> | string
   descricao?: Prisma.StringFilter<"Produto"> | string
-  categoria?: Prisma.StringNullableFilter<"Produto"> | string | null
+  categoria?: Prisma.StringFilter<"Produto"> | string
   unidade?: Prisma.StringFilter<"Produto"> | string
   precoTabelaCentavos?: Prisma.IntFilter<"Produto"> | number
   ativo?: Prisma.BoolFilter<"Produto"> | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFilter<"Produto"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Produto"> | Date | string
   itens?: Prisma.ItemPedidoListRelationFilter
   pedidosHistorico?: Prisma.PedidoHistoricoListRelationFilter
@@ -248,10 +256,11 @@ export type ProdutoOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   codigoErp?: Prisma.SortOrder
   descricao?: Prisma.SortOrder
-  categoria?: Prisma.SortOrderInput | Prisma.SortOrder
+  categoria?: Prisma.SortOrder
   unidade?: Prisma.SortOrder
   precoTabelaCentavos?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   itens?: Prisma.ItemPedidoOrderByRelationAggregateInput
   pedidosHistorico?: Prisma.PedidoHistoricoOrderByRelationAggregateInput
@@ -264,10 +273,11 @@ export type ProdutoWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ProdutoWhereInput[]
   NOT?: Prisma.ProdutoWhereInput | Prisma.ProdutoWhereInput[]
   descricao?: Prisma.StringFilter<"Produto"> | string
-  categoria?: Prisma.StringNullableFilter<"Produto"> | string | null
+  categoria?: Prisma.StringFilter<"Produto"> | string
   unidade?: Prisma.StringFilter<"Produto"> | string
   precoTabelaCentavos?: Prisma.IntFilter<"Produto"> | number
   ativo?: Prisma.BoolFilter<"Produto"> | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFilter<"Produto"> | Date | string
   atualizadoEm?: Prisma.DateTimeFilter<"Produto"> | Date | string
   itens?: Prisma.ItemPedidoListRelationFilter
   pedidosHistorico?: Prisma.PedidoHistoricoListRelationFilter
@@ -277,10 +287,11 @@ export type ProdutoOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   codigoErp?: Prisma.SortOrder
   descricao?: Prisma.SortOrder
-  categoria?: Prisma.SortOrderInput | Prisma.SortOrder
+  categoria?: Prisma.SortOrder
   unidade?: Prisma.SortOrder
   precoTabelaCentavos?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   _count?: Prisma.ProdutoCountOrderByAggregateInput
   _avg?: Prisma.ProdutoAvgOrderByAggregateInput
@@ -296,10 +307,11 @@ export type ProdutoScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Produto"> | string
   codigoErp?: Prisma.StringWithAggregatesFilter<"Produto"> | string
   descricao?: Prisma.StringWithAggregatesFilter<"Produto"> | string
-  categoria?: Prisma.StringNullableWithAggregatesFilter<"Produto"> | string | null
+  categoria?: Prisma.StringWithAggregatesFilter<"Produto"> | string
   unidade?: Prisma.StringWithAggregatesFilter<"Produto"> | string
   precoTabelaCentavos?: Prisma.IntWithAggregatesFilter<"Produto"> | number
   ativo?: Prisma.BoolWithAggregatesFilter<"Produto"> | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeWithAggregatesFilter<"Produto"> | Date | string
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Produto"> | Date | string
 }
 
@@ -307,10 +319,11 @@ export type ProdutoCreateInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   itens?: Prisma.ItemPedidoCreateNestedManyWithoutProdutoInput
   pedidosHistorico?: Prisma.PedidoHistoricoCreateNestedManyWithoutProdutoInput
@@ -320,10 +333,11 @@ export type ProdutoUncheckedCreateInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   itens?: Prisma.ItemPedidoUncheckedCreateNestedManyWithoutProdutoInput
   pedidosHistorico?: Prisma.PedidoHistoricoUncheckedCreateNestedManyWithoutProdutoInput
@@ -333,10 +347,11 @@ export type ProdutoUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itens?: Prisma.ItemPedidoUpdateManyWithoutProdutoNestedInput
   pedidosHistorico?: Prisma.PedidoHistoricoUpdateManyWithoutProdutoNestedInput
@@ -346,10 +361,11 @@ export type ProdutoUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itens?: Prisma.ItemPedidoUncheckedUpdateManyWithoutProdutoNestedInput
   pedidosHistorico?: Prisma.PedidoHistoricoUncheckedUpdateManyWithoutProdutoNestedInput
@@ -359,10 +375,11 @@ export type ProdutoCreateManyInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
 }
 
@@ -370,10 +387,11 @@ export type ProdutoUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -381,10 +399,11 @@ export type ProdutoUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -396,6 +415,7 @@ export type ProdutoCountOrderByAggregateInput = {
   unidade?: Prisma.SortOrder
   precoTabelaCentavos?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -411,6 +431,7 @@ export type ProdutoMaxOrderByAggregateInput = {
   unidade?: Prisma.SortOrder
   precoTabelaCentavos?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -422,6 +443,7 @@ export type ProdutoMinOrderByAggregateInput = {
   unidade?: Prisma.SortOrder
   precoTabelaCentavos?: Prisma.SortOrder
   ativo?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -432,11 +454,6 @@ export type ProdutoSumOrderByAggregateInput = {
 export type ProdutoScalarRelationFilter = {
   is?: Prisma.ProdutoWhereInput
   isNot?: Prisma.ProdutoWhereInput
-}
-
-export type ProdutoNullableScalarRelationFilter = {
-  is?: Prisma.ProdutoWhereInput | null
-  isNot?: Prisma.ProdutoWhereInput | null
 }
 
 export type ProdutoCreateNestedOneWithoutItensInput = {
@@ -459,12 +476,10 @@ export type ProdutoCreateNestedOneWithoutPedidosHistoricoInput = {
   connect?: Prisma.ProdutoWhereUniqueInput
 }
 
-export type ProdutoUpdateOneWithoutPedidosHistoricoNestedInput = {
+export type ProdutoUpdateOneRequiredWithoutPedidosHistoricoNestedInput = {
   create?: Prisma.XOR<Prisma.ProdutoCreateWithoutPedidosHistoricoInput, Prisma.ProdutoUncheckedCreateWithoutPedidosHistoricoInput>
   connectOrCreate?: Prisma.ProdutoCreateOrConnectWithoutPedidosHistoricoInput
   upsert?: Prisma.ProdutoUpsertWithoutPedidosHistoricoInput
-  disconnect?: Prisma.ProdutoWhereInput | boolean
-  delete?: Prisma.ProdutoWhereInput | boolean
   connect?: Prisma.ProdutoWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProdutoUpdateToOneWithWhereWithoutPedidosHistoricoInput, Prisma.ProdutoUpdateWithoutPedidosHistoricoInput>, Prisma.ProdutoUncheckedUpdateWithoutPedidosHistoricoInput>
 }
@@ -473,10 +488,11 @@ export type ProdutoCreateWithoutItensInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   pedidosHistorico?: Prisma.PedidoHistoricoCreateNestedManyWithoutProdutoInput
 }
@@ -485,10 +501,11 @@ export type ProdutoUncheckedCreateWithoutItensInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   pedidosHistorico?: Prisma.PedidoHistoricoUncheckedCreateNestedManyWithoutProdutoInput
 }
@@ -513,10 +530,11 @@ export type ProdutoUpdateWithoutItensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pedidosHistorico?: Prisma.PedidoHistoricoUpdateManyWithoutProdutoNestedInput
 }
@@ -525,10 +543,11 @@ export type ProdutoUncheckedUpdateWithoutItensInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   pedidosHistorico?: Prisma.PedidoHistoricoUncheckedUpdateManyWithoutProdutoNestedInput
 }
@@ -537,10 +556,11 @@ export type ProdutoCreateWithoutPedidosHistoricoInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   itens?: Prisma.ItemPedidoCreateNestedManyWithoutProdutoInput
 }
@@ -549,10 +569,11 @@ export type ProdutoUncheckedCreateWithoutPedidosHistoricoInput = {
   id?: string
   codigoErp: string
   descricao: string
-  categoria?: string | null
+  categoria: string
   unidade: string
   precoTabelaCentavos: number
   ativo: boolean
+  atualizadoNoErpEm: Date | string
   atualizadoEm?: Date | string
   itens?: Prisma.ItemPedidoUncheckedCreateNestedManyWithoutProdutoInput
 }
@@ -577,10 +598,11 @@ export type ProdutoUpdateWithoutPedidosHistoricoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itens?: Prisma.ItemPedidoUpdateManyWithoutProdutoNestedInput
 }
@@ -589,10 +611,11 @@ export type ProdutoUncheckedUpdateWithoutPedidosHistoricoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   codigoErp?: Prisma.StringFieldUpdateOperationsInput | string
   descricao?: Prisma.StringFieldUpdateOperationsInput | string
-  categoria?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  categoria?: Prisma.StringFieldUpdateOperationsInput | string
   unidade?: Prisma.StringFieldUpdateOperationsInput | string
   precoTabelaCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  atualizadoNoErpEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   itens?: Prisma.ItemPedidoUncheckedUpdateManyWithoutProdutoNestedInput
 }
@@ -645,6 +668,7 @@ export type ProdutoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   unidade?: boolean
   precoTabelaCentavos?: boolean
   ativo?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
   itens?: boolean | Prisma.Produto$itensArgs<ExtArgs>
   pedidosHistorico?: boolean | Prisma.Produto$pedidosHistoricoArgs<ExtArgs>
@@ -659,6 +683,7 @@ export type ProdutoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   unidade?: boolean
   precoTabelaCentavos?: boolean
   ativo?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }, ExtArgs["result"]["produto"]>
 
@@ -670,6 +695,7 @@ export type ProdutoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   unidade?: boolean
   precoTabelaCentavos?: boolean
   ativo?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }, ExtArgs["result"]["produto"]>
 
@@ -681,10 +707,11 @@ export type ProdutoSelectScalar = {
   unidade?: boolean
   precoTabelaCentavos?: boolean
   ativo?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type ProdutoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigoErp" | "descricao" | "categoria" | "unidade" | "precoTabelaCentavos" | "ativo" | "atualizadoEm", ExtArgs["result"]["produto"]>
+export type ProdutoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "codigoErp" | "descricao" | "categoria" | "unidade" | "precoTabelaCentavos" | "ativo" | "atualizadoNoErpEm" | "atualizadoEm", ExtArgs["result"]["produto"]>
 export type ProdutoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   itens?: boolean | Prisma.Produto$itensArgs<ExtArgs>
   pedidosHistorico?: boolean | Prisma.Produto$pedidosHistoricoArgs<ExtArgs>
@@ -703,10 +730,11 @@ export type $ProdutoPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     codigoErp: string
     descricao: string
-    categoria: string | null
+    categoria: string
     unidade: string
     precoTabelaCentavos: number
     ativo: boolean
+    atualizadoNoErpEm: Date
     atualizadoEm: Date
   }, ExtArgs["result"]["produto"]>
   composites: {}
@@ -1140,6 +1168,7 @@ export interface ProdutoFieldRefs {
   readonly unidade: Prisma.FieldRef<"Produto", 'String'>
   readonly precoTabelaCentavos: Prisma.FieldRef<"Produto", 'Int'>
   readonly ativo: Prisma.FieldRef<"Produto", 'Boolean'>
+  readonly atualizadoNoErpEm: Prisma.FieldRef<"Produto", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Produto", 'DateTime'>
 }
     

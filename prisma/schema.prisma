@@ -9,7 +9,8 @@ datasource db {
 
 // Conventions (DATA-01, PRD 7.1):
 // - every id is a uuid String; ERP codes live in codigoErp
-// - money is always Int in cents with the Centavos suffix (RN-13)
+// - money is always Int in cents with the Centavos suffix (RN-13); the only
+//   exception is the AI cost, in micro-dollars because it is below one cent
 // - day-only dates use @db.Date; the only Float is the churn probability
 // - every foreign key uses onDelete: Restrict (5-year retention, PRD 7.3)
 
@@ -105,6 +106,8 @@ model Usuario {
   mudancasDeStatus      HistoricoStatus[]
   documentosEnviados    Documento[]       @relation("DocumentoEnviadoPor")
   documentosConfirmados Documento[]       @relation("DocumentoConfirmadoPor")
+  avisosTratados        Contrato[]
+  contatosRegistrados   RiscoChurn[]
 }
 
 model Cliente {
@@ -114,10 +117,14 @@ model Cliente {
   cnpj                  String        @unique
   cidade                String
   uf                    String        @db.Char(2)
-  segmento              String?
-  codigoVendedor        String?
+  segmento              String
+  // ERP salesperson code. Required: the ERP always sends it and it defines
+  // the portfolio (RN-08).
+  codigoVendedor        String
   limiteCreditoCentavos Int
   status                StatusCliente
+  // ERP atualizadoEm. Its max is the atualizadoDesde of the next sync (RN-15).
+  atualizadoNoErpEm     DateTime
   atualizadoEm          DateTime      @updatedAt
 
   titulos          Titulo[]
@@ -135,10 +142,11 @@ model Produto {
   id                  String   @id @default(uuid())
   codigoErp           String   @unique
   descricao           String
-  categoria           String?
+  categoria           String
   unidade             String
   precoTabelaCentavos Int
   ativo               Boolean
+  atualizadoNoErpEm   DateTime
   atualizadoEm        DateTime @updatedAt
 
   itens            ItemPedido[]
@@ -146,18 +154,20 @@ model Produto {
 }
 
 model Titulo {
-  id            String       @id @default(uuid())
-  numero        String
-  parcela       Int
-  clienteId     String
-  pedidoErp     String?
-  valorCentavos Int
-  emissao       DateTime     @db.Date
-  vencimento    DateTime     @db.Date
-  pagamento     DateTime?    @db.Date
-  status        StatusTitulo
-  origem        OrigemTitulo
-  atualizadoEm  DateTime     @updatedAt
+  id                String       @id @default(uuid())
+  numero            String
+  parcela           Int
+  clienteId         String
+  pedidoErp         String?
+  valorCentavos     Int
+  emissao           DateTime     @db.Date
+  vencimento        DateTime     @db.Date
+  pagamento         DateTime?    @db.Date
+  status            StatusTitulo
+  origem            OrigemTitulo
+  // Empty for receivables loaded from the spreadsheet.
+  atualizadoNoErpEm DateTime?
+  atualizadoEm      DateTime     @updatedAt
 
   cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
 
@@ -181,10 +191,14 @@ model Contrato {
   dataLimiteAviso     DateTime  @db.Date
   arquivo             String
   documentoId         String?
+  // Who handled the notice and when (US-022).
+  avisoTratadoPorId   String?
+  avisoTratadoEm      DateTime?
   criadoEm            DateTime  @default(now())
 
-  cliente   Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
-  documento Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  cliente         Cliente    @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  documento       Documento? @relation(fields: [documentoId], references: [id], onDelete: Restrict)
+  avisoTratadoPor Usuario?   @relation(fields: [avisoTratadoPorId], references: [id], onDelete: Restrict)
 
   @@index([clienteId])
   @@index([dataLimiteAviso])
@@ -252,16 +266,17 @@ model PedidoHistorico {
   numero                String
   linha                 Int
   data                  DateTime @db.Date
-  clienteId             String?
+  // Lines without a safe match go to the pending list, not here (US-011).
+  clienteId             String
   clienteNomeOriginal   String?
-  produtoId             String?
+  produtoId             String
   vendedorNome          String?
   quantidade            Int
   precoUnitarioCentavos Int
   status                String
 
-  cliente Cliente? @relation(fields: [clienteId], references: [id], onDelete: Restrict)
-  produto Produto? @relation(fields: [produtoId], references: [id], onDelete: Restrict)
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  produto Produto @relation(fields: [produtoId], references: [id], onDelete: Restrict)
 
   // Lets the history load run again with the same result (RN-16).
   @@unique([numero, linha])
@@ -278,6 +293,9 @@ model Documento {
   situacao        SituacaoDocumento @default(ENVIADO)
   confirmadoPorId String?
   confirmadoEm    DateTime?
+  // Documents classified as OUTRO: summary and the role they go to (US-024).
+  resumo          String?
+  encaminhadoPara Papel?
 
   cliente       Cliente? @relation(fields: [clienteId], references: [id], onDelete: Restrict)
   enviadoPor    Usuario  @relation("DocumentoEnviadoPor", fields: [enviadoPorId], references: [id], onDelete: Restrict)
@@ -292,15 +310,17 @@ model Documento {
 }
 
 model ExecucaoAgente {
-  id                    String   @id @default(uuid())
-  documentoId           String
-  passos                Json
-  ferramentasChamadas   Json
-  resultado             Json?
-  erro                  String?
-  duracaoMs             Int
-  custoEstimadoCentavos Int?
-  criadoEm              DateTime @default(now())
+  id                        String   @id @default(uuid())
+  documentoId               String
+  passos                    Json
+  ferramentasChamadas       Json
+  resultado                 Json?
+  erro                      String?
+  duracaoMs                 Int
+  // AI cost in millionths of a US dollar: one call costs fractions of a cent,
+  // so cents would round it to 0. Still an Int, never a Float.
+  custoEstimadoMicrodolares Int?
+  criadoEm                  DateTime @default(now())
 
   documento Documento @relation(fields: [documentoId], references: [id], onDelete: Restrict)
 
@@ -308,17 +328,19 @@ model ExecucaoAgente {
 }
 
 model RiscoChurn {
-  id                  String     @id @default(uuid())
-  clienteId           String
-  calculadoEm         DateTime
+  id                     String     @id @default(uuid())
+  clienteId              String
+  calculadoEm            DateTime
   // 0 to 1. The only Float in the schema: it is not money.
-  probabilidade       Float
-  faixa               FaixaRisco
-  motivoPrincipal     String
-  versaoModelo        String
-  contatoRegistradoEm DateTime?
+  probabilidade          Float
+  faixa                  FaixaRisco
+  motivoPrincipal        String
+  versaoModelo           String
+  contatoRegistradoEm    DateTime?
+  contatoRegistradoPorId String?
 
-  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  cliente              Cliente  @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  contatoRegistradoPor Usuario? @relation(fields: [contatoRegistradoPorId], references: [id], onDelete: Restrict)
 
   @@unique([clienteId, calculadoEm])
   @@index([calculadoEm, faixa])

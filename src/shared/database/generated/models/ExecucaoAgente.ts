@@ -28,12 +28,12 @@ export type AggregateExecucaoAgente = {
 
 export type ExecucaoAgenteAvgAggregateOutputType = {
   duracaoMs: number | null
-  custoEstimadoCentavos: number | null
+  custoEstimadoMicrodolares: number | null
 }
 
 export type ExecucaoAgenteSumAggregateOutputType = {
   duracaoMs: number | null
-  custoEstimadoCentavos: number | null
+  custoEstimadoMicrodolares: number | null
 }
 
 export type ExecucaoAgenteMinAggregateOutputType = {
@@ -41,7 +41,7 @@ export type ExecucaoAgenteMinAggregateOutputType = {
   documentoId: string | null
   erro: string | null
   duracaoMs: number | null
-  custoEstimadoCentavos: number | null
+  custoEstimadoMicrodolares: number | null
   criadoEm: Date | null
 }
 
@@ -50,7 +50,7 @@ export type ExecucaoAgenteMaxAggregateOutputType = {
   documentoId: string | null
   erro: string | null
   duracaoMs: number | null
-  custoEstimadoCentavos: number | null
+  custoEstimadoMicrodolares: number | null
   criadoEm: Date | null
 }
 
@@ -62,7 +62,7 @@ export type ExecucaoAgenteCountAggregateOutputType = {
   resultado: number
   erro: number
   duracaoMs: number
-  custoEstimadoCentavos: number
+  custoEstimadoMicrodolares: number
   criadoEm: number
   _all: number
 }
@@ -70,12 +70,12 @@ export type ExecucaoAgenteCountAggregateOutputType = {
 
 export type ExecucaoAgenteAvgAggregateInputType = {
   duracaoMs?: true
-  custoEstimadoCentavos?: true
+  custoEstimadoMicrodolares?: true
 }
 
 export type ExecucaoAgenteSumAggregateInputType = {
   duracaoMs?: true
-  custoEstimadoCentavos?: true
+  custoEstimadoMicrodolares?: true
 }
 
 export type ExecucaoAgenteMinAggregateInputType = {
@@ -83,7 +83,7 @@ export type ExecucaoAgenteMinAggregateInputType = {
   documentoId?: true
   erro?: true
   duracaoMs?: true
-  custoEstimadoCentavos?: true
+  custoEstimadoMicrodolares?: true
   criadoEm?: true
 }
 
@@ -92,7 +92,7 @@ export type ExecucaoAgenteMaxAggregateInputType = {
   documentoId?: true
   erro?: true
   duracaoMs?: true
-  custoEstimadoCentavos?: true
+  custoEstimadoMicrodolares?: true
   criadoEm?: true
 }
 
@@ -104,7 +104,7 @@ export type ExecucaoAgenteCountAggregateInputType = {
   resultado?: true
   erro?: true
   duracaoMs?: true
-  custoEstimadoCentavos?: true
+  custoEstimadoMicrodolares?: true
   criadoEm?: true
   _all?: true
 }
@@ -203,7 +203,7 @@ export type ExecucaoAgenteGroupByOutputType = {
   resultado: runtime.JsonValue | null
   erro: string | null
   duracaoMs: number
-  custoEstimadoCentavos: number | null
+  custoEstimadoMicrodolares: number | null
   criadoEm: Date
   _count: ExecucaoAgenteCountAggregateOutputType | null
   _avg: ExecucaoAgenteAvgAggregateOutputType | null
@@ -238,7 +238,7 @@ export type ExecucaoAgenteWhereInput = {
   resultado?: Prisma.JsonNullableFilter<"ExecucaoAgente">
   erro?: Prisma.StringNullableFilter<"ExecucaoAgente"> | string | null
   duracaoMs?: Prisma.IntFilter<"ExecucaoAgente"> | number
-  custoEstimadoCentavos?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
+  custoEstimadoMicrodolares?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"ExecucaoAgente"> | Date | string
   documento?: Prisma.XOR<Prisma.DocumentoScalarRelationFilter, Prisma.DocumentoWhereInput>
 }
@@ -251,7 +251,7 @@ export type ExecucaoAgenteOrderByWithRelationInput = {
   resultado?: Prisma.SortOrderInput | Prisma.SortOrder
   erro?: Prisma.SortOrderInput | Prisma.SortOrder
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   documento?: Prisma.DocumentoOrderByWithRelationInput
 }
@@ -267,7 +267,7 @@ export type ExecucaoAgenteWhereUniqueInput = Prisma.AtLeast<{
   resultado?: Prisma.JsonNullableFilter<"ExecucaoAgente">
   erro?: Prisma.StringNullableFilter<"ExecucaoAgente"> | string | null
   duracaoMs?: Prisma.IntFilter<"ExecucaoAgente"> | number
-  custoEstimadoCentavos?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
+  custoEstimadoMicrodolares?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"ExecucaoAgente"> | Date | string
   documento?: Prisma.XOR<Prisma.DocumentoScalarRelationFilter, Prisma.DocumentoWhereInput>
 }, "id">
@@ -280,7 +280,7 @@ export type ExecucaoAgenteOrderByWithAggregationInput = {
   resultado?: Prisma.SortOrderInput | Prisma.SortOrder
   erro?: Prisma.SortOrderInput | Prisma.SortOrder
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrderInput | Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   _count?: Prisma.ExecucaoAgenteCountOrderByAggregateInput
   _avg?: Prisma.ExecucaoAgenteAvgOrderByAggregateInput
@@ -300,7 +300,7 @@ export type ExecucaoAgenteScalarWhereWithAggregatesInput = {
   resultado?: Prisma.JsonNullableWithAggregatesFilter<"ExecucaoAgente">
   erro?: Prisma.StringNullableWithAggregatesFilter<"ExecucaoAgente"> | string | null
   duracaoMs?: Prisma.IntWithAggregatesFilter<"ExecucaoAgente"> | number
-  custoEstimadoCentavos?: Prisma.IntNullableWithAggregatesFilter<"ExecucaoAgente"> | number | null
+  custoEstimadoMicrodolares?: Prisma.IntNullableWithAggregatesFilter<"ExecucaoAgente"> | number | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"ExecucaoAgente"> | Date | string
 }
 
@@ -311,7 +311,7 @@ export type ExecucaoAgenteCreateInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
   documento: Prisma.DocumentoCreateNestedOneWithoutExecucoesInput
 }
@@ -324,7 +324,7 @@ export type ExecucaoAgenteUncheckedCreateInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
 }
 
@@ -335,7 +335,7 @@ export type ExecucaoAgenteUpdateInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documento?: Prisma.DocumentoUpdateOneRequiredWithoutExecucoesNestedInput
 }
@@ -348,7 +348,7 @@ export type ExecucaoAgenteUncheckedUpdateInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -360,7 +360,7 @@ export type ExecucaoAgenteCreateManyInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
 }
 
@@ -371,7 +371,7 @@ export type ExecucaoAgenteUpdateManyMutationInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -383,7 +383,7 @@ export type ExecucaoAgenteUncheckedUpdateManyInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -405,13 +405,13 @@ export type ExecucaoAgenteCountOrderByAggregateInput = {
   resultado?: Prisma.SortOrder
   erro?: Prisma.SortOrder
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
 export type ExecucaoAgenteAvgOrderByAggregateInput = {
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrder
 }
 
 export type ExecucaoAgenteMaxOrderByAggregateInput = {
@@ -419,7 +419,7 @@ export type ExecucaoAgenteMaxOrderByAggregateInput = {
   documentoId?: Prisma.SortOrder
   erro?: Prisma.SortOrder
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -428,13 +428,13 @@ export type ExecucaoAgenteMinOrderByAggregateInput = {
   documentoId?: Prisma.SortOrder
   erro?: Prisma.SortOrder
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
 export type ExecucaoAgenteSumOrderByAggregateInput = {
   duracaoMs?: Prisma.SortOrder
-  custoEstimadoCentavos?: Prisma.SortOrder
+  custoEstimadoMicrodolares?: Prisma.SortOrder
 }
 
 export type ExecucaoAgenteCreateNestedManyWithoutDocumentoInput = {
@@ -486,7 +486,7 @@ export type ExecucaoAgenteCreateWithoutDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
 }
 
@@ -497,7 +497,7 @@ export type ExecucaoAgenteUncheckedCreateWithoutDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
 }
 
@@ -538,7 +538,7 @@ export type ExecucaoAgenteScalarWhereInput = {
   resultado?: Prisma.JsonNullableFilter<"ExecucaoAgente">
   erro?: Prisma.StringNullableFilter<"ExecucaoAgente"> | string | null
   duracaoMs?: Prisma.IntFilter<"ExecucaoAgente"> | number
-  custoEstimadoCentavos?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
+  custoEstimadoMicrodolares?: Prisma.IntNullableFilter<"ExecucaoAgente"> | number | null
   criadoEm?: Prisma.DateTimeFilter<"ExecucaoAgente"> | Date | string
 }
 
@@ -549,7 +549,7 @@ export type ExecucaoAgenteCreateManyDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: string | null
   duracaoMs: number
-  custoEstimadoCentavos?: number | null
+  custoEstimadoMicrodolares?: number | null
   criadoEm?: Date | string
 }
 
@@ -560,7 +560,7 @@ export type ExecucaoAgenteUpdateWithoutDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -571,7 +571,7 @@ export type ExecucaoAgenteUncheckedUpdateWithoutDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -582,7 +582,7 @@ export type ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoInput = {
   resultado?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   erro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duracaoMs?: Prisma.IntFieldUpdateOperationsInput | number
-  custoEstimadoCentavos?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  custoEstimadoMicrodolares?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -596,7 +596,7 @@ export type ExecucaoAgenteSelect<ExtArgs extends runtime.Types.Extensions.Intern
   resultado?: boolean
   erro?: boolean
   duracaoMs?: boolean
-  custoEstimadoCentavos?: boolean
+  custoEstimadoMicrodolares?: boolean
   criadoEm?: boolean
   documento?: boolean | Prisma.DocumentoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["execucaoAgente"]>
@@ -609,7 +609,7 @@ export type ExecucaoAgenteSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   resultado?: boolean
   erro?: boolean
   duracaoMs?: boolean
-  custoEstimadoCentavos?: boolean
+  custoEstimadoMicrodolares?: boolean
   criadoEm?: boolean
   documento?: boolean | Prisma.DocumentoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["execucaoAgente"]>
@@ -622,7 +622,7 @@ export type ExecucaoAgenteSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   resultado?: boolean
   erro?: boolean
   duracaoMs?: boolean
-  custoEstimadoCentavos?: boolean
+  custoEstimadoMicrodolares?: boolean
   criadoEm?: boolean
   documento?: boolean | Prisma.DocumentoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["execucaoAgente"]>
@@ -635,11 +635,11 @@ export type ExecucaoAgenteSelectScalar = {
   resultado?: boolean
   erro?: boolean
   duracaoMs?: boolean
-  custoEstimadoCentavos?: boolean
+  custoEstimadoMicrodolares?: boolean
   criadoEm?: boolean
 }
 
-export type ExecucaoAgenteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentoId" | "passos" | "ferramentasChamadas" | "resultado" | "erro" | "duracaoMs" | "custoEstimadoCentavos" | "criadoEm", ExtArgs["result"]["execucaoAgente"]>
+export type ExecucaoAgenteOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentoId" | "passos" | "ferramentasChamadas" | "resultado" | "erro" | "duracaoMs" | "custoEstimadoMicrodolares" | "criadoEm", ExtArgs["result"]["execucaoAgente"]>
 export type ExecucaoAgenteInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documento?: boolean | Prisma.DocumentoDefaultArgs<ExtArgs>
 }
@@ -663,7 +663,7 @@ export type $ExecucaoAgentePayload<ExtArgs extends runtime.Types.Extensions.Inte
     resultado: runtime.JsonValue | null
     erro: string | null
     duracaoMs: number
-    custoEstimadoCentavos: number | null
+    custoEstimadoMicrodolares: number | null
     criadoEm: Date
   }, ExtArgs["result"]["execucaoAgente"]>
   composites: {}
@@ -1096,7 +1096,7 @@ export interface ExecucaoAgenteFieldRefs {
   readonly resultado: Prisma.FieldRef<"ExecucaoAgente", 'Json'>
   readonly erro: Prisma.FieldRef<"ExecucaoAgente", 'String'>
   readonly duracaoMs: Prisma.FieldRef<"ExecucaoAgente", 'Int'>
-  readonly custoEstimadoCentavos: Prisma.FieldRef<"ExecucaoAgente", 'Int'>
+  readonly custoEstimadoMicrodolares: Prisma.FieldRef<"ExecucaoAgente", 'Int'>
   readonly criadoEm: Prisma.FieldRef<"ExecucaoAgente", 'DateTime'>
 }
     

@@ -34,6 +34,8 @@ export type DocumentoMinAggregateOutputType = {
   situacao: $Enums.SituacaoDocumento | null
   confirmadoPorId: string | null
   confirmadoEm: Date | null
+  resumo: string | null
+  encaminhadoPara: $Enums.Papel | null
 }
 
 export type DocumentoMaxAggregateOutputType = {
@@ -46,6 +48,8 @@ export type DocumentoMaxAggregateOutputType = {
   situacao: $Enums.SituacaoDocumento | null
   confirmadoPorId: string | null
   confirmadoEm: Date | null
+  resumo: string | null
+  encaminhadoPara: $Enums.Papel | null
 }
 
 export type DocumentoCountAggregateOutputType = {
@@ -58,6 +62,8 @@ export type DocumentoCountAggregateOutputType = {
   situacao: number
   confirmadoPorId: number
   confirmadoEm: number
+  resumo: number
+  encaminhadoPara: number
   _all: number
 }
 
@@ -72,6 +78,8 @@ export type DocumentoMinAggregateInputType = {
   situacao?: true
   confirmadoPorId?: true
   confirmadoEm?: true
+  resumo?: true
+  encaminhadoPara?: true
 }
 
 export type DocumentoMaxAggregateInputType = {
@@ -84,6 +92,8 @@ export type DocumentoMaxAggregateInputType = {
   situacao?: true
   confirmadoPorId?: true
   confirmadoEm?: true
+  resumo?: true
+  encaminhadoPara?: true
 }
 
 export type DocumentoCountAggregateInputType = {
@@ -96,6 +106,8 @@ export type DocumentoCountAggregateInputType = {
   situacao?: true
   confirmadoPorId?: true
   confirmadoEm?: true
+  resumo?: true
+  encaminhadoPara?: true
   _all?: true
 }
 
@@ -181,6 +193,8 @@ export type DocumentoGroupByOutputType = {
   situacao: $Enums.SituacaoDocumento
   confirmadoPorId: string | null
   confirmadoEm: Date | null
+  resumo: string | null
+  encaminhadoPara: $Enums.Papel | null
   _count: DocumentoCountAggregateOutputType | null
   _min: DocumentoMinAggregateOutputType | null
   _max: DocumentoMaxAggregateOutputType | null
@@ -214,6 +228,8 @@ export type DocumentoWhereInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFilter<"Documento"> | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.StringNullableFilter<"Documento"> | string | null
   confirmadoEm?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  resumo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  encaminhadoPara?: Prisma.EnumPapelNullableFilter<"Documento"> | $Enums.Papel | null
   cliente?: Prisma.XOR<Prisma.ClienteNullableScalarRelationFilter, Prisma.ClienteWhereInput> | null
   enviadoPor?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
   confirmadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
@@ -232,6 +248,8 @@ export type DocumentoOrderByWithRelationInput = {
   situacao?: Prisma.SortOrder
   confirmadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  resumo?: Prisma.SortOrderInput | Prisma.SortOrder
+  encaminhadoPara?: Prisma.SortOrderInput | Prisma.SortOrder
   cliente?: Prisma.ClienteOrderByWithRelationInput
   enviadoPor?: Prisma.UsuarioOrderByWithRelationInput
   confirmadoPor?: Prisma.UsuarioOrderByWithRelationInput
@@ -253,6 +271,8 @@ export type DocumentoWhereUniqueInput = Prisma.AtLeast<{
   situacao?: Prisma.EnumSituacaoDocumentoFilter<"Documento"> | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.StringNullableFilter<"Documento"> | string | null
   confirmadoEm?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  resumo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  encaminhadoPara?: Prisma.EnumPapelNullableFilter<"Documento"> | $Enums.Papel | null
   cliente?: Prisma.XOR<Prisma.ClienteNullableScalarRelationFilter, Prisma.ClienteWhereInput> | null
   enviadoPor?: Prisma.XOR<Prisma.UsuarioScalarRelationFilter, Prisma.UsuarioWhereInput>
   confirmadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
@@ -271,6 +291,8 @@ export type DocumentoOrderByWithAggregationInput = {
   situacao?: Prisma.SortOrder
   confirmadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   confirmadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  resumo?: Prisma.SortOrderInput | Prisma.SortOrder
+  encaminhadoPara?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.DocumentoCountOrderByAggregateInput
   _max?: Prisma.DocumentoMaxOrderByAggregateInput
   _min?: Prisma.DocumentoMinOrderByAggregateInput
@@ -289,6 +311,8 @@ export type DocumentoScalarWhereWithAggregatesInput = {
   situacao?: Prisma.EnumSituacaoDocumentoWithAggregatesFilter<"Documento"> | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
   confirmadoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Documento"> | Date | string | null
+  resumo?: Prisma.StringNullableWithAggregatesFilter<"Documento"> | string | null
+  encaminhadoPara?: Prisma.EnumPapelNullableWithAggregatesFilter<"Documento"> | $Enums.Papel | null
 }
 
 export type DocumentoCreateInput = {
@@ -298,6 +322,8 @@ export type DocumentoCreateInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
@@ -316,6 +342,8 @@ export type DocumentoUncheckedCreateInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
@@ -328,6 +356,8 @@ export type DocumentoUpdateInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
@@ -346,6 +376,8 @@ export type DocumentoUncheckedUpdateInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
@@ -361,6 +393,8 @@ export type DocumentoCreateManyInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
 }
 
 export type DocumentoUpdateManyMutationInput = {
@@ -370,6 +404,8 @@ export type DocumentoUpdateManyMutationInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
 }
 
 export type DocumentoUncheckedUpdateManyInput = {
@@ -382,6 +418,8 @@ export type DocumentoUncheckedUpdateManyInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
 }
 
 export type DocumentoListRelationFilter = {
@@ -409,6 +447,8 @@ export type DocumentoCountOrderByAggregateInput = {
   situacao?: Prisma.SortOrder
   confirmadoPorId?: Prisma.SortOrder
   confirmadoEm?: Prisma.SortOrder
+  resumo?: Prisma.SortOrder
+  encaminhadoPara?: Prisma.SortOrder
 }
 
 export type DocumentoMaxOrderByAggregateInput = {
@@ -421,6 +461,8 @@ export type DocumentoMaxOrderByAggregateInput = {
   situacao?: Prisma.SortOrder
   confirmadoPorId?: Prisma.SortOrder
   confirmadoEm?: Prisma.SortOrder
+  resumo?: Prisma.SortOrder
+  encaminhadoPara?: Prisma.SortOrder
 }
 
 export type DocumentoMinOrderByAggregateInput = {
@@ -433,6 +475,8 @@ export type DocumentoMinOrderByAggregateInput = {
   situacao?: Prisma.SortOrder
   confirmadoPorId?: Prisma.SortOrder
   confirmadoEm?: Prisma.SortOrder
+  resumo?: Prisma.SortOrder
+  encaminhadoPara?: Prisma.SortOrder
 }
 
 export type DocumentoScalarRelationFilter = {
@@ -606,6 +650,10 @@ export type EnumSituacaoDocumentoFieldUpdateOperationsInput = {
   set?: $Enums.SituacaoDocumento
 }
 
+export type NullableEnumPapelFieldUpdateOperationsInput = {
+  set?: $Enums.Papel | null
+}
+
 export type DocumentoCreateNestedOneWithoutExecucoesInput = {
   create?: Prisma.XOR<Prisma.DocumentoCreateWithoutExecucoesInput, Prisma.DocumentoUncheckedCreateWithoutExecucoesInput>
   connectOrCreate?: Prisma.DocumentoCreateOrConnectWithoutExecucoesInput
@@ -627,6 +675,8 @@ export type DocumentoCreateWithoutEnviadoPorInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
   execucoes?: Prisma.ExecucaoAgenteCreateNestedManyWithoutDocumentoInput
@@ -643,6 +693,8 @@ export type DocumentoUncheckedCreateWithoutEnviadoPorInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
@@ -665,6 +717,8 @@ export type DocumentoCreateWithoutConfirmadoPorInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   execucoes?: Prisma.ExecucaoAgenteCreateNestedManyWithoutDocumentoInput
@@ -681,6 +735,8 @@ export type DocumentoUncheckedCreateWithoutConfirmadoPorInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
@@ -725,6 +781,8 @@ export type DocumentoScalarWhereInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFilter<"Documento"> | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.StringNullableFilter<"Documento"> | string | null
   confirmadoEm?: Prisma.DateTimeNullableFilter<"Documento"> | Date | string | null
+  resumo?: Prisma.StringNullableFilter<"Documento"> | string | null
+  encaminhadoPara?: Prisma.EnumPapelNullableFilter<"Documento"> | $Enums.Papel | null
 }
 
 export type DocumentoUpsertWithWhereUniqueWithoutConfirmadoPorInput = {
@@ -750,6 +808,8 @@ export type DocumentoCreateWithoutClienteInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
   execucoes?: Prisma.ExecucaoAgenteCreateNestedManyWithoutDocumentoInput
@@ -766,6 +826,8 @@ export type DocumentoUncheckedCreateWithoutClienteInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
@@ -804,6 +866,8 @@ export type DocumentoCreateWithoutContratosInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
@@ -821,6 +885,8 @@ export type DocumentoUncheckedCreateWithoutContratosInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
 }
@@ -848,6 +914,8 @@ export type DocumentoUpdateWithoutContratosInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
@@ -865,6 +933,8 @@ export type DocumentoUncheckedUpdateWithoutContratosInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
 }
@@ -876,6 +946,8 @@ export type DocumentoCreateWithoutPedidosInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
@@ -893,6 +965,8 @@ export type DocumentoUncheckedCreateWithoutPedidosInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
 }
@@ -920,6 +994,8 @@ export type DocumentoUpdateWithoutPedidosInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
@@ -937,6 +1013,8 @@ export type DocumentoUncheckedUpdateWithoutPedidosInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
 }
@@ -948,6 +1026,8 @@ export type DocumentoCreateWithoutExecucoesInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   cliente?: Prisma.ClienteCreateNestedOneWithoutDocumentosInput
   enviadoPor: Prisma.UsuarioCreateNestedOneWithoutDocumentosEnviadosInput
   confirmadoPor?: Prisma.UsuarioCreateNestedOneWithoutDocumentosConfirmadosInput
@@ -965,6 +1045,8 @@ export type DocumentoUncheckedCreateWithoutExecucoesInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutDocumentoInput
   contratos?: Prisma.ContratoUncheckedCreateNestedManyWithoutDocumentoInput
 }
@@ -992,6 +1074,8 @@ export type DocumentoUpdateWithoutExecucoesInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
@@ -1009,6 +1093,8 @@ export type DocumentoUncheckedUpdateWithoutExecucoesInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
 }
@@ -1022,6 +1108,8 @@ export type DocumentoCreateManyEnviadoPorInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
 }
 
 export type DocumentoCreateManyConfirmadoPorInput = {
@@ -1033,6 +1121,8 @@ export type DocumentoCreateManyConfirmadoPorInput = {
   enviadoEm?: Date | string
   situacao?: $Enums.SituacaoDocumento
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
 }
 
 export type DocumentoUpdateWithoutEnviadoPorInput = {
@@ -1042,6 +1132,8 @@ export type DocumentoUpdateWithoutEnviadoPorInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
   execucoes?: Prisma.ExecucaoAgenteUpdateManyWithoutDocumentoNestedInput
@@ -1058,6 +1150,8 @@ export type DocumentoUncheckedUpdateWithoutEnviadoPorInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
@@ -1072,6 +1166,8 @@ export type DocumentoUncheckedUpdateManyWithoutEnviadoPorInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
 }
 
 export type DocumentoUpdateWithoutConfirmadoPorInput = {
@@ -1081,6 +1177,8 @@ export type DocumentoUpdateWithoutConfirmadoPorInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   cliente?: Prisma.ClienteUpdateOneWithoutDocumentosNestedInput
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   execucoes?: Prisma.ExecucaoAgenteUpdateManyWithoutDocumentoNestedInput
@@ -1097,6 +1195,8 @@ export type DocumentoUncheckedUpdateWithoutConfirmadoPorInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
@@ -1111,6 +1211,8 @@ export type DocumentoUncheckedUpdateManyWithoutConfirmadoPorInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
 }
 
 export type DocumentoCreateManyClienteInput = {
@@ -1122,6 +1224,8 @@ export type DocumentoCreateManyClienteInput = {
   situacao?: $Enums.SituacaoDocumento
   confirmadoPorId?: string | null
   confirmadoEm?: Date | string | null
+  resumo?: string | null
+  encaminhadoPara?: $Enums.Papel | null
 }
 
 export type DocumentoUpdateWithoutClienteInput = {
@@ -1131,6 +1235,8 @@ export type DocumentoUpdateWithoutClienteInput = {
   enviadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   enviadoPor?: Prisma.UsuarioUpdateOneRequiredWithoutDocumentosEnviadosNestedInput
   confirmadoPor?: Prisma.UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput
   execucoes?: Prisma.ExecucaoAgenteUpdateManyWithoutDocumentoNestedInput
@@ -1147,6 +1253,8 @@ export type DocumentoUncheckedUpdateWithoutClienteInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
   execucoes?: Prisma.ExecucaoAgenteUncheckedUpdateManyWithoutDocumentoNestedInput
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutDocumentoNestedInput
   contratos?: Prisma.ContratoUncheckedUpdateManyWithoutDocumentoNestedInput
@@ -1161,6 +1269,8 @@ export type DocumentoUncheckedUpdateManyWithoutClienteInput = {
   situacao?: Prisma.EnumSituacaoDocumentoFieldUpdateOperationsInput | $Enums.SituacaoDocumento
   confirmadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   confirmadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  resumo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encaminhadoPara?: Prisma.NullableEnumPapelFieldUpdateOperationsInput | $Enums.Papel | null
 }
 
 
@@ -1222,6 +1332,8 @@ export type DocumentoSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   situacao?: boolean
   confirmadoPorId?: boolean
   confirmadoEm?: boolean
+  resumo?: boolean
+  encaminhadoPara?: boolean
   cliente?: boolean | Prisma.Documento$clienteArgs<ExtArgs>
   enviadoPor?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   confirmadoPor?: boolean | Prisma.Documento$confirmadoPorArgs<ExtArgs>
@@ -1241,6 +1353,8 @@ export type DocumentoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   situacao?: boolean
   confirmadoPorId?: boolean
   confirmadoEm?: boolean
+  resumo?: boolean
+  encaminhadoPara?: boolean
   cliente?: boolean | Prisma.Documento$clienteArgs<ExtArgs>
   enviadoPor?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   confirmadoPor?: boolean | Prisma.Documento$confirmadoPorArgs<ExtArgs>
@@ -1256,6 +1370,8 @@ export type DocumentoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   situacao?: boolean
   confirmadoPorId?: boolean
   confirmadoEm?: boolean
+  resumo?: boolean
+  encaminhadoPara?: boolean
   cliente?: boolean | Prisma.Documento$clienteArgs<ExtArgs>
   enviadoPor?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   confirmadoPor?: boolean | Prisma.Documento$confirmadoPorArgs<ExtArgs>
@@ -1271,9 +1387,11 @@ export type DocumentoSelectScalar = {
   situacao?: boolean
   confirmadoPorId?: boolean
   confirmadoEm?: boolean
+  resumo?: boolean
+  encaminhadoPara?: boolean
 }
 
-export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "arquivo" | "tipo" | "clienteId" | "enviadoPorId" | "enviadoEm" | "situacao" | "confirmadoPorId" | "confirmadoEm", ExtArgs["result"]["documento"]>
+export type DocumentoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "arquivo" | "tipo" | "clienteId" | "enviadoPorId" | "enviadoEm" | "situacao" | "confirmadoPorId" | "confirmadoEm" | "resumo" | "encaminhadoPara", ExtArgs["result"]["documento"]>
 export type DocumentoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.Documento$clienteArgs<ExtArgs>
   enviadoPor?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
@@ -1314,6 +1432,8 @@ export type $DocumentoPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     situacao: $Enums.SituacaoDocumento
     confirmadoPorId: string | null
     confirmadoEm: Date | null
+    resumo: string | null
+    encaminhadoPara: $Enums.Papel | null
   }, ExtArgs["result"]["documento"]>
   composites: {}
 }
@@ -1752,6 +1872,8 @@ export interface DocumentoFieldRefs {
   readonly situacao: Prisma.FieldRef<"Documento", 'SituacaoDocumento'>
   readonly confirmadoPorId: Prisma.FieldRef<"Documento", 'String'>
   readonly confirmadoEm: Prisma.FieldRef<"Documento", 'DateTime'>
+  readonly resumo: Prisma.FieldRef<"Documento", 'String'>
+  readonly encaminhadoPara: Prisma.FieldRef<"Documento", 'Papel'>
 }
     
 

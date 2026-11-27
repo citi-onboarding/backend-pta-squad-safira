@@ -63,6 +63,9 @@ const clientes = [
   },
 ] as const;
 
+// Fixed, so a second run writes the same rows.
+const atualizadoNoErpEm = new Date("2026-11-01T09:00:00-03:00");
+
 const produtos = [
   {
     codigoErp: "P9001",
@@ -97,16 +100,16 @@ try {
   for (const cliente of clientes) {
     await database.cliente.upsert({
       where: { codigoErp: cliente.codigoErp },
-      update: cliente,
-      create: cliente,
+      update: { ...cliente, atualizadoNoErpEm },
+      create: { ...cliente, atualizadoNoErpEm },
     });
   }
 
   for (const produto of produtos) {
     await database.produto.upsert({
       where: { codigoErp: produto.codigoErp },
-      update: produto,
-      create: produto,
+      update: { ...produto, atualizadoNoErpEm },
+      create: { ...produto, atualizadoNoErpEm },
     });
   }
 } finally {

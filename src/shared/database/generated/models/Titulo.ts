@@ -48,6 +48,7 @@ export type TituloMinAggregateOutputType = {
   pagamento: Date | null
   status: $Enums.StatusTitulo | null
   origem: $Enums.OrigemTitulo | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -63,6 +64,7 @@ export type TituloMaxAggregateOutputType = {
   pagamento: Date | null
   status: $Enums.StatusTitulo | null
   origem: $Enums.OrigemTitulo | null
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date | null
 }
 
@@ -78,6 +80,7 @@ export type TituloCountAggregateOutputType = {
   pagamento: number
   status: number
   origem: number
+  atualizadoNoErpEm: number
   atualizadoEm: number
   _all: number
 }
@@ -105,6 +108,7 @@ export type TituloMinAggregateInputType = {
   pagamento?: true
   status?: true
   origem?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -120,6 +124,7 @@ export type TituloMaxAggregateInputType = {
   pagamento?: true
   status?: true
   origem?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
 }
 
@@ -135,6 +140,7 @@ export type TituloCountAggregateInputType = {
   pagamento?: true
   status?: true
   origem?: true
+  atualizadoNoErpEm?: true
   atualizadoEm?: true
   _all?: true
 }
@@ -237,6 +243,7 @@ export type TituloGroupByOutputType = {
   pagamento: Date | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm: Date | null
   atualizadoEm: Date
   _count: TituloCountAggregateOutputType | null
   _avg: TituloAvgAggregateOutputType | null
@@ -275,6 +282,7 @@ export type TituloWhereInput = {
   pagamento?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   status?: Prisma.EnumStatusTituloFilter<"Titulo"> | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFilter<"Titulo"> | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   atualizadoEm?: Prisma.DateTimeFilter<"Titulo"> | Date | string
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
 }
@@ -291,6 +299,7 @@ export type TituloOrderByWithRelationInput = {
   pagamento?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   origem?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrderInput | Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   cliente?: Prisma.ClienteOrderByWithRelationInput
 }
@@ -311,6 +320,7 @@ export type TituloWhereUniqueInput = Prisma.AtLeast<{
   pagamento?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   status?: Prisma.EnumStatusTituloFilter<"Titulo"> | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFilter<"Titulo"> | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   atualizadoEm?: Prisma.DateTimeFilter<"Titulo"> | Date | string
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
 }, "id" | "numero_parcela">
@@ -327,6 +337,7 @@ export type TituloOrderByWithAggregationInput = {
   pagamento?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   origem?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrderInput | Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
   _count?: Prisma.TituloCountOrderByAggregateInput
   _avg?: Prisma.TituloAvgOrderByAggregateInput
@@ -350,6 +361,7 @@ export type TituloScalarWhereWithAggregatesInput = {
   pagamento?: Prisma.DateTimeNullableWithAggregatesFilter<"Titulo"> | Date | string | null
   status?: Prisma.EnumStatusTituloWithAggregatesFilter<"Titulo"> | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloWithAggregatesFilter<"Titulo"> | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Titulo"> | Date | string | null
   atualizadoEm?: Prisma.DateTimeWithAggregatesFilter<"Titulo"> | Date | string
 }
 
@@ -364,6 +376,7 @@ export type TituloCreateInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
   cliente: Prisma.ClienteCreateNestedOneWithoutTitulosInput
 }
@@ -380,6 +393,7 @@ export type TituloUncheckedCreateInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
 }
 
@@ -394,6 +408,7 @@ export type TituloUpdateInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutTitulosNestedInput
 }
@@ -410,6 +425,7 @@ export type TituloUncheckedUpdateInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -425,6 +441,7 @@ export type TituloCreateManyInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
 }
 
@@ -439,6 +456,7 @@ export type TituloUpdateManyMutationInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -454,6 +472,7 @@ export type TituloUncheckedUpdateManyInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -484,6 +503,7 @@ export type TituloCountOrderByAggregateInput = {
   pagamento?: Prisma.SortOrder
   status?: Prisma.SortOrder
   origem?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -504,6 +524,7 @@ export type TituloMaxOrderByAggregateInput = {
   pagamento?: Prisma.SortOrder
   status?: Prisma.SortOrder
   origem?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -519,6 +540,7 @@ export type TituloMinOrderByAggregateInput = {
   pagamento?: Prisma.SortOrder
   status?: Prisma.SortOrder
   origem?: Prisma.SortOrder
+  atualizadoNoErpEm?: Prisma.SortOrder
   atualizadoEm?: Prisma.SortOrder
 }
 
@@ -592,6 +614,7 @@ export type TituloCreateWithoutClienteInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
 }
 
@@ -606,6 +629,7 @@ export type TituloUncheckedCreateWithoutClienteInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
 }
 
@@ -650,6 +674,7 @@ export type TituloScalarWhereInput = {
   pagamento?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   status?: Prisma.EnumStatusTituloFilter<"Titulo"> | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFilter<"Titulo"> | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.DateTimeNullableFilter<"Titulo"> | Date | string | null
   atualizadoEm?: Prisma.DateTimeFilter<"Titulo"> | Date | string
 }
 
@@ -664,6 +689,7 @@ export type TituloCreateManyClienteInput = {
   pagamento?: Date | string | null
   status: $Enums.StatusTitulo
   origem: $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Date | string | null
   atualizadoEm?: Date | string
 }
 
@@ -678,6 +704,7 @@ export type TituloUpdateWithoutClienteInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -692,6 +719,7 @@ export type TituloUncheckedUpdateWithoutClienteInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -706,6 +734,7 @@ export type TituloUncheckedUpdateManyWithoutClienteInput = {
   pagamento?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumStatusTituloFieldUpdateOperationsInput | $Enums.StatusTitulo
   origem?: Prisma.EnumOrigemTituloFieldUpdateOperationsInput | $Enums.OrigemTitulo
+  atualizadoNoErpEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -723,6 +752,7 @@ export type TituloSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   pagamento?: boolean
   status?: boolean
   origem?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["titulo"]>
@@ -739,6 +769,7 @@ export type TituloSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   pagamento?: boolean
   status?: boolean
   origem?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["titulo"]>
@@ -755,6 +786,7 @@ export type TituloSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   pagamento?: boolean
   status?: boolean
   origem?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["titulo"]>
@@ -771,10 +803,11 @@ export type TituloSelectScalar = {
   pagamento?: boolean
   status?: boolean
   origem?: boolean
+  atualizadoNoErpEm?: boolean
   atualizadoEm?: boolean
 }
 
-export type TituloOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "parcela" | "clienteId" | "pedidoErp" | "valorCentavos" | "emissao" | "vencimento" | "pagamento" | "status" | "origem" | "atualizadoEm", ExtArgs["result"]["titulo"]>
+export type TituloOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "parcela" | "clienteId" | "pedidoErp" | "valorCentavos" | "emissao" | "vencimento" | "pagamento" | "status" | "origem" | "atualizadoNoErpEm" | "atualizadoEm", ExtArgs["result"]["titulo"]>
 export type TituloInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
 }
@@ -802,6 +835,7 @@ export type $TituloPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     pagamento: Date | null
     status: $Enums.StatusTitulo
     origem: $Enums.OrigemTitulo
+    atualizadoNoErpEm: Date | null
     atualizadoEm: Date
   }, ExtArgs["result"]["titulo"]>
   composites: {}
@@ -1238,6 +1272,7 @@ export interface TituloFieldRefs {
   readonly pagamento: Prisma.FieldRef<"Titulo", 'DateTime'>
   readonly status: Prisma.FieldRef<"Titulo", 'StatusTitulo'>
   readonly origem: Prisma.FieldRef<"Titulo", 'OrigemTitulo'>
+  readonly atualizadoNoErpEm: Prisma.FieldRef<"Titulo", 'DateTime'>
   readonly atualizadoEm: Prisma.FieldRef<"Titulo", 'DateTime'>
 }
     

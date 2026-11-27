@@ -52,6 +52,8 @@ export type ContratoMinAggregateOutputType = {
   dataLimiteAviso: Date | null
   arquivo: string | null
   documentoId: string | null
+  avisoTratadoPorId: string | null
+  avisoTratadoEm: Date | null
   criadoEm: Date | null
 }
 
@@ -69,6 +71,8 @@ export type ContratoMaxAggregateOutputType = {
   dataLimiteAviso: Date | null
   arquivo: string | null
   documentoId: string | null
+  avisoTratadoPorId: string | null
+  avisoTratadoEm: Date | null
   criadoEm: Date | null
 }
 
@@ -86,6 +90,8 @@ export type ContratoCountAggregateOutputType = {
   dataLimiteAviso: number
   arquivo: number
   documentoId: number
+  avisoTratadoPorId: number
+  avisoTratadoEm: number
   criadoEm: number
   _all: number
 }
@@ -117,6 +123,8 @@ export type ContratoMinAggregateInputType = {
   dataLimiteAviso?: true
   arquivo?: true
   documentoId?: true
+  avisoTratadoPorId?: true
+  avisoTratadoEm?: true
   criadoEm?: true
 }
 
@@ -134,6 +142,8 @@ export type ContratoMaxAggregateInputType = {
   dataLimiteAviso?: true
   arquivo?: true
   documentoId?: true
+  avisoTratadoPorId?: true
+  avisoTratadoEm?: true
   criadoEm?: true
 }
 
@@ -151,6 +161,8 @@ export type ContratoCountAggregateInputType = {
   dataLimiteAviso?: true
   arquivo?: true
   documentoId?: true
+  avisoTratadoPorId?: true
+  avisoTratadoEm?: true
   criadoEm?: true
   _all?: true
 }
@@ -255,6 +267,8 @@ export type ContratoGroupByOutputType = {
   dataLimiteAviso: Date
   arquivo: string
   documentoId: string | null
+  avisoTratadoPorId: string | null
+  avisoTratadoEm: Date | null
   criadoEm: Date
   _count: ContratoCountAggregateOutputType | null
   _avg: ContratoAvgAggregateOutputType | null
@@ -295,9 +309,12 @@ export type ContratoWhereInput = {
   dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringFilter<"Contrato"> | string
   documentoId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoPorId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoEm?: Prisma.DateTimeNullableFilter<"Contrato"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
   documento?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
+  avisoTratadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
 }
 
 export type ContratoOrderByWithRelationInput = {
@@ -314,9 +331,12 @@ export type ContratoOrderByWithRelationInput = {
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
   documentoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avisoTratadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avisoTratadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   cliente?: Prisma.ClienteOrderByWithRelationInput
   documento?: Prisma.DocumentoOrderByWithRelationInput
+  avisoTratadoPor?: Prisma.UsuarioOrderByWithRelationInput
 }
 
 export type ContratoWhereUniqueInput = Prisma.AtLeast<{
@@ -336,9 +356,12 @@ export type ContratoWhereUniqueInput = Prisma.AtLeast<{
   dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringFilter<"Contrato"> | string
   documentoId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoPorId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoEm?: Prisma.DateTimeNullableFilter<"Contrato"> | Date | string | null
   criadoEm?: Prisma.DateTimeFilter<"Contrato"> | Date | string
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
   documento?: Prisma.XOR<Prisma.DocumentoNullableScalarRelationFilter, Prisma.DocumentoWhereInput> | null
+  avisoTratadoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
 }, "id" | "numero">
 
 export type ContratoOrderByWithAggregationInput = {
@@ -355,6 +378,8 @@ export type ContratoOrderByWithAggregationInput = {
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
   documentoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avisoTratadoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
+  avisoTratadoEm?: Prisma.SortOrderInput | Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
   _count?: Prisma.ContratoCountOrderByAggregateInput
   _avg?: Prisma.ContratoAvgOrderByAggregateInput
@@ -380,6 +405,8 @@ export type ContratoScalarWhereWithAggregatesInput = {
   dataLimiteAviso?: Prisma.DateTimeWithAggregatesFilter<"Contrato"> | Date | string
   arquivo?: Prisma.StringWithAggregatesFilter<"Contrato"> | string
   documentoId?: Prisma.StringNullableWithAggregatesFilter<"Contrato"> | string | null
+  avisoTratadoPorId?: Prisma.StringNullableWithAggregatesFilter<"Contrato"> | string | null
+  avisoTratadoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"Contrato"> | Date | string | null
   criadoEm?: Prisma.DateTimeWithAggregatesFilter<"Contrato"> | Date | string
 }
 
@@ -395,9 +422,11 @@ export type ContratoCreateInput = {
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
   cliente: Prisma.ClienteCreateNestedOneWithoutContratosInput
   documento?: Prisma.DocumentoCreateNestedOneWithoutContratosInput
+  avisoTratadoPor?: Prisma.UsuarioCreateNestedOneWithoutAvisosTratadosInput
 }
 
 export type ContratoUncheckedCreateInput = {
@@ -414,6 +443,8 @@ export type ContratoUncheckedCreateInput = {
   dataLimiteAviso: Date | string
   arquivo: string
   documentoId?: string | null
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -429,9 +460,11 @@ export type ContratoUpdateInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutContratosNestedInput
   documento?: Prisma.DocumentoUpdateOneWithoutContratosNestedInput
+  avisoTratadoPor?: Prisma.UsuarioUpdateOneWithoutAvisosTratadosNestedInput
 }
 
 export type ContratoUncheckedUpdateInput = {
@@ -448,6 +481,8 @@ export type ContratoUncheckedUpdateInput = {
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
   documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -465,6 +500,8 @@ export type ContratoCreateManyInput = {
   dataLimiteAviso: Date | string
   arquivo: string
   documentoId?: string | null
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -480,6 +517,7 @@ export type ContratoUpdateManyMutationInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -497,6 +535,8 @@ export type ContratoUncheckedUpdateManyInput = {
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
   documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -524,6 +564,8 @@ export type ContratoCountOrderByAggregateInput = {
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
   documentoId?: Prisma.SortOrder
+  avisoTratadoPorId?: Prisma.SortOrder
+  avisoTratadoEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -547,6 +589,8 @@ export type ContratoMaxOrderByAggregateInput = {
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
   documentoId?: Prisma.SortOrder
+  avisoTratadoPorId?: Prisma.SortOrder
+  avisoTratadoEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -564,6 +608,8 @@ export type ContratoMinOrderByAggregateInput = {
   dataLimiteAviso?: Prisma.SortOrder
   arquivo?: Prisma.SortOrder
   documentoId?: Prisma.SortOrder
+  avisoTratadoPorId?: Prisma.SortOrder
+  avisoTratadoEm?: Prisma.SortOrder
   criadoEm?: Prisma.SortOrder
 }
 
@@ -571,6 +617,48 @@ export type ContratoSumOrderByAggregateInput = {
   avisoPrevioDias?: Prisma.SortOrder
   prazoPagamentoDias?: Prisma.SortOrder
   volumeMinimo?: Prisma.SortOrder
+}
+
+export type ContratoCreateNestedManyWithoutAvisoTratadoPorInput = {
+  create?: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput> | Prisma.ContratoCreateWithoutAvisoTratadoPorInput[] | Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput[]
+  connectOrCreate?: Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput | Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput[]
+  createMany?: Prisma.ContratoCreateManyAvisoTratadoPorInputEnvelope
+  connect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+}
+
+export type ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput = {
+  create?: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput> | Prisma.ContratoCreateWithoutAvisoTratadoPorInput[] | Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput[]
+  connectOrCreate?: Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput | Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput[]
+  createMany?: Prisma.ContratoCreateManyAvisoTratadoPorInputEnvelope
+  connect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+}
+
+export type ContratoUpdateManyWithoutAvisoTratadoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput> | Prisma.ContratoCreateWithoutAvisoTratadoPorInput[] | Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput[]
+  connectOrCreate?: Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput | Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput[]
+  upsert?: Prisma.ContratoUpsertWithWhereUniqueWithoutAvisoTratadoPorInput | Prisma.ContratoUpsertWithWhereUniqueWithoutAvisoTratadoPorInput[]
+  createMany?: Prisma.ContratoCreateManyAvisoTratadoPorInputEnvelope
+  set?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  disconnect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  delete?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  connect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  update?: Prisma.ContratoUpdateWithWhereUniqueWithoutAvisoTratadoPorInput | Prisma.ContratoUpdateWithWhereUniqueWithoutAvisoTratadoPorInput[]
+  updateMany?: Prisma.ContratoUpdateManyWithWhereWithoutAvisoTratadoPorInput | Prisma.ContratoUpdateManyWithWhereWithoutAvisoTratadoPorInput[]
+  deleteMany?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
+}
+
+export type ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput> | Prisma.ContratoCreateWithoutAvisoTratadoPorInput[] | Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput[]
+  connectOrCreate?: Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput | Prisma.ContratoCreateOrConnectWithoutAvisoTratadoPorInput[]
+  upsert?: Prisma.ContratoUpsertWithWhereUniqueWithoutAvisoTratadoPorInput | Prisma.ContratoUpsertWithWhereUniqueWithoutAvisoTratadoPorInput[]
+  createMany?: Prisma.ContratoCreateManyAvisoTratadoPorInputEnvelope
+  set?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  disconnect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  delete?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  connect?: Prisma.ContratoWhereUniqueInput | Prisma.ContratoWhereUniqueInput[]
+  update?: Prisma.ContratoUpdateWithWhereUniqueWithoutAvisoTratadoPorInput | Prisma.ContratoUpdateWithWhereUniqueWithoutAvisoTratadoPorInput[]
+  updateMany?: Prisma.ContratoUpdateManyWithWhereWithoutAvisoTratadoPorInput | Prisma.ContratoUpdateManyWithWhereWithoutAvisoTratadoPorInput[]
+  deleteMany?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
 }
 
 export type ContratoCreateNestedManyWithoutClienteInput = {
@@ -665,6 +753,90 @@ export type ContratoUncheckedUpdateManyWithoutDocumentoNestedInput = {
   deleteMany?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
 }
 
+export type ContratoCreateWithoutAvisoTratadoPorInput = {
+  id?: string
+  numero: string
+  inicio: Date | string
+  fim: Date | string
+  avisoPrevioDias: number
+  renovacaoAutomatica: boolean
+  prazoPagamentoDias?: number | null
+  volumeMinimo?: number | null
+  temAditivo?: boolean
+  dataLimiteAviso: Date | string
+  arquivo: string
+  avisoTratadoEm?: Date | string | null
+  criadoEm?: Date | string
+  cliente: Prisma.ClienteCreateNestedOneWithoutContratosInput
+  documento?: Prisma.DocumentoCreateNestedOneWithoutContratosInput
+}
+
+export type ContratoUncheckedCreateWithoutAvisoTratadoPorInput = {
+  id?: string
+  numero: string
+  clienteId: string
+  inicio: Date | string
+  fim: Date | string
+  avisoPrevioDias: number
+  renovacaoAutomatica: boolean
+  prazoPagamentoDias?: number | null
+  volumeMinimo?: number | null
+  temAditivo?: boolean
+  dataLimiteAviso: Date | string
+  arquivo: string
+  documentoId?: string | null
+  avisoTratadoEm?: Date | string | null
+  criadoEm?: Date | string
+}
+
+export type ContratoCreateOrConnectWithoutAvisoTratadoPorInput = {
+  where: Prisma.ContratoWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput>
+}
+
+export type ContratoCreateManyAvisoTratadoPorInputEnvelope = {
+  data: Prisma.ContratoCreateManyAvisoTratadoPorInput | Prisma.ContratoCreateManyAvisoTratadoPorInput[]
+  skipDuplicates?: boolean
+}
+
+export type ContratoUpsertWithWhereUniqueWithoutAvisoTratadoPorInput = {
+  where: Prisma.ContratoWhereUniqueInput
+  update: Prisma.XOR<Prisma.ContratoUpdateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedUpdateWithoutAvisoTratadoPorInput>
+  create: Prisma.XOR<Prisma.ContratoCreateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedCreateWithoutAvisoTratadoPorInput>
+}
+
+export type ContratoUpdateWithWhereUniqueWithoutAvisoTratadoPorInput = {
+  where: Prisma.ContratoWhereUniqueInput
+  data: Prisma.XOR<Prisma.ContratoUpdateWithoutAvisoTratadoPorInput, Prisma.ContratoUncheckedUpdateWithoutAvisoTratadoPorInput>
+}
+
+export type ContratoUpdateManyWithWhereWithoutAvisoTratadoPorInput = {
+  where: Prisma.ContratoScalarWhereInput
+  data: Prisma.XOR<Prisma.ContratoUpdateManyMutationInput, Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorInput>
+}
+
+export type ContratoScalarWhereInput = {
+  AND?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
+  OR?: Prisma.ContratoScalarWhereInput[]
+  NOT?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
+  id?: Prisma.StringFilter<"Contrato"> | string
+  numero?: Prisma.StringFilter<"Contrato"> | string
+  clienteId?: Prisma.StringFilter<"Contrato"> | string
+  inicio?: Prisma.DateTimeFilter<"Contrato"> | Date | string
+  fim?: Prisma.DateTimeFilter<"Contrato"> | Date | string
+  avisoPrevioDias?: Prisma.IntFilter<"Contrato"> | number
+  renovacaoAutomatica?: Prisma.BoolFilter<"Contrato"> | boolean
+  prazoPagamentoDias?: Prisma.IntNullableFilter<"Contrato"> | number | null
+  volumeMinimo?: Prisma.IntNullableFilter<"Contrato"> | number | null
+  temAditivo?: Prisma.BoolFilter<"Contrato"> | boolean
+  dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
+  arquivo?: Prisma.StringFilter<"Contrato"> | string
+  documentoId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoPorId?: Prisma.StringNullableFilter<"Contrato"> | string | null
+  avisoTratadoEm?: Prisma.DateTimeNullableFilter<"Contrato"> | Date | string | null
+  criadoEm?: Prisma.DateTimeFilter<"Contrato"> | Date | string
+}
+
 export type ContratoCreateWithoutClienteInput = {
   id?: string
   numero: string
@@ -677,8 +849,10 @@ export type ContratoCreateWithoutClienteInput = {
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
   documento?: Prisma.DocumentoCreateNestedOneWithoutContratosInput
+  avisoTratadoPor?: Prisma.UsuarioCreateNestedOneWithoutAvisosTratadosInput
 }
 
 export type ContratoUncheckedCreateWithoutClienteInput = {
@@ -694,6 +868,8 @@ export type ContratoUncheckedCreateWithoutClienteInput = {
   dataLimiteAviso: Date | string
   arquivo: string
   documentoId?: string | null
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -723,26 +899,6 @@ export type ContratoUpdateManyWithWhereWithoutClienteInput = {
   data: Prisma.XOR<Prisma.ContratoUpdateManyMutationInput, Prisma.ContratoUncheckedUpdateManyWithoutClienteInput>
 }
 
-export type ContratoScalarWhereInput = {
-  AND?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
-  OR?: Prisma.ContratoScalarWhereInput[]
-  NOT?: Prisma.ContratoScalarWhereInput | Prisma.ContratoScalarWhereInput[]
-  id?: Prisma.StringFilter<"Contrato"> | string
-  numero?: Prisma.StringFilter<"Contrato"> | string
-  clienteId?: Prisma.StringFilter<"Contrato"> | string
-  inicio?: Prisma.DateTimeFilter<"Contrato"> | Date | string
-  fim?: Prisma.DateTimeFilter<"Contrato"> | Date | string
-  avisoPrevioDias?: Prisma.IntFilter<"Contrato"> | number
-  renovacaoAutomatica?: Prisma.BoolFilter<"Contrato"> | boolean
-  prazoPagamentoDias?: Prisma.IntNullableFilter<"Contrato"> | number | null
-  volumeMinimo?: Prisma.IntNullableFilter<"Contrato"> | number | null
-  temAditivo?: Prisma.BoolFilter<"Contrato"> | boolean
-  dataLimiteAviso?: Prisma.DateTimeFilter<"Contrato"> | Date | string
-  arquivo?: Prisma.StringFilter<"Contrato"> | string
-  documentoId?: Prisma.StringNullableFilter<"Contrato"> | string | null
-  criadoEm?: Prisma.DateTimeFilter<"Contrato"> | Date | string
-}
-
 export type ContratoCreateWithoutDocumentoInput = {
   id?: string
   numero: string
@@ -755,8 +911,10 @@ export type ContratoCreateWithoutDocumentoInput = {
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
   cliente: Prisma.ClienteCreateNestedOneWithoutContratosInput
+  avisoTratadoPor?: Prisma.UsuarioCreateNestedOneWithoutAvisosTratadosInput
 }
 
 export type ContratoUncheckedCreateWithoutDocumentoInput = {
@@ -772,6 +930,8 @@ export type ContratoUncheckedCreateWithoutDocumentoInput = {
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -801,6 +961,78 @@ export type ContratoUpdateManyWithWhereWithoutDocumentoInput = {
   data: Prisma.XOR<Prisma.ContratoUpdateManyMutationInput, Prisma.ContratoUncheckedUpdateManyWithoutDocumentoInput>
 }
 
+export type ContratoCreateManyAvisoTratadoPorInput = {
+  id?: string
+  numero: string
+  clienteId: string
+  inicio: Date | string
+  fim: Date | string
+  avisoPrevioDias: number
+  renovacaoAutomatica: boolean
+  prazoPagamentoDias?: number | null
+  volumeMinimo?: number | null
+  temAditivo?: boolean
+  dataLimiteAviso: Date | string
+  arquivo: string
+  documentoId?: string | null
+  avisoTratadoEm?: Date | string | null
+  criadoEm?: Date | string
+}
+
+export type ContratoUpdateWithoutAvisoTratadoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numero?: Prisma.StringFieldUpdateOperationsInput | string
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
+  renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cliente?: Prisma.ClienteUpdateOneRequiredWithoutContratosNestedInput
+  documento?: Prisma.DocumentoUpdateOneWithoutContratosNestedInput
+}
+
+export type ContratoUncheckedUpdateWithoutAvisoTratadoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numero?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
+  renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ContratoUncheckedUpdateManyWithoutAvisoTratadoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  numero?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  inicio?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fim?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  avisoPrevioDias?: Prisma.IntFieldUpdateOperationsInput | number
+  renovacaoAutomatica?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  prazoPagamentoDias?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  volumeMinimo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type ContratoCreateManyClienteInput = {
   id?: string
   numero: string
@@ -814,6 +1046,8 @@ export type ContratoCreateManyClienteInput = {
   dataLimiteAviso: Date | string
   arquivo: string
   documentoId?: string | null
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -829,8 +1063,10 @@ export type ContratoUpdateWithoutClienteInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documento?: Prisma.DocumentoUpdateOneWithoutContratosNestedInput
+  avisoTratadoPor?: Prisma.UsuarioUpdateOneWithoutAvisosTratadosNestedInput
 }
 
 export type ContratoUncheckedUpdateWithoutClienteInput = {
@@ -846,6 +1082,8 @@ export type ContratoUncheckedUpdateWithoutClienteInput = {
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
   documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -862,6 +1100,8 @@ export type ContratoUncheckedUpdateManyWithoutClienteInput = {
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
   documentoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -878,6 +1118,8 @@ export type ContratoCreateManyDocumentoInput = {
   temAditivo?: boolean
   dataLimiteAviso: Date | string
   arquivo: string
+  avisoTratadoPorId?: string | null
+  avisoTratadoEm?: Date | string | null
   criadoEm?: Date | string
 }
 
@@ -893,8 +1135,10 @@ export type ContratoUpdateWithoutDocumentoInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutContratosNestedInput
+  avisoTratadoPor?: Prisma.UsuarioUpdateOneWithoutAvisosTratadosNestedInput
 }
 
 export type ContratoUncheckedUpdateWithoutDocumentoInput = {
@@ -910,6 +1154,8 @@ export type ContratoUncheckedUpdateWithoutDocumentoInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -926,6 +1172,8 @@ export type ContratoUncheckedUpdateManyWithoutDocumentoInput = {
   temAditivo?: Prisma.BoolFieldUpdateOperationsInput | boolean
   dataLimiteAviso?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   arquivo?: Prisma.StringFieldUpdateOperationsInput | string
+  avisoTratadoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avisoTratadoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -945,9 +1193,12 @@ export type ContratoSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   dataLimiteAviso?: boolean
   arquivo?: boolean
   documentoId?: boolean
+  avisoTratadoPorId?: boolean
+  avisoTratadoEm?: boolean
   criadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["contrato"]>
 
 export type ContratoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -964,9 +1215,12 @@ export type ContratoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   dataLimiteAviso?: boolean
   arquivo?: boolean
   documentoId?: boolean
+  avisoTratadoPorId?: boolean
+  avisoTratadoEm?: boolean
   criadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["contrato"]>
 
 export type ContratoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -983,9 +1237,12 @@ export type ContratoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   dataLimiteAviso?: boolean
   arquivo?: boolean
   documentoId?: boolean
+  avisoTratadoPorId?: boolean
+  avisoTratadoEm?: boolean
   criadoEm?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }, ExtArgs["result"]["contrato"]>
 
 export type ContratoSelectScalar = {
@@ -1002,21 +1259,26 @@ export type ContratoSelectScalar = {
   dataLimiteAviso?: boolean
   arquivo?: boolean
   documentoId?: boolean
+  avisoTratadoPorId?: boolean
+  avisoTratadoEm?: boolean
   criadoEm?: boolean
 }
 
-export type ContratoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "clienteId" | "inicio" | "fim" | "avisoPrevioDias" | "renovacaoAutomatica" | "prazoPagamentoDias" | "volumeMinimo" | "temAditivo" | "dataLimiteAviso" | "arquivo" | "documentoId" | "criadoEm", ExtArgs["result"]["contrato"]>
+export type ContratoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "clienteId" | "inicio" | "fim" | "avisoPrevioDias" | "renovacaoAutomatica" | "prazoPagamentoDias" | "volumeMinimo" | "temAditivo" | "dataLimiteAviso" | "arquivo" | "documentoId" | "avisoTratadoPorId" | "avisoTratadoEm" | "criadoEm", ExtArgs["result"]["contrato"]>
 export type ContratoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }
 export type ContratoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }
 export type ContratoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
   documento?: boolean | Prisma.Contrato$documentoArgs<ExtArgs>
+  avisoTratadoPor?: boolean | Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>
 }
 
 export type $ContratoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1024,6 +1286,7 @@ export type $ContratoPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   objects: {
     cliente: Prisma.$ClientePayload<ExtArgs>
     documento: Prisma.$DocumentoPayload<ExtArgs> | null
+    avisoTratadoPor: Prisma.$UsuarioPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1039,6 +1302,8 @@ export type $ContratoPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     dataLimiteAviso: Date
     arquivo: string
     documentoId: string | null
+    avisoTratadoPorId: string | null
+    avisoTratadoEm: Date | null
     criadoEm: Date
   }, ExtArgs["result"]["contrato"]>
   composites: {}
@@ -1436,6 +1701,7 @@ export interface Prisma__ContratoClient<T, Null = never, ExtArgs extends runtime
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cliente<T extends Prisma.ClienteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClienteDefaultArgs<ExtArgs>>): Prisma.Prisma__ClienteClient<runtime.Types.Result.GetResult<Prisma.$ClientePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   documento<T extends Prisma.Contrato$documentoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contrato$documentoArgs<ExtArgs>>): Prisma.Prisma__DocumentoClient<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  avisoTratadoPor<T extends Prisma.Contrato$avisoTratadoPorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contrato$avisoTratadoPorArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1478,6 +1744,8 @@ export interface ContratoFieldRefs {
   readonly dataLimiteAviso: Prisma.FieldRef<"Contrato", 'DateTime'>
   readonly arquivo: Prisma.FieldRef<"Contrato", 'String'>
   readonly documentoId: Prisma.FieldRef<"Contrato", 'String'>
+  readonly avisoTratadoPorId: Prisma.FieldRef<"Contrato", 'String'>
+  readonly avisoTratadoEm: Prisma.FieldRef<"Contrato", 'DateTime'>
   readonly criadoEm: Prisma.FieldRef<"Contrato", 'DateTime'>
 }
     
@@ -1896,6 +2164,25 @@ export type Contrato$documentoArgs<ExtArgs extends runtime.Types.Extensions.Inte
    */
   include?: Prisma.DocumentoInclude<ExtArgs> | null
   where?: Prisma.DocumentoWhereInput
+}
+
+/**
+ * Contrato.avisoTratadoPor
+ */
+export type Contrato$avisoTratadoPorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Usuario
+   */
+  select?: Prisma.UsuarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Usuario
+   */
+  omit?: Prisma.UsuarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsuarioInclude<ExtArgs> | null
+  where?: Prisma.UsuarioWhereInput
 }
 
 /**

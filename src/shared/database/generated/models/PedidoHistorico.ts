@@ -228,9 +228,9 @@ export type PedidoHistoricoGroupByOutputType = {
   numero: string
   linha: number
   data: Date
-  clienteId: string | null
+  clienteId: string
   clienteNomeOriginal: string | null
-  produtoId: string | null
+  produtoId: string
   vendedorNome: string | null
   quantidade: number
   precoUnitarioCentavos: number
@@ -265,15 +265,15 @@ export type PedidoHistoricoWhereInput = {
   numero?: Prisma.StringFilter<"PedidoHistorico"> | string
   linha?: Prisma.IntFilter<"PedidoHistorico"> | number
   data?: Prisma.DateTimeFilter<"PedidoHistorico"> | Date | string
-  clienteId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  clienteId?: Prisma.StringFilter<"PedidoHistorico"> | string
   clienteNomeOriginal?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
-  produtoId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  produtoId?: Prisma.StringFilter<"PedidoHistorico"> | string
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
   status?: Prisma.StringFilter<"PedidoHistorico"> | string
-  cliente?: Prisma.XOR<Prisma.ClienteNullableScalarRelationFilter, Prisma.ClienteWhereInput> | null
-  produto?: Prisma.XOR<Prisma.ProdutoNullableScalarRelationFilter, Prisma.ProdutoWhereInput> | null
+  cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
+  produto?: Prisma.XOR<Prisma.ProdutoScalarRelationFilter, Prisma.ProdutoWhereInput>
 }
 
 export type PedidoHistoricoOrderByWithRelationInput = {
@@ -281,9 +281,9 @@ export type PedidoHistoricoOrderByWithRelationInput = {
   numero?: Prisma.SortOrder
   linha?: Prisma.SortOrder
   data?: Prisma.SortOrder
-  clienteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  clienteId?: Prisma.SortOrder
   clienteNomeOriginal?: Prisma.SortOrderInput | Prisma.SortOrder
-  produtoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  produtoId?: Prisma.SortOrder
   vendedorNome?: Prisma.SortOrderInput | Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
@@ -301,15 +301,15 @@ export type PedidoHistoricoWhereUniqueInput = Prisma.AtLeast<{
   numero?: Prisma.StringFilter<"PedidoHistorico"> | string
   linha?: Prisma.IntFilter<"PedidoHistorico"> | number
   data?: Prisma.DateTimeFilter<"PedidoHistorico"> | Date | string
-  clienteId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  clienteId?: Prisma.StringFilter<"PedidoHistorico"> | string
   clienteNomeOriginal?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
-  produtoId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  produtoId?: Prisma.StringFilter<"PedidoHistorico"> | string
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
   status?: Prisma.StringFilter<"PedidoHistorico"> | string
-  cliente?: Prisma.XOR<Prisma.ClienteNullableScalarRelationFilter, Prisma.ClienteWhereInput> | null
-  produto?: Prisma.XOR<Prisma.ProdutoNullableScalarRelationFilter, Prisma.ProdutoWhereInput> | null
+  cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
+  produto?: Prisma.XOR<Prisma.ProdutoScalarRelationFilter, Prisma.ProdutoWhereInput>
 }, "id" | "numero_linha">
 
 export type PedidoHistoricoOrderByWithAggregationInput = {
@@ -317,9 +317,9 @@ export type PedidoHistoricoOrderByWithAggregationInput = {
   numero?: Prisma.SortOrder
   linha?: Prisma.SortOrder
   data?: Prisma.SortOrder
-  clienteId?: Prisma.SortOrderInput | Prisma.SortOrder
+  clienteId?: Prisma.SortOrder
   clienteNomeOriginal?: Prisma.SortOrderInput | Prisma.SortOrder
-  produtoId?: Prisma.SortOrderInput | Prisma.SortOrder
+  produtoId?: Prisma.SortOrder
   vendedorNome?: Prisma.SortOrderInput | Prisma.SortOrder
   quantidade?: Prisma.SortOrder
   precoUnitarioCentavos?: Prisma.SortOrder
@@ -339,9 +339,9 @@ export type PedidoHistoricoScalarWhereWithAggregatesInput = {
   numero?: Prisma.StringWithAggregatesFilter<"PedidoHistorico"> | string
   linha?: Prisma.IntWithAggregatesFilter<"PedidoHistorico"> | number
   data?: Prisma.DateTimeWithAggregatesFilter<"PedidoHistorico"> | Date | string
-  clienteId?: Prisma.StringNullableWithAggregatesFilter<"PedidoHistorico"> | string | null
+  clienteId?: Prisma.StringWithAggregatesFilter<"PedidoHistorico"> | string
   clienteNomeOriginal?: Prisma.StringNullableWithAggregatesFilter<"PedidoHistorico"> | string | null
-  produtoId?: Prisma.StringNullableWithAggregatesFilter<"PedidoHistorico"> | string | null
+  produtoId?: Prisma.StringWithAggregatesFilter<"PedidoHistorico"> | string
   vendedorNome?: Prisma.StringNullableWithAggregatesFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntWithAggregatesFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntWithAggregatesFilter<"PedidoHistorico"> | number
@@ -358,8 +358,8 @@ export type PedidoHistoricoCreateInput = {
   quantidade: number
   precoUnitarioCentavos: number
   status: string
-  cliente?: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
-  produto?: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
+  cliente: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
+  produto: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
 }
 
 export type PedidoHistoricoUncheckedCreateInput = {
@@ -367,9 +367,9 @@ export type PedidoHistoricoUncheckedCreateInput = {
   numero: string
   linha: number
   data: Date | string
-  clienteId?: string | null
+  clienteId: string
   clienteNomeOriginal?: string | null
-  produtoId?: string | null
+  produtoId: string
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
@@ -386,8 +386,8 @@ export type PedidoHistoricoUpdateInput = {
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  cliente?: Prisma.ClienteUpdateOneWithoutPedidosHistoricoNestedInput
-  produto?: Prisma.ProdutoUpdateOneWithoutPedidosHistoricoNestedInput
+  cliente?: Prisma.ClienteUpdateOneRequiredWithoutPedidosHistoricoNestedInput
+  produto?: Prisma.ProdutoUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
 
 export type PedidoHistoricoUncheckedUpdateInput = {
@@ -395,9 +395,9 @@ export type PedidoHistoricoUncheckedUpdateInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  clienteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  produtoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  produtoId?: Prisma.StringFieldUpdateOperationsInput | string
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
@@ -409,9 +409,9 @@ export type PedidoHistoricoCreateManyInput = {
   numero: string
   linha: number
   data: Date | string
-  clienteId?: string | null
+  clienteId: string
   clienteNomeOriginal?: string | null
-  produtoId?: string | null
+  produtoId: string
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
@@ -435,9 +435,9 @@ export type PedidoHistoricoUncheckedUpdateManyInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  clienteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  produtoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  produtoId?: Prisma.StringFieldUpdateOperationsInput | string
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
@@ -607,7 +607,7 @@ export type PedidoHistoricoCreateWithoutClienteInput = {
   quantidade: number
   precoUnitarioCentavos: number
   status: string
-  produto?: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
+  produto: Prisma.ProdutoCreateNestedOneWithoutPedidosHistoricoInput
 }
 
 export type PedidoHistoricoUncheckedCreateWithoutClienteInput = {
@@ -616,7 +616,7 @@ export type PedidoHistoricoUncheckedCreateWithoutClienteInput = {
   linha: number
   data: Date | string
   clienteNomeOriginal?: string | null
-  produtoId?: string | null
+  produtoId: string
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
@@ -657,9 +657,9 @@ export type PedidoHistoricoScalarWhereInput = {
   numero?: Prisma.StringFilter<"PedidoHistorico"> | string
   linha?: Prisma.IntFilter<"PedidoHistorico"> | number
   data?: Prisma.DateTimeFilter<"PedidoHistorico"> | Date | string
-  clienteId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  clienteId?: Prisma.StringFilter<"PedidoHistorico"> | string
   clienteNomeOriginal?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
-  produtoId?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
+  produtoId?: Prisma.StringFilter<"PedidoHistorico"> | string
   vendedorNome?: Prisma.StringNullableFilter<"PedidoHistorico"> | string | null
   quantidade?: Prisma.IntFilter<"PedidoHistorico"> | number
   precoUnitarioCentavos?: Prisma.IntFilter<"PedidoHistorico"> | number
@@ -676,7 +676,7 @@ export type PedidoHistoricoCreateWithoutProdutoInput = {
   quantidade: number
   precoUnitarioCentavos: number
   status: string
-  cliente?: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
+  cliente: Prisma.ClienteCreateNestedOneWithoutPedidosHistoricoInput
 }
 
 export type PedidoHistoricoUncheckedCreateWithoutProdutoInput = {
@@ -684,7 +684,7 @@ export type PedidoHistoricoUncheckedCreateWithoutProdutoInput = {
   numero: string
   linha: number
   data: Date | string
-  clienteId?: string | null
+  clienteId: string
   clienteNomeOriginal?: string | null
   vendedorNome?: string | null
   quantidade: number
@@ -724,7 +724,7 @@ export type PedidoHistoricoCreateManyClienteInput = {
   linha: number
   data: Date | string
   clienteNomeOriginal?: string | null
-  produtoId?: string | null
+  produtoId: string
   vendedorNome?: string | null
   quantidade: number
   precoUnitarioCentavos: number
@@ -741,7 +741,7 @@ export type PedidoHistoricoUpdateWithoutClienteInput = {
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  produto?: Prisma.ProdutoUpdateOneWithoutPedidosHistoricoNestedInput
+  produto?: Prisma.ProdutoUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
 
 export type PedidoHistoricoUncheckedUpdateWithoutClienteInput = {
@@ -750,7 +750,7 @@ export type PedidoHistoricoUncheckedUpdateWithoutClienteInput = {
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  produtoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  produtoId?: Prisma.StringFieldUpdateOperationsInput | string
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
@@ -763,7 +763,7 @@ export type PedidoHistoricoUncheckedUpdateManyWithoutClienteInput = {
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  produtoId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  produtoId?: Prisma.StringFieldUpdateOperationsInput | string
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
@@ -775,7 +775,7 @@ export type PedidoHistoricoCreateManyProdutoInput = {
   numero: string
   linha: number
   data: Date | string
-  clienteId?: string | null
+  clienteId: string
   clienteNomeOriginal?: string | null
   vendedorNome?: string | null
   quantidade: number
@@ -793,7 +793,7 @@ export type PedidoHistoricoUpdateWithoutProdutoInput = {
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
   precoUnitarioCentavos?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  cliente?: Prisma.ClienteUpdateOneWithoutPedidosHistoricoNestedInput
+  cliente?: Prisma.ClienteUpdateOneRequiredWithoutPedidosHistoricoNestedInput
 }
 
 export type PedidoHistoricoUncheckedUpdateWithoutProdutoInput = {
@@ -801,7 +801,7 @@ export type PedidoHistoricoUncheckedUpdateWithoutProdutoInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  clienteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
@@ -814,7 +814,7 @@ export type PedidoHistoricoUncheckedUpdateManyWithoutProdutoInput = {
   numero?: Prisma.StringFieldUpdateOperationsInput | string
   linha?: Prisma.IntFieldUpdateOperationsInput | number
   data?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  clienteId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
   clienteNomeOriginal?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   vendedorNome?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantidade?: Prisma.IntFieldUpdateOperationsInput | number
@@ -836,8 +836,8 @@ export type PedidoHistoricoSelect<ExtArgs extends runtime.Types.Extensions.Inter
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
   status?: boolean
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
 
 export type PedidoHistoricoSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -852,8 +852,8 @@ export type PedidoHistoricoSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
   status?: boolean
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
 
 export type PedidoHistoricoSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -868,8 +868,8 @@ export type PedidoHistoricoSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   quantidade?: boolean
   precoUnitarioCentavos?: boolean
   status?: boolean
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["pedidoHistorico"]>
 
 export type PedidoHistoricoSelectScalar = {
@@ -888,32 +888,32 @@ export type PedidoHistoricoSelectScalar = {
 
 export type PedidoHistoricoOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "numero" | "linha" | "data" | "clienteId" | "clienteNomeOriginal" | "produtoId" | "vendedorNome" | "quantidade" | "precoUnitarioCentavos" | "status", ExtArgs["result"]["pedidoHistorico"]>
 export type PedidoHistoricoInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }
 export type PedidoHistoricoIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }
 export type PedidoHistoricoIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  cliente?: boolean | Prisma.PedidoHistorico$clienteArgs<ExtArgs>
-  produto?: boolean | Prisma.PedidoHistorico$produtoArgs<ExtArgs>
+  cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  produto?: boolean | Prisma.ProdutoDefaultArgs<ExtArgs>
 }
 
 export type $PedidoHistoricoPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "PedidoHistorico"
   objects: {
-    cliente: Prisma.$ClientePayload<ExtArgs> | null
-    produto: Prisma.$ProdutoPayload<ExtArgs> | null
+    cliente: Prisma.$ClientePayload<ExtArgs>
+    produto: Prisma.$ProdutoPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     numero: string
     linha: number
     data: Date
-    clienteId: string | null
+    clienteId: string
     clienteNomeOriginal: string | null
-    produtoId: string | null
+    produtoId: string
     vendedorNome: string | null
     quantidade: number
     precoUnitarioCentavos: number
@@ -1312,8 +1312,8 @@ readonly fields: PedidoHistoricoFieldRefs;
  */
 export interface Prisma__PedidoHistoricoClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  cliente<T extends Prisma.PedidoHistorico$clienteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PedidoHistorico$clienteArgs<ExtArgs>>): Prisma.Prisma__ClienteClient<runtime.Types.Result.GetResult<Prisma.$ClientePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-  produto<T extends Prisma.PedidoHistorico$produtoArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PedidoHistorico$produtoArgs<ExtArgs>>): Prisma.Prisma__ProdutoClient<runtime.Types.Result.GetResult<Prisma.$ProdutoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  cliente<T extends Prisma.ClienteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClienteDefaultArgs<ExtArgs>>): Prisma.Prisma__ClienteClient<runtime.Types.Result.GetResult<Prisma.$ClientePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  produto<T extends Prisma.ProdutoDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProdutoDefaultArgs<ExtArgs>>): Prisma.Prisma__ProdutoClient<runtime.Types.Result.GetResult<Prisma.$ProdutoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1752,44 +1752,6 @@ export type PedidoHistoricoDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many PedidoHistoricos to delete.
    */
   limit?: number
-}
-
-/**
- * PedidoHistorico.cliente
- */
-export type PedidoHistorico$clienteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Cliente
-   */
-  select?: Prisma.ClienteSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Cliente
-   */
-  omit?: Prisma.ClienteOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ClienteInclude<ExtArgs> | null
-  where?: Prisma.ClienteWhereInput
-}
-
-/**
- * PedidoHistorico.produto
- */
-export type PedidoHistorico$produtoArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Produto
-   */
-  select?: Prisma.ProdutoSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the Produto
-   */
-  omit?: Prisma.ProdutoOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ProdutoInclude<ExtArgs> | null
-  where?: Prisma.ProdutoWhereInput
 }
 
 /**

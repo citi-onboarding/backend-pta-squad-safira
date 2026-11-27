@@ -318,6 +318,13 @@ export type EnumSituacaoDocumentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel> | $Enums.SituacaoDocumento
 }
 
+export type EnumPapelNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Papel | Prisma.EnumPapelFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel> | $Enums.Papel | null
+}
+
 export type EnumTipoDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.TipoDocumento | Prisma.EnumTipoDocumentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipoDocumento[] | Prisma.ListEnumTipoDocumentoFieldRefInput<$PrismaModel>
@@ -336,6 +343,16 @@ export type EnumSituacaoDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel>
+}
+
+export type EnumPapelNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Papel | Prisma.EnumPapelFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPapelNullableWithAggregatesFilter<$PrismaModel> | $Enums.Papel | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel>
 }
 
 export type JsonFilter<$PrismaModel = never> =
@@ -835,6 +852,13 @@ export type NestedEnumSituacaoDocumentoFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel> | $Enums.SituacaoDocumento
 }
 
+export type NestedEnumPapelNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.Papel | Prisma.EnumPapelFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel> | $Enums.Papel | null
+}
+
 export type NestedEnumTipoDocumentoWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.TipoDocumento | Prisma.EnumTipoDocumentoFieldRefInput<$PrismaModel>
   in?: $Enums.TipoDocumento[] | Prisma.ListEnumTipoDocumentoFieldRefInput<$PrismaModel>
@@ -853,6 +877,16 @@ export type NestedEnumSituacaoDocumentoWithAggregatesFilter<$PrismaModel = never
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel>
   _max?: Prisma.NestedEnumSituacaoDocumentoFilter<$PrismaModel>
+}
+
+export type NestedEnumPapelNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.Papel | Prisma.EnumPapelFieldRefInput<$PrismaModel> | null
+  in?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.Papel[] | Prisma.ListEnumPapelFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumPapelNullableWithAggregatesFilter<$PrismaModel> | $Enums.Papel | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPapelNullableFilter<$PrismaModel>
 }
 
 export type NestedJsonFilter<$PrismaModel = never> =

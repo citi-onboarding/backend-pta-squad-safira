@@ -218,6 +218,8 @@ export type UsuarioWhereInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusListRelationFilter
   documentosEnviados?: Prisma.DocumentoListRelationFilter
   documentosConfirmados?: Prisma.DocumentoListRelationFilter
+  avisosTratados?: Prisma.ContratoListRelationFilter
+  contatosRegistrados?: Prisma.RiscoChurnListRelationFilter
 }
 
 export type UsuarioOrderByWithRelationInput = {
@@ -234,6 +236,8 @@ export type UsuarioOrderByWithRelationInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusOrderByRelationAggregateInput
   documentosEnviados?: Prisma.DocumentoOrderByRelationAggregateInput
   documentosConfirmados?: Prisma.DocumentoOrderByRelationAggregateInput
+  avisosTratados?: Prisma.ContratoOrderByRelationAggregateInput
+  contatosRegistrados?: Prisma.RiscoChurnOrderByRelationAggregateInput
 }
 
 export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
@@ -253,6 +257,8 @@ export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
   mudancasDeStatus?: Prisma.HistoricoStatusListRelationFilter
   documentosEnviados?: Prisma.DocumentoListRelationFilter
   documentosConfirmados?: Prisma.DocumentoListRelationFilter
+  avisosTratados?: Prisma.ContratoListRelationFilter
+  contatosRegistrados?: Prisma.RiscoChurnListRelationFilter
 }, "id" | "email" | "codigoVendedor">
 
 export type UsuarioOrderByWithAggregationInput = {
@@ -299,6 +305,8 @@ export type UsuarioCreateInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUncheckedCreateInput = {
@@ -315,6 +323,8 @@ export type UsuarioUncheckedCreateInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUpdateInput = {
@@ -331,6 +341,8 @@ export type UsuarioUpdateInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUncheckedUpdateInput = {
@@ -347,6 +359,8 @@ export type UsuarioUncheckedUpdateInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioCreateManyInput = {
@@ -421,14 +435,14 @@ export type UsuarioMinOrderByAggregateInput = {
   atualizadoEm?: Prisma.SortOrder
 }
 
-export type UsuarioScalarRelationFilter = {
-  is?: Prisma.UsuarioWhereInput
-  isNot?: Prisma.UsuarioWhereInput
-}
-
 export type UsuarioNullableScalarRelationFilter = {
   is?: Prisma.UsuarioWhereInput | null
   isNot?: Prisma.UsuarioWhereInput | null
+}
+
+export type UsuarioScalarRelationFilter = {
+  is?: Prisma.UsuarioWhereInput
+  isNot?: Prisma.UsuarioWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -449,6 +463,22 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type UsuarioCreateNestedOneWithoutAvisosTratadosInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedCreateWithoutAvisosTratadosInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutAvisosTratadosInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+}
+
+export type UsuarioUpdateOneWithoutAvisosTratadosNestedInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedCreateWithoutAvisosTratadosInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutAvisosTratadosInput
+  upsert?: Prisma.UsuarioUpsertWithoutAvisosTratadosInput
+  disconnect?: Prisma.UsuarioWhereInput | boolean
+  delete?: Prisma.UsuarioWhereInput | boolean
+  connect?: Prisma.UsuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutAvisosTratadosInput, Prisma.UsuarioUpdateWithoutAvisosTratadosInput>, Prisma.UsuarioUncheckedUpdateWithoutAvisosTratadosInput>
 }
 
 export type UsuarioCreateNestedOneWithoutPedidosInput = {
@@ -511,6 +541,106 @@ export type UsuarioUpdateOneWithoutDocumentosConfirmadosNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutDocumentosConfirmadosInput, Prisma.UsuarioUpdateWithoutDocumentosConfirmadosInput>, Prisma.UsuarioUncheckedUpdateWithoutDocumentosConfirmadosInput>
 }
 
+export type UsuarioCreateNestedOneWithoutContatosRegistradosInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedCreateWithoutContatosRegistradosInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutContatosRegistradosInput
+  connect?: Prisma.UsuarioWhereUniqueInput
+}
+
+export type UsuarioUpdateOneWithoutContatosRegistradosNestedInput = {
+  create?: Prisma.XOR<Prisma.UsuarioCreateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedCreateWithoutContatosRegistradosInput>
+  connectOrCreate?: Prisma.UsuarioCreateOrConnectWithoutContatosRegistradosInput
+  upsert?: Prisma.UsuarioUpsertWithoutContatosRegistradosInput
+  disconnect?: Prisma.UsuarioWhereInput | boolean
+  delete?: Prisma.UsuarioWhereInput | boolean
+  connect?: Prisma.UsuarioWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UsuarioUpdateToOneWithWhereWithoutContatosRegistradosInput, Prisma.UsuarioUpdateWithoutContatosRegistradosInput>, Prisma.UsuarioUncheckedUpdateWithoutContatosRegistradosInput>
+}
+
+export type UsuarioCreateWithoutAvisosTratadosInput = {
+  id?: string
+  nome: string
+  email: string
+  senhaHash: string
+  papel: $Enums.Papel
+  ativo?: boolean
+  codigoVendedor?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  pedidos?: Prisma.PedidoCreateNestedManyWithoutVendedorInput
+  mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
+  documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
+  documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
+}
+
+export type UsuarioUncheckedCreateWithoutAvisosTratadosInput = {
+  id?: string
+  nome: string
+  email: string
+  senhaHash: string
+  papel: $Enums.Papel
+  ativo?: boolean
+  codigoVendedor?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutVendedorInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
+  documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
+  documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
+}
+
+export type UsuarioCreateOrConnectWithoutAvisosTratadosInput = {
+  where: Prisma.UsuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedCreateWithoutAvisosTratadosInput>
+}
+
+export type UsuarioUpsertWithoutAvisosTratadosInput = {
+  update: Prisma.XOR<Prisma.UsuarioUpdateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedUpdateWithoutAvisosTratadosInput>
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedCreateWithoutAvisosTratadosInput>
+  where?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioUpdateToOneWithWhereWithoutAvisosTratadosInput = {
+  where?: Prisma.UsuarioWhereInput
+  data: Prisma.XOR<Prisma.UsuarioUpdateWithoutAvisosTratadosInput, Prisma.UsuarioUncheckedUpdateWithoutAvisosTratadosInput>
+}
+
+export type UsuarioUpdateWithoutAvisosTratadosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelFieldUpdateOperationsInput | $Enums.Papel
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pedidos?: Prisma.PedidoUpdateManyWithoutVendedorNestedInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
+  documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
+  documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
+}
+
+export type UsuarioUncheckedUpdateWithoutAvisosTratadosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelFieldUpdateOperationsInput | $Enums.Papel
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutVendedorNestedInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
+  documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
+  documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
+}
+
 export type UsuarioCreateWithoutPedidosInput = {
   id?: string
   nome: string
@@ -524,6 +654,8 @@ export type UsuarioCreateWithoutPedidosInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUncheckedCreateWithoutPedidosInput = {
@@ -539,6 +671,8 @@ export type UsuarioUncheckedCreateWithoutPedidosInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioCreateOrConnectWithoutPedidosInput = {
@@ -570,6 +704,8 @@ export type UsuarioUpdateWithoutPedidosInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutPedidosInput = {
@@ -585,6 +721,8 @@ export type UsuarioUncheckedUpdateWithoutPedidosInput = {
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioCreateWithoutMudancasDeStatusInput = {
@@ -600,6 +738,8 @@ export type UsuarioCreateWithoutMudancasDeStatusInput = {
   pedidos?: Prisma.PedidoCreateNestedManyWithoutVendedorInput
   documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUncheckedCreateWithoutMudancasDeStatusInput = {
@@ -615,6 +755,8 @@ export type UsuarioUncheckedCreateWithoutMudancasDeStatusInput = {
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutVendedorInput
   documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
   documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioCreateOrConnectWithoutMudancasDeStatusInput = {
@@ -646,6 +788,8 @@ export type UsuarioUpdateWithoutMudancasDeStatusInput = {
   pedidos?: Prisma.PedidoUpdateManyWithoutVendedorNestedInput
   documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutMudancasDeStatusInput = {
@@ -661,6 +805,8 @@ export type UsuarioUncheckedUpdateWithoutMudancasDeStatusInput = {
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutVendedorNestedInput
   documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
   documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioCreateWithoutDocumentosEnviadosInput = {
@@ -676,6 +822,8 @@ export type UsuarioCreateWithoutDocumentosEnviadosInput = {
   pedidos?: Prisma.PedidoCreateNestedManyWithoutVendedorInput
   mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
   documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUncheckedCreateWithoutDocumentosEnviadosInput = {
@@ -691,6 +839,8 @@ export type UsuarioUncheckedCreateWithoutDocumentosEnviadosInput = {
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutVendedorInput
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
   documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioCreateOrConnectWithoutDocumentosEnviadosInput = {
@@ -711,6 +861,8 @@ export type UsuarioCreateWithoutDocumentosConfirmadosInput = {
   pedidos?: Prisma.PedidoCreateNestedManyWithoutVendedorInput
   mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioUncheckedCreateWithoutDocumentosConfirmadosInput = {
@@ -726,6 +878,8 @@ export type UsuarioUncheckedCreateWithoutDocumentosConfirmadosInput = {
   pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutVendedorInput
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
   documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput
 }
 
 export type UsuarioCreateOrConnectWithoutDocumentosConfirmadosInput = {
@@ -757,6 +911,8 @@ export type UsuarioUpdateWithoutDocumentosEnviadosInput = {
   pedidos?: Prisma.PedidoUpdateManyWithoutVendedorNestedInput
   mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
   documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutDocumentosEnviadosInput = {
@@ -772,6 +928,8 @@ export type UsuarioUncheckedUpdateWithoutDocumentosEnviadosInput = {
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutVendedorNestedInput
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
   documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUpsertWithoutDocumentosConfirmadosInput = {
@@ -798,6 +956,8 @@ export type UsuarioUpdateWithoutDocumentosConfirmadosInput = {
   pedidos?: Prisma.PedidoUpdateManyWithoutVendedorNestedInput
   mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput
 }
 
 export type UsuarioUncheckedUpdateWithoutDocumentosConfirmadosInput = {
@@ -813,6 +973,92 @@ export type UsuarioUncheckedUpdateWithoutDocumentosConfirmadosInput = {
   pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutVendedorNestedInput
   mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
   documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
+  contatosRegistrados?: Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput
+}
+
+export type UsuarioCreateWithoutContatosRegistradosInput = {
+  id?: string
+  nome: string
+  email: string
+  senhaHash: string
+  papel: $Enums.Papel
+  ativo?: boolean
+  codigoVendedor?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  pedidos?: Prisma.PedidoCreateNestedManyWithoutVendedorInput
+  mudancasDeStatus?: Prisma.HistoricoStatusCreateNestedManyWithoutUsuarioInput
+  documentosEnviados?: Prisma.DocumentoCreateNestedManyWithoutEnviadoPorInput
+  documentosConfirmados?: Prisma.DocumentoCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoCreateNestedManyWithoutAvisoTratadoPorInput
+}
+
+export type UsuarioUncheckedCreateWithoutContatosRegistradosInput = {
+  id?: string
+  nome: string
+  email: string
+  senhaHash: string
+  papel: $Enums.Papel
+  ativo?: boolean
+  codigoVendedor?: string | null
+  criadoEm?: Date | string
+  atualizadoEm?: Date | string
+  pedidos?: Prisma.PedidoUncheckedCreateNestedManyWithoutVendedorInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUncheckedCreateNestedManyWithoutUsuarioInput
+  documentosEnviados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutEnviadoPorInput
+  documentosConfirmados?: Prisma.DocumentoUncheckedCreateNestedManyWithoutConfirmadoPorInput
+  avisosTratados?: Prisma.ContratoUncheckedCreateNestedManyWithoutAvisoTratadoPorInput
+}
+
+export type UsuarioCreateOrConnectWithoutContatosRegistradosInput = {
+  where: Prisma.UsuarioWhereUniqueInput
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedCreateWithoutContatosRegistradosInput>
+}
+
+export type UsuarioUpsertWithoutContatosRegistradosInput = {
+  update: Prisma.XOR<Prisma.UsuarioUpdateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedUpdateWithoutContatosRegistradosInput>
+  create: Prisma.XOR<Prisma.UsuarioCreateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedCreateWithoutContatosRegistradosInput>
+  where?: Prisma.UsuarioWhereInput
+}
+
+export type UsuarioUpdateToOneWithWhereWithoutContatosRegistradosInput = {
+  where?: Prisma.UsuarioWhereInput
+  data: Prisma.XOR<Prisma.UsuarioUpdateWithoutContatosRegistradosInput, Prisma.UsuarioUncheckedUpdateWithoutContatosRegistradosInput>
+}
+
+export type UsuarioUpdateWithoutContatosRegistradosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelFieldUpdateOperationsInput | $Enums.Papel
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pedidos?: Prisma.PedidoUpdateManyWithoutVendedorNestedInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUpdateManyWithoutUsuarioNestedInput
+  documentosEnviados?: Prisma.DocumentoUpdateManyWithoutEnviadoPorNestedInput
+  documentosConfirmados?: Prisma.DocumentoUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUpdateManyWithoutAvisoTratadoPorNestedInput
+}
+
+export type UsuarioUncheckedUpdateWithoutContatosRegistradosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nome?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  senhaHash?: Prisma.StringFieldUpdateOperationsInput | string
+  papel?: Prisma.EnumPapelFieldUpdateOperationsInput | $Enums.Papel
+  ativo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  codigoVendedor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  criadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  atualizadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  pedidos?: Prisma.PedidoUncheckedUpdateManyWithoutVendedorNestedInput
+  mudancasDeStatus?: Prisma.HistoricoStatusUncheckedUpdateManyWithoutUsuarioNestedInput
+  documentosEnviados?: Prisma.DocumentoUncheckedUpdateManyWithoutEnviadoPorNestedInput
+  documentosConfirmados?: Prisma.DocumentoUncheckedUpdateManyWithoutConfirmadoPorNestedInput
+  avisosTratados?: Prisma.ContratoUncheckedUpdateManyWithoutAvisoTratadoPorNestedInput
 }
 
 
@@ -825,6 +1071,8 @@ export type UsuarioCountOutputType = {
   mudancasDeStatus: number
   documentosEnviados: number
   documentosConfirmados: number
+  avisosTratados: number
+  contatosRegistrados: number
 }
 
 export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -832,6 +1080,8 @@ export type UsuarioCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   mudancasDeStatus?: boolean | UsuarioCountOutputTypeCountMudancasDeStatusArgs
   documentosEnviados?: boolean | UsuarioCountOutputTypeCountDocumentosEnviadosArgs
   documentosConfirmados?: boolean | UsuarioCountOutputTypeCountDocumentosConfirmadosArgs
+  avisosTratados?: boolean | UsuarioCountOutputTypeCountAvisosTratadosArgs
+  contatosRegistrados?: boolean | UsuarioCountOutputTypeCountContatosRegistradosArgs
 }
 
 /**
@@ -872,6 +1122,20 @@ export type UsuarioCountOutputTypeCountDocumentosConfirmadosArgs<ExtArgs extends
   where?: Prisma.DocumentoWhereInput
 }
 
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountAvisosTratadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContratoWhereInput
+}
+
+/**
+ * UsuarioCountOutputType without action
+ */
+export type UsuarioCountOutputTypeCountContatosRegistradosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RiscoChurnWhereInput
+}
+
 
 export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -887,6 +1151,8 @@ export type UsuarioSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   mudancasDeStatus?: boolean | Prisma.Usuario$mudancasDeStatusArgs<ExtArgs>
   documentosEnviados?: boolean | Prisma.Usuario$documentosEnviadosArgs<ExtArgs>
   documentosConfirmados?: boolean | Prisma.Usuario$documentosConfirmadosArgs<ExtArgs>
+  avisosTratados?: boolean | Prisma.Usuario$avisosTratadosArgs<ExtArgs>
+  contatosRegistrados?: boolean | Prisma.Usuario$contatosRegistradosArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["usuario"]>
 
@@ -932,6 +1198,8 @@ export type UsuarioInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   mudancasDeStatus?: boolean | Prisma.Usuario$mudancasDeStatusArgs<ExtArgs>
   documentosEnviados?: boolean | Prisma.Usuario$documentosEnviadosArgs<ExtArgs>
   documentosConfirmados?: boolean | Prisma.Usuario$documentosConfirmadosArgs<ExtArgs>
+  avisosTratados?: boolean | Prisma.Usuario$avisosTratadosArgs<ExtArgs>
+  contatosRegistrados?: boolean | Prisma.Usuario$contatosRegistradosArgs<ExtArgs>
   _count?: boolean | Prisma.UsuarioCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UsuarioIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -944,6 +1212,8 @@ export type $UsuarioPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     mudancasDeStatus: Prisma.$HistoricoStatusPayload<ExtArgs>[]
     documentosEnviados: Prisma.$DocumentoPayload<ExtArgs>[]
     documentosConfirmados: Prisma.$DocumentoPayload<ExtArgs>[]
+    avisosTratados: Prisma.$ContratoPayload<ExtArgs>[]
+    contatosRegistrados: Prisma.$RiscoChurnPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1353,6 +1623,8 @@ export interface Prisma__UsuarioClient<T, Null = never, ExtArgs extends runtime.
   mudancasDeStatus<T extends Prisma.Usuario$mudancasDeStatusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$mudancasDeStatusArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$HistoricoStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentosEnviados<T extends Prisma.Usuario$documentosEnviadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$documentosEnviadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   documentosConfirmados<T extends Prisma.Usuario$documentosConfirmadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$documentosConfirmadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DocumentoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  avisosTratados<T extends Prisma.Usuario$avisosTratadosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$avisosTratadosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContratoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  contatosRegistrados<T extends Prisma.Usuario$contatosRegistradosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Usuario$contatosRegistradosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RiscoChurnPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1877,6 +2149,54 @@ export type Usuario$documentosConfirmadosArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.DocumentoScalarFieldEnum | Prisma.DocumentoScalarFieldEnum[]
+}
+
+/**
+ * Usuario.avisosTratados
+ */
+export type Usuario$avisosTratadosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Contrato
+   */
+  select?: Prisma.ContratoSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Contrato
+   */
+  omit?: Prisma.ContratoOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContratoInclude<ExtArgs> | null
+  where?: Prisma.ContratoWhereInput
+  orderBy?: Prisma.ContratoOrderByWithRelationInput | Prisma.ContratoOrderByWithRelationInput[]
+  cursor?: Prisma.ContratoWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContratoScalarFieldEnum | Prisma.ContratoScalarFieldEnum[]
+}
+
+/**
+ * Usuario.contatosRegistrados
+ */
+export type Usuario$contatosRegistradosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RiscoChurn
+   */
+  select?: Prisma.RiscoChurnSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RiscoChurn
+   */
+  omit?: Prisma.RiscoChurnOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RiscoChurnInclude<ExtArgs> | null
+  where?: Prisma.RiscoChurnWhereInput
+  orderBy?: Prisma.RiscoChurnOrderByWithRelationInput | Prisma.RiscoChurnOrderByWithRelationInput[]
+  cursor?: Prisma.RiscoChurnWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RiscoChurnScalarFieldEnum | Prisma.RiscoChurnScalarFieldEnum[]
 }
 
 /**

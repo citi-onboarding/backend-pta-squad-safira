@@ -43,6 +43,7 @@ export type RiscoChurnMinAggregateOutputType = {
   motivoPrincipal: string | null
   versaoModelo: string | null
   contatoRegistradoEm: Date | null
+  contatoRegistradoPorId: string | null
 }
 
 export type RiscoChurnMaxAggregateOutputType = {
@@ -54,6 +55,7 @@ export type RiscoChurnMaxAggregateOutputType = {
   motivoPrincipal: string | null
   versaoModelo: string | null
   contatoRegistradoEm: Date | null
+  contatoRegistradoPorId: string | null
 }
 
 export type RiscoChurnCountAggregateOutputType = {
@@ -65,6 +67,7 @@ export type RiscoChurnCountAggregateOutputType = {
   motivoPrincipal: number
   versaoModelo: number
   contatoRegistradoEm: number
+  contatoRegistradoPorId: number
   _all: number
 }
 
@@ -86,6 +89,7 @@ export type RiscoChurnMinAggregateInputType = {
   motivoPrincipal?: true
   versaoModelo?: true
   contatoRegistradoEm?: true
+  contatoRegistradoPorId?: true
 }
 
 export type RiscoChurnMaxAggregateInputType = {
@@ -97,6 +101,7 @@ export type RiscoChurnMaxAggregateInputType = {
   motivoPrincipal?: true
   versaoModelo?: true
   contatoRegistradoEm?: true
+  contatoRegistradoPorId?: true
 }
 
 export type RiscoChurnCountAggregateInputType = {
@@ -108,6 +113,7 @@ export type RiscoChurnCountAggregateInputType = {
   motivoPrincipal?: true
   versaoModelo?: true
   contatoRegistradoEm?: true
+  contatoRegistradoPorId?: true
   _all?: true
 }
 
@@ -206,6 +212,7 @@ export type RiscoChurnGroupByOutputType = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm: Date | null
+  contatoRegistradoPorId: string | null
   _count: RiscoChurnCountAggregateOutputType | null
   _avg: RiscoChurnAvgAggregateOutputType | null
   _sum: RiscoChurnSumAggregateOutputType | null
@@ -240,7 +247,9 @@ export type RiscoChurnWhereInput = {
   motivoPrincipal?: Prisma.StringFilter<"RiscoChurn"> | string
   versaoModelo?: Prisma.StringFilter<"RiscoChurn"> | string
   contatoRegistradoEm?: Prisma.DateTimeNullableFilter<"RiscoChurn"> | Date | string | null
+  contatoRegistradoPorId?: Prisma.StringNullableFilter<"RiscoChurn"> | string | null
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
+  contatoRegistradoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
 }
 
 export type RiscoChurnOrderByWithRelationInput = {
@@ -252,7 +261,9 @@ export type RiscoChurnOrderByWithRelationInput = {
   motivoPrincipal?: Prisma.SortOrder
   versaoModelo?: Prisma.SortOrder
   contatoRegistradoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  contatoRegistradoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   cliente?: Prisma.ClienteOrderByWithRelationInput
+  contatoRegistradoPor?: Prisma.UsuarioOrderByWithRelationInput
 }
 
 export type RiscoChurnWhereUniqueInput = Prisma.AtLeast<{
@@ -268,7 +279,9 @@ export type RiscoChurnWhereUniqueInput = Prisma.AtLeast<{
   motivoPrincipal?: Prisma.StringFilter<"RiscoChurn"> | string
   versaoModelo?: Prisma.StringFilter<"RiscoChurn"> | string
   contatoRegistradoEm?: Prisma.DateTimeNullableFilter<"RiscoChurn"> | Date | string | null
+  contatoRegistradoPorId?: Prisma.StringNullableFilter<"RiscoChurn"> | string | null
   cliente?: Prisma.XOR<Prisma.ClienteScalarRelationFilter, Prisma.ClienteWhereInput>
+  contatoRegistradoPor?: Prisma.XOR<Prisma.UsuarioNullableScalarRelationFilter, Prisma.UsuarioWhereInput> | null
 }, "id" | "clienteId_calculadoEm">
 
 export type RiscoChurnOrderByWithAggregationInput = {
@@ -280,6 +293,7 @@ export type RiscoChurnOrderByWithAggregationInput = {
   motivoPrincipal?: Prisma.SortOrder
   versaoModelo?: Prisma.SortOrder
   contatoRegistradoEm?: Prisma.SortOrderInput | Prisma.SortOrder
+  contatoRegistradoPorId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.RiscoChurnCountOrderByAggregateInput
   _avg?: Prisma.RiscoChurnAvgOrderByAggregateInput
   _max?: Prisma.RiscoChurnMaxOrderByAggregateInput
@@ -299,6 +313,7 @@ export type RiscoChurnScalarWhereWithAggregatesInput = {
   motivoPrincipal?: Prisma.StringWithAggregatesFilter<"RiscoChurn"> | string
   versaoModelo?: Prisma.StringWithAggregatesFilter<"RiscoChurn"> | string
   contatoRegistradoEm?: Prisma.DateTimeNullableWithAggregatesFilter<"RiscoChurn"> | Date | string | null
+  contatoRegistradoPorId?: Prisma.StringNullableWithAggregatesFilter<"RiscoChurn"> | string | null
 }
 
 export type RiscoChurnCreateInput = {
@@ -310,6 +325,7 @@ export type RiscoChurnCreateInput = {
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
   cliente: Prisma.ClienteCreateNestedOneWithoutRiscosInput
+  contatoRegistradoPor?: Prisma.UsuarioCreateNestedOneWithoutContatosRegistradosInput
 }
 
 export type RiscoChurnUncheckedCreateInput = {
@@ -321,6 +337,7 @@ export type RiscoChurnUncheckedCreateInput = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
+  contatoRegistradoPorId?: string | null
 }
 
 export type RiscoChurnUpdateInput = {
@@ -332,6 +349,7 @@ export type RiscoChurnUpdateInput = {
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   cliente?: Prisma.ClienteUpdateOneRequiredWithoutRiscosNestedInput
+  contatoRegistradoPor?: Prisma.UsuarioUpdateOneWithoutContatosRegistradosNestedInput
 }
 
 export type RiscoChurnUncheckedUpdateInput = {
@@ -343,6 +361,7 @@ export type RiscoChurnUncheckedUpdateInput = {
   motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contatoRegistradoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RiscoChurnCreateManyInput = {
@@ -354,6 +373,7 @@ export type RiscoChurnCreateManyInput = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
+  contatoRegistradoPorId?: string | null
 }
 
 export type RiscoChurnUpdateManyMutationInput = {
@@ -375,6 +395,7 @@ export type RiscoChurnUncheckedUpdateManyInput = {
   motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contatoRegistradoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RiscoChurnListRelationFilter = {
@@ -401,6 +422,7 @@ export type RiscoChurnCountOrderByAggregateInput = {
   motivoPrincipal?: Prisma.SortOrder
   versaoModelo?: Prisma.SortOrder
   contatoRegistradoEm?: Prisma.SortOrder
+  contatoRegistradoPorId?: Prisma.SortOrder
 }
 
 export type RiscoChurnAvgOrderByAggregateInput = {
@@ -416,6 +438,7 @@ export type RiscoChurnMaxOrderByAggregateInput = {
   motivoPrincipal?: Prisma.SortOrder
   versaoModelo?: Prisma.SortOrder
   contatoRegistradoEm?: Prisma.SortOrder
+  contatoRegistradoPorId?: Prisma.SortOrder
 }
 
 export type RiscoChurnMinOrderByAggregateInput = {
@@ -427,10 +450,53 @@ export type RiscoChurnMinOrderByAggregateInput = {
   motivoPrincipal?: Prisma.SortOrder
   versaoModelo?: Prisma.SortOrder
   contatoRegistradoEm?: Prisma.SortOrder
+  contatoRegistradoPorId?: Prisma.SortOrder
 }
 
 export type RiscoChurnSumOrderByAggregateInput = {
   probabilidade?: Prisma.SortOrder
+}
+
+export type RiscoChurnCreateNestedManyWithoutContatoRegistradoPorInput = {
+  create?: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput> | Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput[] | Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput[]
+  connectOrCreate?: Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput | Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput[]
+  createMany?: Prisma.RiscoChurnCreateManyContatoRegistradoPorInputEnvelope
+  connect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+}
+
+export type RiscoChurnUncheckedCreateNestedManyWithoutContatoRegistradoPorInput = {
+  create?: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput> | Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput[] | Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput[]
+  connectOrCreate?: Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput | Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput[]
+  createMany?: Prisma.RiscoChurnCreateManyContatoRegistradoPorInputEnvelope
+  connect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+}
+
+export type RiscoChurnUpdateManyWithoutContatoRegistradoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput> | Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput[] | Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput[]
+  connectOrCreate?: Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput | Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput[]
+  upsert?: Prisma.RiscoChurnUpsertWithWhereUniqueWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpsertWithWhereUniqueWithoutContatoRegistradoPorInput[]
+  createMany?: Prisma.RiscoChurnCreateManyContatoRegistradoPorInputEnvelope
+  set?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  disconnect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  delete?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  connect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  update?: Prisma.RiscoChurnUpdateWithWhereUniqueWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpdateWithWhereUniqueWithoutContatoRegistradoPorInput[]
+  updateMany?: Prisma.RiscoChurnUpdateManyWithWhereWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpdateManyWithWhereWithoutContatoRegistradoPorInput[]
+  deleteMany?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
+}
+
+export type RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorNestedInput = {
+  create?: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput> | Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput[] | Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput[]
+  connectOrCreate?: Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput | Prisma.RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput[]
+  upsert?: Prisma.RiscoChurnUpsertWithWhereUniqueWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpsertWithWhereUniqueWithoutContatoRegistradoPorInput[]
+  createMany?: Prisma.RiscoChurnCreateManyContatoRegistradoPorInputEnvelope
+  set?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  disconnect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  delete?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  connect?: Prisma.RiscoChurnWhereUniqueInput | Prisma.RiscoChurnWhereUniqueInput[]
+  update?: Prisma.RiscoChurnUpdateWithWhereUniqueWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpdateWithWhereUniqueWithoutContatoRegistradoPorInput[]
+  updateMany?: Prisma.RiscoChurnUpdateManyWithWhereWithoutContatoRegistradoPorInput | Prisma.RiscoChurnUpdateManyWithWhereWithoutContatoRegistradoPorInput[]
+  deleteMany?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
 }
 
 export type RiscoChurnCreateNestedManyWithoutClienteInput = {
@@ -487,6 +553,69 @@ export type EnumFaixaRiscoFieldUpdateOperationsInput = {
   set?: $Enums.FaixaRisco
 }
 
+export type RiscoChurnCreateWithoutContatoRegistradoPorInput = {
+  id?: string
+  calculadoEm: Date | string
+  probabilidade: number
+  faixa: $Enums.FaixaRisco
+  motivoPrincipal: string
+  versaoModelo: string
+  contatoRegistradoEm?: Date | string | null
+  cliente: Prisma.ClienteCreateNestedOneWithoutRiscosInput
+}
+
+export type RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput = {
+  id?: string
+  clienteId: string
+  calculadoEm: Date | string
+  probabilidade: number
+  faixa: $Enums.FaixaRisco
+  motivoPrincipal: string
+  versaoModelo: string
+  contatoRegistradoEm?: Date | string | null
+}
+
+export type RiscoChurnCreateOrConnectWithoutContatoRegistradoPorInput = {
+  where: Prisma.RiscoChurnWhereUniqueInput
+  create: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput>
+}
+
+export type RiscoChurnCreateManyContatoRegistradoPorInputEnvelope = {
+  data: Prisma.RiscoChurnCreateManyContatoRegistradoPorInput | Prisma.RiscoChurnCreateManyContatoRegistradoPorInput[]
+  skipDuplicates?: boolean
+}
+
+export type RiscoChurnUpsertWithWhereUniqueWithoutContatoRegistradoPorInput = {
+  where: Prisma.RiscoChurnWhereUniqueInput
+  update: Prisma.XOR<Prisma.RiscoChurnUpdateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedUpdateWithoutContatoRegistradoPorInput>
+  create: Prisma.XOR<Prisma.RiscoChurnCreateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedCreateWithoutContatoRegistradoPorInput>
+}
+
+export type RiscoChurnUpdateWithWhereUniqueWithoutContatoRegistradoPorInput = {
+  where: Prisma.RiscoChurnWhereUniqueInput
+  data: Prisma.XOR<Prisma.RiscoChurnUpdateWithoutContatoRegistradoPorInput, Prisma.RiscoChurnUncheckedUpdateWithoutContatoRegistradoPorInput>
+}
+
+export type RiscoChurnUpdateManyWithWhereWithoutContatoRegistradoPorInput = {
+  where: Prisma.RiscoChurnScalarWhereInput
+  data: Prisma.XOR<Prisma.RiscoChurnUpdateManyMutationInput, Prisma.RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorInput>
+}
+
+export type RiscoChurnScalarWhereInput = {
+  AND?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
+  OR?: Prisma.RiscoChurnScalarWhereInput[]
+  NOT?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
+  id?: Prisma.StringFilter<"RiscoChurn"> | string
+  clienteId?: Prisma.StringFilter<"RiscoChurn"> | string
+  calculadoEm?: Prisma.DateTimeFilter<"RiscoChurn"> | Date | string
+  probabilidade?: Prisma.FloatFilter<"RiscoChurn"> | number
+  faixa?: Prisma.EnumFaixaRiscoFilter<"RiscoChurn"> | $Enums.FaixaRisco
+  motivoPrincipal?: Prisma.StringFilter<"RiscoChurn"> | string
+  versaoModelo?: Prisma.StringFilter<"RiscoChurn"> | string
+  contatoRegistradoEm?: Prisma.DateTimeNullableFilter<"RiscoChurn"> | Date | string | null
+  contatoRegistradoPorId?: Prisma.StringNullableFilter<"RiscoChurn"> | string | null
+}
+
 export type RiscoChurnCreateWithoutClienteInput = {
   id?: string
   calculadoEm: Date | string
@@ -495,6 +624,7 @@ export type RiscoChurnCreateWithoutClienteInput = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
+  contatoRegistradoPor?: Prisma.UsuarioCreateNestedOneWithoutContatosRegistradosInput
 }
 
 export type RiscoChurnUncheckedCreateWithoutClienteInput = {
@@ -505,6 +635,7 @@ export type RiscoChurnUncheckedCreateWithoutClienteInput = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
+  contatoRegistradoPorId?: string | null
 }
 
 export type RiscoChurnCreateOrConnectWithoutClienteInput = {
@@ -533,18 +664,48 @@ export type RiscoChurnUpdateManyWithWhereWithoutClienteInput = {
   data: Prisma.XOR<Prisma.RiscoChurnUpdateManyMutationInput, Prisma.RiscoChurnUncheckedUpdateManyWithoutClienteInput>
 }
 
-export type RiscoChurnScalarWhereInput = {
-  AND?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
-  OR?: Prisma.RiscoChurnScalarWhereInput[]
-  NOT?: Prisma.RiscoChurnScalarWhereInput | Prisma.RiscoChurnScalarWhereInput[]
-  id?: Prisma.StringFilter<"RiscoChurn"> | string
-  clienteId?: Prisma.StringFilter<"RiscoChurn"> | string
-  calculadoEm?: Prisma.DateTimeFilter<"RiscoChurn"> | Date | string
-  probabilidade?: Prisma.FloatFilter<"RiscoChurn"> | number
-  faixa?: Prisma.EnumFaixaRiscoFilter<"RiscoChurn"> | $Enums.FaixaRisco
-  motivoPrincipal?: Prisma.StringFilter<"RiscoChurn"> | string
-  versaoModelo?: Prisma.StringFilter<"RiscoChurn"> | string
-  contatoRegistradoEm?: Prisma.DateTimeNullableFilter<"RiscoChurn"> | Date | string | null
+export type RiscoChurnCreateManyContatoRegistradoPorInput = {
+  id?: string
+  clienteId: string
+  calculadoEm: Date | string
+  probabilidade: number
+  faixa: $Enums.FaixaRisco
+  motivoPrincipal: string
+  versaoModelo: string
+  contatoRegistradoEm?: Date | string | null
+}
+
+export type RiscoChurnUpdateWithoutContatoRegistradoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  calculadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  probabilidade?: Prisma.FloatFieldUpdateOperationsInput | number
+  faixa?: Prisma.EnumFaixaRiscoFieldUpdateOperationsInput | $Enums.FaixaRisco
+  motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
+  versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
+  contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cliente?: Prisma.ClienteUpdateOneRequiredWithoutRiscosNestedInput
+}
+
+export type RiscoChurnUncheckedUpdateWithoutContatoRegistradoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  calculadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  probabilidade?: Prisma.FloatFieldUpdateOperationsInput | number
+  faixa?: Prisma.EnumFaixaRiscoFieldUpdateOperationsInput | $Enums.FaixaRisco
+  motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
+  versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
+  contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type RiscoChurnUncheckedUpdateManyWithoutContatoRegistradoPorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clienteId?: Prisma.StringFieldUpdateOperationsInput | string
+  calculadoEm?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  probabilidade?: Prisma.FloatFieldUpdateOperationsInput | number
+  faixa?: Prisma.EnumFaixaRiscoFieldUpdateOperationsInput | $Enums.FaixaRisco
+  motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
+  versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
+  contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type RiscoChurnCreateManyClienteInput = {
@@ -555,6 +716,7 @@ export type RiscoChurnCreateManyClienteInput = {
   motivoPrincipal: string
   versaoModelo: string
   contatoRegistradoEm?: Date | string | null
+  contatoRegistradoPorId?: string | null
 }
 
 export type RiscoChurnUpdateWithoutClienteInput = {
@@ -565,6 +727,7 @@ export type RiscoChurnUpdateWithoutClienteInput = {
   motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contatoRegistradoPor?: Prisma.UsuarioUpdateOneWithoutContatosRegistradosNestedInput
 }
 
 export type RiscoChurnUncheckedUpdateWithoutClienteInput = {
@@ -575,6 +738,7 @@ export type RiscoChurnUncheckedUpdateWithoutClienteInput = {
   motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contatoRegistradoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type RiscoChurnUncheckedUpdateManyWithoutClienteInput = {
@@ -585,6 +749,7 @@ export type RiscoChurnUncheckedUpdateManyWithoutClienteInput = {
   motivoPrincipal?: Prisma.StringFieldUpdateOperationsInput | string
   versaoModelo?: Prisma.StringFieldUpdateOperationsInput | string
   contatoRegistradoEm?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contatoRegistradoPorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -598,7 +763,9 @@ export type RiscoChurnSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   motivoPrincipal?: boolean
   versaoModelo?: boolean
   contatoRegistradoEm?: boolean
+  contatoRegistradoPorId?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }, ExtArgs["result"]["riscoChurn"]>
 
 export type RiscoChurnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -610,7 +777,9 @@ export type RiscoChurnSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   motivoPrincipal?: boolean
   versaoModelo?: boolean
   contatoRegistradoEm?: boolean
+  contatoRegistradoPorId?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }, ExtArgs["result"]["riscoChurn"]>
 
 export type RiscoChurnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -622,7 +791,9 @@ export type RiscoChurnSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   motivoPrincipal?: boolean
   versaoModelo?: boolean
   contatoRegistradoEm?: boolean
+  contatoRegistradoPorId?: boolean
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }, ExtArgs["result"]["riscoChurn"]>
 
 export type RiscoChurnSelectScalar = {
@@ -634,23 +805,28 @@ export type RiscoChurnSelectScalar = {
   motivoPrincipal?: boolean
   versaoModelo?: boolean
   contatoRegistradoEm?: boolean
+  contatoRegistradoPorId?: boolean
 }
 
-export type RiscoChurnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "calculadoEm" | "probabilidade" | "faixa" | "motivoPrincipal" | "versaoModelo" | "contatoRegistradoEm", ExtArgs["result"]["riscoChurn"]>
+export type RiscoChurnOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clienteId" | "calculadoEm" | "probabilidade" | "faixa" | "motivoPrincipal" | "versaoModelo" | "contatoRegistradoEm" | "contatoRegistradoPorId", ExtArgs["result"]["riscoChurn"]>
 export type RiscoChurnInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }
 export type RiscoChurnIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }
 export type RiscoChurnIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cliente?: boolean | Prisma.ClienteDefaultArgs<ExtArgs>
+  contatoRegistradoPor?: boolean | Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>
 }
 
 export type $RiscoChurnPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RiscoChurn"
   objects: {
     cliente: Prisma.$ClientePayload<ExtArgs>
+    contatoRegistradoPor: Prisma.$UsuarioPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -661,6 +837,7 @@ export type $RiscoChurnPayload<ExtArgs extends runtime.Types.Extensions.Internal
     motivoPrincipal: string
     versaoModelo: string
     contatoRegistradoEm: Date | null
+    contatoRegistradoPorId: string | null
   }, ExtArgs["result"]["riscoChurn"]>
   composites: {}
 }
@@ -1056,6 +1233,7 @@ readonly fields: RiscoChurnFieldRefs;
 export interface Prisma__RiscoChurnClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cliente<T extends Prisma.ClienteDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClienteDefaultArgs<ExtArgs>>): Prisma.Prisma__ClienteClient<runtime.Types.Result.GetResult<Prisma.$ClientePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  contatoRegistradoPor<T extends Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RiscoChurn$contatoRegistradoPorArgs<ExtArgs>>): Prisma.Prisma__UsuarioClient<runtime.Types.Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1093,6 +1271,7 @@ export interface RiscoChurnFieldRefs {
   readonly motivoPrincipal: Prisma.FieldRef<"RiscoChurn", 'String'>
   readonly versaoModelo: Prisma.FieldRef<"RiscoChurn", 'String'>
   readonly contatoRegistradoEm: Prisma.FieldRef<"RiscoChurn", 'DateTime'>
+  readonly contatoRegistradoPorId: Prisma.FieldRef<"RiscoChurn", 'String'>
 }
     
 
@@ -1491,6 +1670,25 @@ export type RiscoChurnDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many RiscoChurns to delete.
    */
   limit?: number
+}
+
+/**
+ * RiscoChurn.contatoRegistradoPor
+ */
+export type RiscoChurn$contatoRegistradoPorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Usuario
+   */
+  select?: Prisma.UsuarioSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Usuario
+   */
+  omit?: Prisma.UsuarioOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UsuarioInclude<ExtArgs> | null
+  where?: Prisma.UsuarioWhereInput
 }
 
 /**

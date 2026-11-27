@@ -54,10 +54,11 @@ CREATE TABLE "Cliente" (
     "cnpj" TEXT NOT NULL,
     "cidade" TEXT NOT NULL,
     "uf" CHAR(2) NOT NULL,
-    "segmento" TEXT,
-    "codigoVendedor" TEXT,
+    "segmento" TEXT NOT NULL,
+    "codigoVendedor" TEXT NOT NULL,
     "limiteCreditoCentavos" INTEGER NOT NULL,
     "status" "StatusCliente" NOT NULL,
+    "atualizadoNoErpEm" TIMESTAMP(3) NOT NULL,
     "atualizadoEm" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Cliente_pkey" PRIMARY KEY ("id")
@@ -68,10 +69,11 @@ CREATE TABLE "Produto" (
     "id" TEXT NOT NULL,
     "codigoErp" TEXT NOT NULL,
     "descricao" TEXT NOT NULL,
-    "categoria" TEXT,
+    "categoria" TEXT NOT NULL,
     "unidade" TEXT NOT NULL,
     "precoTabelaCentavos" INTEGER NOT NULL,
     "ativo" BOOLEAN NOT NULL,
+    "atualizadoNoErpEm" TIMESTAMP(3) NOT NULL,
     "atualizadoEm" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Produto_pkey" PRIMARY KEY ("id")
@@ -90,6 +92,7 @@ CREATE TABLE "Titulo" (
     "pagamento" DATE,
     "status" "StatusTitulo" NOT NULL,
     "origem" "OrigemTitulo" NOT NULL,
+    "atualizadoNoErpEm" TIMESTAMP(3),
     "atualizadoEm" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Titulo_pkey" PRIMARY KEY ("id")
@@ -110,6 +113,8 @@ CREATE TABLE "Contrato" (
     "dataLimiteAviso" DATE NOT NULL,
     "arquivo" TEXT NOT NULL,
     "documentoId" TEXT,
+    "avisoTratadoPorId" TEXT,
+    "avisoTratadoEm" TIMESTAMP(3),
     "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Contrato_pkey" PRIMARY KEY ("id")
@@ -164,9 +169,9 @@ CREATE TABLE "PedidoHistorico" (
     "numero" TEXT NOT NULL,
     "linha" INTEGER NOT NULL,
     "data" DATE NOT NULL,
-    "clienteId" TEXT,
+    "clienteId" TEXT NOT NULL,
     "clienteNomeOriginal" TEXT,
-    "produtoId" TEXT,
+    "produtoId" TEXT NOT NULL,
     "vendedorNome" TEXT,
     "quantidade" INTEGER NOT NULL,
     "precoUnitarioCentavos" INTEGER NOT NULL,
@@ -186,6 +191,8 @@ CREATE TABLE "Documento" (
     "situacao" "SituacaoDocumento" NOT NULL DEFAULT 'ENVIADO',
     "confirmadoPorId" TEXT,
     "confirmadoEm" TIMESTAMP(3),
+    "resumo" TEXT,
+    "encaminhadoPara" "Papel",
 
     CONSTRAINT "Documento_pkey" PRIMARY KEY ("id")
 );
@@ -199,7 +206,7 @@ CREATE TABLE "ExecucaoAgente" (
     "resultado" JSONB,
     "erro" TEXT,
     "duracaoMs" INTEGER NOT NULL,
-    "custoEstimadoCentavos" INTEGER,
+    "custoEstimadoMicrodolares" INTEGER,
     "criadoEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ExecucaoAgente_pkey" PRIMARY KEY ("id")
@@ -215,6 +222,7 @@ CREATE TABLE "RiscoChurn" (
     "motivoPrincipal" TEXT NOT NULL,
     "versaoModelo" TEXT NOT NULL,
     "contatoRegistradoEm" TIMESTAMP(3),
+    "contatoRegistradoPorId" TEXT,
 
     CONSTRAINT "RiscoChurn_pkey" PRIMARY KEY ("id")
 );
@@ -328,6 +336,9 @@ ALTER TABLE "Contrato" ADD CONSTRAINT "Contrato_clienteId_fkey" FOREIGN KEY ("cl
 ALTER TABLE "Contrato" ADD CONSTRAINT "Contrato_documentoId_fkey" FOREIGN KEY ("documentoId") REFERENCES "Documento"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Contrato" ADD CONSTRAINT "Contrato_avisoTratadoPorId_fkey" FOREIGN KEY ("avisoTratadoPorId") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Pedido" ADD CONSTRAINT "Pedido_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "Cliente"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -368,3 +379,11 @@ ALTER TABLE "ExecucaoAgente" ADD CONSTRAINT "ExecucaoAgente_documentoId_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "RiscoChurn" ADD CONSTRAINT "RiscoChurn_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "Cliente"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RiscoChurn" ADD CONSTRAINT "RiscoChurn_contatoRegistradoPorId_fkey" FOREIGN KEY ("contatoRegistradoPorId") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- A salesperson must have an ERP salesperson code, or no client would be in
+-- their portfolio (RN-08). Prisma cannot express this, so it is a CHECK.
+ALTER TABLE "Usuario" ADD CONSTRAINT "Usuario_vendedor_tem_codigo"
+  CHECK ("papel" <> 'VENDEDOR' OR "codigoVendedor" IS NOT NULL);
