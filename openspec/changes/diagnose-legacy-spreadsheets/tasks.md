@@ -53,3 +53,9 @@
 - [x] Red: developer writes the failing tests (16 failed for the expected reason).
 - [x] Green: implement, regenerate the document twice, and check it for personal data.
 - [x] Refactor and run all gates again.
+
+## Dependency placement
+
+- [x] Move `exceljs@4.4.0` to `devDependencies` (`pnpm add -D exceljs@4.4.0 --save-exact`), as the squad manager asked, and record the decision in the design and the change summary.
+- [x] Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, and `pnpm build`.
+- [ ] Run `pnpm test:container` on a machine where it passes: on the developer's Windows machine, the host request to `127.0.0.1:3001/health/ready` did not answer (Docker Desktop port relay), while inside the container `/health/ready` answered 200 and `exceljs` was absent from the production image.

@@ -20,7 +20,7 @@ Read the three spreadsheets the DistriLux sales team uses today, measure what is
 - `scripts/data/diagnose-spreadsheets.ts` builds the profile of each file, detects the seventeen problems of the spec (the ten from the task and PRD 7.4, plus seven found in the real files during review: statuses written in different ways, salespeople identified by name, missing required values, CNPJs in different formats, status values outside the portal values, values written with a dot, and client codes out of pattern), counts receivables issued from 2026-10-01, and holds the hand-written column match with the DATA-01 Prisma schema and the BACK-02 ERP client schemas, including the conversion each column needs. The clients file is marked as lookup only (PRD 7.7). Duplicates are found by record key (client CNPJ or code, order and product, receivable and installment), not only by identical text.
 - `scripts/data/render-diagnosis.ts` turns the diagnosis into Markdown with one proposed cleaning rule per problem found (RN-09, RN-13, RN-16).
 - `scripts/data/run-diagnosis.ts` is the `pnpm data:diagnose` command; it formats the document with the repository's Prettier settings and writes `docs/data/diagnostico-planilhas.md`.
-- New dependency: `exceljs@4.4.0` (pinned).
+- New development dependency: `exceljs@4.4.0` (pinned, in `devDependencies`, so it stays out of the production image; it moves to `dependencies` only if DATA-03 turns the load into an API route).
 
 ## Resulting behavior
 
