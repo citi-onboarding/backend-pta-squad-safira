@@ -1,0 +1,955 @@
+import { SPREADSHEETS } from "./read-spreadsheets.js";
+import type {
+  Cell,
+  Sheet,
+  SheetRow,
+  SpreadsheetName,
+  Spreadsheets,
+} from "./read-spreadsheets.js";
+
+// Pure functions: they only look at the rows the reader returned.
+
+export const PROBLEM_IDS = [
+  "clients-written-differently",
+  "invalid-cnpj",
+  "mixed-date-formats",
+  "decimal-comma-values",
+  "duplicates",
+  "orders-without-client",
+  "clients-identified-by-name",
+  "wrong-quantities",
+  "total-lines",
+  "outdated-status",
+  "status-written-differently",
+  "salespeople-identified-by-name",
+  "missing-required-values",
+  "cnpj-different-formats",
+  "unknown-status-values",
+  "dot-separated-values",
+  "client-codes-out-of-pattern",
+] as const;
+
+export type ProblemId = (typeof PROBLEM_IDS)[number];
+
+export interface FileOccurrence {
+  file: string;
+  rows: number;
+  exampleRows: number[];
+  /** Number of distinct spellings; only for salespeople identified by name. */
+  distinctValues?: number;
+}
+
+export interface ProblemResult {
+  id: ProblemId;
+  found: boolean;
+  rows: number;
+  byFile: FileOccurrence[];
+}
+
+export interface ColumnProfile {
+  name: string;
+  kinds: Cell["kind"][];
+  empty: number;
+  /** Formulas whose result was not saved in the file. */
+  formulas: number;
+  /** Date or value formats; only for date, money, and quantity columns. */
+  formats?: string[];
+}
+
+export interface SheetProfile {
+  file: string;
+  contentRows: number;
+  blankRows: number;
+  totalLines: number;
+  columns: ColumnProfile[];
+  distinctOrders?: number;
+}
+
+export interface ColumnMatch {
+  column: string;
+  portalField: string | null;
+  erpField: string | null;
+  /** What has to change before the value can be loaded, if anything. */
+  conversion: string | null;
+}
+
+export interface Diagnosis {
+  profiles: Record<SpreadsheetName, SheetProfile>;
+  problems: ProblemResult[];
+  receivablesFromErp: number;
+}
+
+const SHEET_ORDER: SpreadsheetName[] = ["clientes", "pedidos", "titulos"];
+const MAX_EXAMPLES = 5;
+const ERP_RECEIVABLES_FROM = Date.UTC(2026, 9, 1);
+
+const DATE_COLUMNS: Record<SpreadsheetName, string[]> = {
+  clientes: ["Últ. atualização"],
+  pedidos: ["Data"],
+  titulos: ["data_emissao", "data_vencimento", "data_pagamento"],
+};
+
+const VALUE_COLUMNS: Record<SpreadsheetName, string[]> = {
+  clientes: ["Limite"],
+  pedidos: ["Qtd", "Preço Unit.", "Total"],
+  titulos: ["valor"],
+};
+
+// Portal field (DATA-01 Prisma schema) and ERP field (BACK-02 client schemas)
+// for every column. The clients file is only used to find the ERP client
+// (PRD 7.7), so its other columns are not loaded.
+const NOT_LOADED = "not loaded: the ERP value is used (PRD 7.7)";
+
+export const COLUMN_MATCHES: Record<SpreadsheetName, ColumnMatch[]> = {
+  clientes: [
+    match(
+      "Cód.",
+      "Cliente.codigoErp",
+      "cliente.codigo",
+      "lookup only (PRD 7.7): normalize the code to find the ERP client",
+    ),
+    match(
+      "Razão Social",
+      "Cliente.razaoSocial",
+      "cliente.razaoSocial",
+      NOT_LOADED,
+    ),
+    match(
+      "CNPJ",
+      "Cliente.cnpj",
+      "cliente.cnpj",
+      "lookup only (PRD 7.7): normalize to 14 digits to find the ERP client",
+    ),
+    match(
+      "Cidade/UF",
+      "Cliente.cidade + Cliente.uf",
+      "cliente.cidade + cliente.uf",
+      NOT_LOADED,
+    ),
+    match("Segmento", "Cliente.segmento", "cliente.segmento", NOT_LOADED),
+    match("Vendedor", "Cliente.codigoVendedor", "cliente.vendedor", NOT_LOADED),
+    match(
+      "Limite",
+      "Cliente.limiteCreditoCentavos",
+      "cliente.limiteCreditoCentavos",
+      NOT_LOADED,
+    ),
+    match("Situação", "Cliente.status", "cliente.status", NOT_LOADED),
+    match("Contato", null, null),
+    match("Telefone", null, null),
+    match(
+      "Últ. atualização",
+      null,
+      null,
+      "not loaded: it is the spreadsheet's edit date; Cliente.atualizadoNoErpEm comes from the ERP",
+    ),
+  ],
+  pedidos: [
+    match(
+      "Nº Pedido",
+      "PedidoHistorico.numero",
+      "pedido.numero",
+      "number to text",
+    ),
+    match(
+      "Data",
+      "PedidoHistorico.data",
+      "pedido.criadoEm",
+      "date in one format",
+    ),
+    match(
+      "Cliente",
+      "PedidoHistorico.clienteId + PedidoHistorico.clienteNomeOriginal",
+      "pedido.cliente",
+      "client code or name to Cliente.id; a name is also kept in clienteNomeOriginal",
+    ),
+    match("Vendedor", "PedidoHistorico.vendedorNome", null, "kept as typed"),
+    match(
+      "Produto",
+      "PedidoHistorico.produtoId",
+      "pedido.itens.produto",
+      "product code to Produto.id",
+    ),
+    match(
+      "Descrição",
+      "Produto.descricao",
+      "pedido.itens.descricao",
+      "not loaded: the ERP product description is used (RN-09)",
+    ),
+    match(
+      "Qtd",
+      "PedidoHistorico.quantidade",
+      "pedido.itens.quantidade",
+      "positive whole number",
+    ),
+    match(
+      "Un",
+      "Produto.unidade",
+      "produto.unidade",
+      "not loaded: only checks quantities written with a unit",
+    ),
+    match(
+      "Preço Unit.",
+      "PedidoHistorico.precoUnitarioCentavos",
+      "pedido.itens.precoUnitarioCentavos",
+      "reais to integer cents",
+    ),
+    match(
+      "Total",
+      null,
+      "pedido.itens.subtotalCentavos",
+      "computed as Qtd times Preço Unit.",
+    ),
+    match(
+      "Status",
+      "PedidoHistorico.cancelado",
+      null,
+      "true for Cancelado, false for Faturado, after trimming and ignoring letter case (the ERP order status only has RECEBIDO)",
+    ),
+  ],
+  titulos: [
+    match(
+      "id_titulo",
+      "Titulo.numero",
+      "titulo.numero",
+      "kept as text (the ERP sends a number)",
+    ),
+    match(
+      "id_cliente",
+      "Titulo.clienteId",
+      "titulo.cliente",
+      "normalize the code, then client code to Cliente.id",
+    ),
+    match(
+      "num_pedido",
+      "Titulo.pedidoErp",
+      "titulo.pedidoErp",
+      "kept as text (the ERP sends a number)",
+    ),
+    match(
+      "parcela",
+      "Titulo.parcela",
+      "titulo.parcela",
+      "installment number before `/` or `de` (written `1/2` or `1 de 2`)",
+    ),
+    match(
+      "valor",
+      "Titulo.valorCentavos",
+      "titulo.valorCentavos",
+      "reais to integer cents, reading a dot by the digits after it",
+    ),
+    match(
+      "data_emissao",
+      "Titulo.emissao",
+      "titulo.emissao",
+      "date in one format",
+    ),
+    match(
+      "data_vencimento",
+      "Titulo.vencimento",
+      "titulo.vencimento",
+      "date in one format",
+    ),
+    match(
+      "data_pagamento",
+      "Titulo.pagamento",
+      "titulo.pagamento",
+      "date in one format",
+    ),
+    match(
+      "status",
+      "Titulo.status",
+      "titulo.status",
+      "text to EM_ABERTO, VENCIDO, or PAGO; Estornado is discarded",
+    ),
+  ],
+};
+
+function match(
+  column: string,
+  portalField: string | null,
+  erpField: string | null,
+  conversion: string | null = null,
+): ColumnMatch {
+  return { column, portalField, erpField, conversion };
+}
+
+// ---------- cell helpers ----------
+
+function text(cell: Cell | undefined): string {
+  if (!cell || cell.kind === "empty" || cell.kind === "formula") return "";
+  if (cell.kind === "date") return cell.value.toISOString();
+  return String(cell.value).trim();
+}
+
+function isEmpty(cell: Cell | undefined): boolean {
+  return !cell || cell.kind === "empty";
+}
+
+function normalizeName(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+// Describes text by its shape, never by its value: digits become 9 and
+// letters become a (for example, "10 cx" becomes "99 aa").
+function shapeOf(value: string): string {
+  return `shape ${value.replace(/\p{L}/gu, "a").replace(/\p{N}/gu, "9")}`;
+}
+
+const DATE_PATTERNS: { name: string; pattern: RegExp; order: "dmy" | "ymd" }[] =
+  [
+    {
+      name: "dd/mm/yyyy",
+      pattern: /^(\d{2})\/(\d{2})\/(\d{4})$/,
+      order: "dmy",
+    },
+    { name: "dd/mm/yy", pattern: /^(\d{2})\/(\d{2})\/(\d{2})$/, order: "dmy" },
+    {
+      name: "dd.mm.yyyy",
+      pattern: /^(\d{2})\.(\d{2})\.(\d{4})$/,
+      order: "dmy",
+    },
+    { name: "dd-mm-yyyy", pattern: /^(\d{2})-(\d{2})-(\d{4})$/, order: "dmy" },
+    { name: "yyyy-mm-dd", pattern: /^(\d{4})-(\d{2})-(\d{2})$/, order: "ymd" },
+  ];
+
+// Excel stores dates as days since 1899-12-30; copied to a CSV, they become
+// five-digit numbers written as text.
+const EXCEL_SERIAL = /^\d{5}$/;
+const EXCEL_EPOCH = Date.UTC(1899, 11, 30);
+const DAY_IN_MS = 86_400_000;
+
+function dateFormat(cell: Cell): string {
+  if (cell.kind === "date") return "Excel date";
+  const value = text(cell);
+  if (EXCEL_SERIAL.test(value)) return "Excel serial number";
+  return (
+    DATE_PATTERNS.find(({ pattern }) => pattern.test(value))?.name ??
+    shapeOf(value)
+  );
+}
+
+// A dot followed by groups of exactly three digits separates thousands
+// (`12.000`); followed by one or two digits it is a decimal point (`1234.56`).
+// Money in these files never has three decimals.
+const THOUSANDS_DOT = /^-?\d{1,3}(\.\d{3})+$/;
+const DECIMAL_POINT = /^-?\d+\.\d{1,2}$/;
+const CURRENCY = /^R\$\s*/;
+
+function valueFormat(cell: Cell): string {
+  if (cell.kind === "number") return "number";
+  const value = text(cell);
+  if (CURRENCY.test(value)) return "text with R$";
+  if (value.includes(",")) return "text with decimal comma";
+  if (THOUSANDS_DOT.test(value)) return "text with thousands dot";
+  if (DECIMAL_POINT.test(value)) return "text with decimal point";
+  if (/^-?\d+$/.test(value)) return "text with digits only";
+  return shapeOf(value);
+}
+
+function toNumber(cell: Cell | undefined): number | null {
+  if (cell?.kind === "number") return cell.value;
+  if (cell?.kind !== "text") return null;
+  const value = cell.value.trim().replace(CURRENCY, "");
+  const normalized =
+    value.includes(",") || THOUSANDS_DOT.test(value)
+      ? value.replace(/\./g, "").replace(",", ".")
+      : value;
+  const parsed = Number(normalized);
+  return normalized === "" || Number.isNaN(parsed) ? null : parsed;
+}
+
+function toUtcDay(cell: Cell | undefined): number | null {
+  if (!cell || cell.kind === "empty") return null;
+  if (cell.kind === "date") return cell.value.getTime();
+  const value = text(cell);
+  if (EXCEL_SERIAL.test(value)) return EXCEL_EPOCH + Number(value) * DAY_IN_MS;
+  for (const { pattern, order } of DATE_PATTERNS) {
+    const [, first = "", second = "", third = ""] = pattern.exec(value) ?? [];
+    if (first === "") continue;
+    const [day, month, year] =
+      order === "dmy" ? [first, second, third] : [third, second, first];
+    // Two-digit years in these files are all from the 2000s.
+    const fullYear = year.length === 2 ? 2000 + Number(year) : Number(year);
+    return Date.UTC(fullYear, Number(month) - 1, Number(day));
+  }
+  return null;
+}
+
+function isValidCnpj(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 14 || /^(\d)\1{13}$/.test(digits)) return false;
+  const checkDigit = (length: number): number => {
+    const weights =
+      length === 12
+        ? [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+        : [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+    const sum = weights.reduce(
+      (total, weight, index) => total + weight * Number(digits[index]),
+      0,
+    );
+    const rest = sum % 11;
+    return rest < 2 ? 0 : 11 - rest;
+  };
+  return (
+    checkDigit(12) === Number(digits[12]) &&
+    checkDigit(13) === Number(digits[13])
+  );
+}
+
+// ---------- row classification ----------
+
+type RowKind = "content" | "blank" | "total";
+
+function rowKind(sheet: Sheet, row: SheetRow): RowKind {
+  const filled = sheet.columns
+    .map((column) => row.cells[column])
+    .filter((cell): cell is Cell => !isEmpty(cell));
+  const first = filled[0];
+  if (!first) return "blank";
+  if (first.kind === "text" && /^total/i.test(first.value.trim())) {
+    return "total";
+  }
+  return "content";
+}
+
+function contentRows(sheet: Sheet): SheetRow[] {
+  return sheet.rows.filter((row) => rowKind(sheet, row) === "content");
+}
+
+// ---------- profile ----------
+
+function profileOf(name: SpreadsheetName, sheet: Sheet): SheetProfile {
+  const kinds = sheet.rows.map((row) => rowKind(sheet, row));
+  const content = contentRows(sheet);
+  const formatColumns = new Map<string, (cell: Cell) => string>([
+    ...DATE_COLUMNS[name].map((column) => [column, dateFormat] as const),
+    ...VALUE_COLUMNS[name].map((column) => [column, valueFormat] as const),
+  ]);
+
+  const columns = sheet.columns.map((column): ColumnProfile => {
+    const cells = content.map((row) => row.cells[column]);
+    const filled = cells.filter((cell): cell is Cell => !isEmpty(cell));
+    const values = filled.filter((cell) => cell.kind !== "formula");
+    const profile: ColumnProfile = {
+      name: column,
+      kinds: [...new Set(filled.map((cell) => cell.kind))].sort(),
+      empty: cells.length - filled.length,
+      formulas: filled.length - values.length,
+    };
+    const format = formatColumns.get(column);
+    if (format) {
+      profile.formats = [...new Set(values.map(format))].sort();
+    }
+    return profile;
+  });
+
+  const profile: SheetProfile = {
+    file: sheet.file,
+    contentRows: content.length,
+    blankRows: kinds.filter((kind) => kind === "blank").length,
+    totalLines: kinds.filter((kind) => kind === "total").length,
+    columns,
+  };
+  if (name === "pedidos") {
+    profile.distinctOrders = new Set(
+      content
+        .map((row) => text(row.cells["Nº Pedido"]))
+        .filter((value) => value !== ""),
+    ).size;
+  }
+  return profile;
+}
+
+// ---------- problems ----------
+
+type RowsByFile = Partial<Record<SpreadsheetName, number[]>>;
+
+type DistinctByFile = Partial<Record<SpreadsheetName, number>>;
+
+function result(
+  id: ProblemId,
+  rowsByFile: RowsByFile,
+  distinctByFile: DistinctByFile = {},
+): ProblemResult {
+  const byFile = SHEET_ORDER.flatMap((name): FileOccurrence[] => {
+    const rows = [...new Set(rowsByFile[name] ?? [])].sort((a, b) => a - b);
+    if (rows.length === 0) return [];
+    const occurrence: FileOccurrence = {
+      file: SPREADSHEETS[name].file,
+      rows: rows.length,
+      exampleRows: rows.slice(0, MAX_EXAMPLES),
+    };
+    const distinct = distinctByFile[name];
+    if (distinct !== undefined) occurrence.distinctValues = distinct;
+    return [occurrence];
+  });
+  const rows = byFile.reduce((total, entry) => total + entry.rows, 0);
+  return { id, found: rows > 0, rows, byFile };
+}
+
+function clientsWrittenDifferently(sheets: Spreadsheets): RowsByFile {
+  const groups = new Map<string, { spellings: Set<string>; rows: number[] }>();
+  for (const row of contentRows(sheets.clientes)) {
+    const name = text(row.cells["Razão Social"]);
+    if (name === "") continue;
+    const key = normalizeName(name);
+    const group = groups.get(key) ?? { spellings: new Set(), rows: [] };
+    group.spellings.add(name);
+    group.rows.push(row.rowNumber);
+    groups.set(key, group);
+  }
+  const rows = [...groups.values()]
+    .filter((group) => group.spellings.size > 1)
+    .flatMap((group) => group.rows);
+  return { clientes: rows };
+}
+
+function invalidCnpj(sheets: Spreadsheets): RowsByFile {
+  return {
+    clientes: contentRows(sheets.clientes)
+      .filter((row) => {
+        const value = text(row.cells.CNPJ);
+        return value !== "" && !isValidCnpj(value);
+      })
+      .map((row) => row.rowNumber),
+  };
+}
+
+function mixedDateFormats(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    const rows = new Set<number>();
+    for (const column of DATE_COLUMNS[name]) {
+      const cells = contentRows(sheets[name])
+        .map((row) => ({ row: row.rowNumber, cell: row.cells[column] }))
+        .filter((entry): entry is { row: number; cell: Cell } =>
+          Boolean(
+            entry.cell && !isEmpty(entry.cell) && entry.cell.kind !== "formula",
+          ),
+        );
+      const counts = new Map<string, number>();
+      for (const { cell } of cells) {
+        const format = dateFormat(cell);
+        counts.set(format, (counts.get(format) ?? 0) + 1);
+      }
+      if (counts.size < 2) continue;
+      const dominant = [...counts.entries()].sort(
+        (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+      )[0]?.[0];
+      for (const { row, cell } of cells) {
+        if (dateFormat(cell) !== dominant) rows.add(row);
+      }
+    }
+    found[name] = [...rows];
+  }
+  return found;
+}
+
+function decimalCommaValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    found[name] = contentRows(sheets[name])
+      .filter((row) =>
+        VALUE_COLUMNS[name].some((column) => {
+          const cell = row.cells[column];
+          return cell?.kind === "text" && cell.value.includes(",");
+        }),
+      )
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function cnpjDigits(cell: Cell | undefined): string {
+  const digits = text(cell).replace(/\D/g, "");
+  return digits === "" ? "" : digits.padStart(14, "0");
+}
+
+function installmentNumber(cell: Cell | undefined): string {
+  const [first = ""] = text(cell).split(/\/|\s+de\s+/);
+  return first === "" ? "" : String(Number(first));
+}
+
+// Keys that identify the same record even when it is written differently.
+// A row repeats a record when any of its keys was already seen.
+const RECORD_KEYS: Record<SpreadsheetName, (row: SheetRow) => string[]> = {
+  clientes: (row) => [
+    cnpjDigits(row.cells.CNPJ),
+    text(row.cells["Cód."]).toUpperCase(),
+  ],
+  pedidos: (row) => {
+    const product = text(row.cells.Produto).toUpperCase();
+    return [product === "" ? "" : `${text(row.cells["Nº Pedido"])}|${product}`];
+  },
+  titulos: (row) => {
+    const id = text(row.cells.id_titulo);
+    const installment = installmentNumber(row.cells.parcela);
+    return [id === "" || installment === "" ? "" : `${id}|${installment}`];
+  },
+};
+
+function duplicates(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    const sheet = sheets[name];
+    const seen = new Set<string>();
+    const rows: number[] = [];
+    for (const row of contentRows(sheet)) {
+      const whole = JSON.stringify(
+        sheet.columns.map((column) => text(row.cells[column])),
+      );
+      const keys = [
+        `row|${whole}`,
+        ...RECORD_KEYS[name](row)
+          .map((key, index) => (key === "" ? "" : `${String(index)}|${key}`))
+          .filter((key) => key !== ""),
+      ];
+      if (keys.some((key) => seen.has(key))) rows.push(row.rowNumber);
+      for (const key of keys) seen.add(key);
+    }
+    found[name] = rows;
+  }
+  return found;
+}
+
+function ordersWithoutClient(sheets: Spreadsheets): RowsByFile {
+  return {
+    pedidos: contentRows(sheets.pedidos)
+      .filter((row) => isEmpty(row.cells.Cliente))
+      .map((row) => row.rowNumber),
+  };
+}
+
+function clientsIdentifiedByName(sheets: Spreadsheets): RowsByFile {
+  const codes = new Set(
+    contentRows(sheets.clientes)
+      .map((row) => text(row.cells["Cód."]))
+      .filter((code) => code !== ""),
+  );
+  return {
+    pedidos: contentRows(sheets.pedidos)
+      .filter((row) => {
+        const client = text(row.cells.Cliente);
+        return client !== "" && !codes.has(client);
+      })
+      .map((row) => row.rowNumber),
+  };
+}
+
+// A quantity at least this many times the product's median is taken as typed
+// wrong (for example, 3500 where the product usually sells 12). Products with
+// fewer rows have no reliable median.
+const QUANTITY_OUTLIER_FACTOR = 20;
+const QUANTITY_OUTLIER_MIN_ROWS = 10;
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1
+    ? (sorted[middle] ?? 0)
+    : ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
+}
+
+function quantityOutliers(rows: SheetRow[]): number[] {
+  const byProduct = new Map<string, { row: number; quantity: number }[]>();
+  for (const row of rows) {
+    const product = text(row.cells.Produto).toUpperCase();
+    const quantity = toNumber(row.cells.Qtd);
+    if (product === "" || quantity === null) continue;
+    byProduct.set(product, [
+      ...(byProduct.get(product) ?? []),
+      { row: row.rowNumber, quantity },
+    ]);
+  }
+  return [...byProduct.values()]
+    .filter((entries) => entries.length >= QUANTITY_OUTLIER_MIN_ROWS)
+    .flatMap((entries) => {
+      const usual = median(entries.map((entry) => entry.quantity));
+      return entries
+        .filter((entry) => entry.quantity >= QUANTITY_OUTLIER_FACTOR * usual)
+        .map((entry) => entry.row);
+    });
+}
+
+function wrongQuantities(sheets: Spreadsheets): RowsByFile {
+  const rows = contentRows(sheets.pedidos);
+  return {
+    pedidos: [
+      ...rows
+        .filter((row) => {
+          const quantity = toNumber(row.cells.Qtd);
+          if (
+            quantity === null ||
+            !Number.isInteger(quantity) ||
+            quantity <= 0
+          ) {
+            return true;
+          }
+          const price = toNumber(row.cells["Preço Unit."]);
+          const total = toNumber(row.cells.Total);
+          if (price === null || total === null) return false;
+          // Compare in integer cents to avoid floating-point noise (RN-13).
+          const expected = Math.round(quantity * price * 100);
+          return Math.abs(expected - Math.round(total * 100)) > 1;
+        })
+        .map((row) => row.rowNumber),
+      ...quantityOutliers(rows),
+    ],
+  };
+}
+
+function totalLines(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    const sheet = sheets[name];
+    found[name] = sheet.rows
+      .filter((row) => rowKind(sheet, row) === "total")
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function outdatedStatus(sheets: Spreadsheets): RowsByFile {
+  return {
+    titulos: contentRows(sheets.titulos)
+      .filter((row) => {
+        const paid = normalizeName(text(row.cells.status)) === "pago";
+        const hasPayment = !isEmpty(row.cells.data_pagamento);
+        return hasPayment !== paid;
+      })
+      .map((row) => row.rowNumber),
+  };
+}
+
+function rawText(cell: Cell | undefined): string {
+  return cell?.kind === "text" ? cell.value : text(cell);
+}
+
+// Rows whose value is not the most common spelling of the same normalized
+// value (ties go to the first spelling in alphabetical order).
+function offSpellingRows(rows: SheetRow[], column: string): number[] {
+  const groups = new Map<string, Map<string, number[]>>();
+  for (const row of rows) {
+    const spelling = rawText(row.cells[column]);
+    if (spelling.trim() === "") continue;
+    const key = normalizeName(spelling);
+    const group = groups.get(key) ?? new Map<string, number[]>();
+    group.set(spelling, [...(group.get(spelling) ?? []), row.rowNumber]);
+    groups.set(key, group);
+  }
+  return [...groups.values()].flatMap((group) => {
+    const [, ...others] = [...group.entries()].sort(
+      (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+    );
+    return others.flatMap(([, rowNumbers]) => rowNumbers);
+  });
+}
+
+function statusWrittenDifferently(sheets: Spreadsheets): RowsByFile {
+  return {
+    clientes: offSpellingRows(contentRows(sheets.clientes), "Situação"),
+    pedidos: offSpellingRows(contentRows(sheets.pedidos), "Status"),
+    titulos: offSpellingRows(contentRows(sheets.titulos), "status"),
+  };
+}
+
+const SALESPERSON_FILES = ["clientes", "pedidos"] as const;
+
+function salespeopleIdentifiedByName(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SALESPERSON_FILES) {
+    found[name] = contentRows(sheets[name])
+      .filter((row) => !isEmpty(row.cells.Vendedor))
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function salespersonSpellings(sheets: Spreadsheets): DistinctByFile {
+  const distinct: DistinctByFile = {};
+  for (const name of SALESPERSON_FILES) {
+    distinct[name] = new Set(
+      contentRows(sheets[name])
+        .map((row) => text(row.cells.Vendedor))
+        .filter((value) => value !== ""),
+    ).size;
+  }
+  return distinct;
+}
+
+const REQUIRED_COLUMNS: Record<SpreadsheetName, string> = {
+  clientes: "Cód.",
+  pedidos: "Produto",
+  titulos: "id_cliente",
+};
+
+function missingRequiredValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    found[name] = contentRows(sheets[name])
+      .filter((row) => isEmpty(row.cells[REQUIRED_COLUMNS[name]]))
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function cnpjFormat(cell: Cell): string {
+  if (cell.kind === "number") return "Excel number";
+  return /^\d+$/.test(text(cell)) ? "digits only" : "masked";
+}
+
+function cnpjDifferentFormats(sheets: Spreadsheets): RowsByFile {
+  const cells = contentRows(sheets.clientes)
+    .map((row) => ({ row: row.rowNumber, cell: row.cells.CNPJ }))
+    .filter((entry): entry is { row: number; cell: Cell } =>
+      Boolean(entry.cell && !isEmpty(entry.cell)),
+    );
+  const counts = new Map<string, number>();
+  for (const { cell } of cells) {
+    const format = cnpjFormat(cell);
+    counts.set(format, (counts.get(format) ?? 0) + 1);
+  }
+  if (counts.size < 2) return {};
+  const dominant = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+  )[0]?.[0];
+  return {
+    clientes: cells
+      .filter(({ cell }) => cnpjFormat(cell) !== dominant)
+      .map(({ row }) => row),
+  };
+}
+
+// Values the portal accepts, compared after normalizeName. Order statuses
+// are free text in the portal, so they have no fixed list.
+const PORTAL_STATUSES = {
+  clientes: { column: "Situação", values: ["ativo", "bloqueado", "inativo"] },
+  titulos: { column: "status", values: ["pago", "em aberto", "vencido"] },
+} as const;
+
+function unknownStatusValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const [name, { column, values }] of Object.entries(PORTAL_STATUSES)) {
+    const allowed: readonly string[] = values;
+    found[name as SpreadsheetName] = contentRows(
+      sheets[name as SpreadsheetName],
+    )
+      .filter((row) => {
+        const value = text(row.cells[column]);
+        return value !== "" && !allowed.includes(normalizeName(value));
+      })
+      .map((row) => row.rowNumber);
+  }
+  return found;
+}
+
+function dotSeparatedValues(sheets: Spreadsheets): RowsByFile {
+  const found: RowsByFile = {};
+  for (const name of SHEET_ORDER) {
+    const rows = new Set<number>();
+    for (const column of VALUE_COLUMNS[name]) {
+      const cells = contentRows(sheets[name]).flatMap((row) => {
+        const cell = row.cells[column];
+        return cell?.kind === "text"
+          ? [{ row: row.rowNumber, value: cell.value.trim() }]
+          : [];
+      });
+      if (!cells.some(({ value }) => value.includes(","))) continue;
+      for (const { row, value } of cells) {
+        if (THOUSANDS_DOT.test(value) || DECIMAL_POINT.test(value)) {
+          rows.add(row);
+        }
+      }
+    }
+    found[name] = [...rows];
+  }
+  return found;
+}
+
+const CLIENT_CODE_COLUMNS: Record<SpreadsheetName, string> = {
+  clientes: "Cód.",
+  pedidos: "Cliente",
+  titulos: "id_cliente",
+};
+
+// A letter followed by digits, with any letter case or spaces around it.
+const CLIENT_CODE = /^\s*(\p{L})\s*(\d+)\s*$/u;
+
+// Client codes that differ from the common pattern: one capital letter and
+// the most common number of digits (for example, `c0012`, `C012`, or ` C0012`
+// when most codes are written `C0012`).
+function clientCodesOutOfPattern(sheets: Spreadsheets): RowsByFile {
+  const codes = SHEET_ORDER.flatMap((name) =>
+    contentRows(sheets[name]).flatMap((row) => {
+      const raw = rawText(row.cells[CLIENT_CODE_COLUMNS[name]]);
+      const [, letter = "", digits = ""] = CLIENT_CODE.exec(raw) ?? [];
+      return digits === ""
+        ? []
+        : [{ name, row: row.rowNumber, raw, letter, digits }];
+    }),
+  );
+  const lengths = new Map<number, number>();
+  for (const { digits } of codes) {
+    lengths.set(digits.length, (lengths.get(digits.length) ?? 0) + 1);
+  }
+  const common =
+    [...lengths.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ??
+    0;
+  const found: RowsByFile = {};
+  for (const { name, row, raw, letter, digits } of codes) {
+    const canonical = `${letter.toUpperCase()}${digits.padStart(common, "0")}`;
+    if (raw !== canonical) found[name] = [...(found[name] ?? []), row];
+  }
+  return found;
+}
+
+const DETECTORS: Record<ProblemId, (sheets: Spreadsheets) => RowsByFile> = {
+  "clients-written-differently": clientsWrittenDifferently,
+  "invalid-cnpj": invalidCnpj,
+  "mixed-date-formats": mixedDateFormats,
+  "decimal-comma-values": decimalCommaValues,
+  duplicates,
+  "orders-without-client": ordersWithoutClient,
+  "clients-identified-by-name": clientsIdentifiedByName,
+  "wrong-quantities": wrongQuantities,
+  "total-lines": totalLines,
+  "outdated-status": outdatedStatus,
+  "status-written-differently": statusWrittenDifferently,
+  "salespeople-identified-by-name": salespeopleIdentifiedByName,
+  "missing-required-values": missingRequiredValues,
+  "cnpj-different-formats": cnpjDifferentFormats,
+  "unknown-status-values": unknownStatusValues,
+  "dot-separated-values": dotSeparatedValues,
+  "client-codes-out-of-pattern": clientCodesOutOfPattern,
+};
+
+export function diagnose(sheets: Spreadsheets): Diagnosis {
+  const profiles = Object.fromEntries(
+    SHEET_ORDER.map((name) => [name, profileOf(name, sheets[name])]),
+  ) as Record<SpreadsheetName, SheetProfile>;
+
+  const receivablesFromErp = contentRows(sheets.titulos).filter((row) => {
+    const issued = toUtcDay(row.cells.data_emissao);
+    return issued !== null && issued >= ERP_RECEIVABLES_FROM;
+  }).length;
+
+  return {
+    profiles,
+    problems: PROBLEM_IDS.map((id) =>
+      result(
+        id,
+        DETECTORS[id](sheets),
+        id === "salespeople-identified-by-name"
+          ? salespersonSpellings(sheets)
+          : {},
+      ),
+    ),
+    receivablesFromErp,
+  };
+}
