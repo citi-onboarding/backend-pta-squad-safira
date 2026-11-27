@@ -68,4 +68,6 @@ The project manager asked for the salesperson-code validation on update and for 
 
 - A salesperson must have a salesperson code when created (kickoff answer: "the ideal is to have the code at registration"); since the review of pull request #13, the same rule applies on update.
 - ADR number: BACK-02 (#12) also adds an ADR numbered 0001, so this change's ADR is numbered 0002 (`docs/adr/0002-signed-session-token-and-argon2id.md`), following the project manager's rule for the clash.
-- The first administrator in production: the kickoff mentioned an initial administrator account, but today it only exists through the development seed.
+- The first administrator in production is created directly in the database by the team, with a password hash made by `hashPassword` from `src/shared/security/password.ts`. That administrator then creates the other users through `POST /users`. The development seed is not used in production.
+- The administrator has no access to clients: PRD section 4.2 gives the role no client action, and the prototype menu for "Administrador (TI)" only has users, the history load, and the ERP sync.
+- The prototype says a new user "receives a link to create the password". This change follows the task instead: the administrator sets the first password on `POST /users` and resets it on `POST /users/{id}/redefinir-senha`, because sending email is future scope (PRD 5.3).

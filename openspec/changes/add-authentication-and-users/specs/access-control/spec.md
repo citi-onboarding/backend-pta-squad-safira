@@ -155,7 +155,7 @@ A salesperson MUST only access clients whose ERP salesperson code matches the sa
 #### Scenario: Administrator
 
 - **WHEN** an administrator tries to access any client
-- **THEN** access is denied, because PRD section 4.2 does not give this role access to clients
+- **THEN** access is denied, because PRD section 4.2 does not give this role access to clients, and the prototype shows the administrator only users, the history load, and the ERP sync
 
 #### Scenario: Salesperson lists clients
 
