@@ -33,13 +33,13 @@
 
 ## 5. Refactor
 
-- [ ] 5.1 Review names, duplication, and logs, keeping search terms, CNPJs, and client data out of every log line.
-- [ ] 5.2 Run the tests again after refactoring.
+- [x] 5.1 Review names, duplication, and logs, keeping search terms, CNPJs, and client data out of every log line.
+- [x] 5.2 Run the tests again after refactoring.
 
 ## 6. Consolidation
 
-- [ ] 6.1 Write `docs/changes/add-customer-search-and-profile.md` using `docs/templates/change.md`, and evaluate whether an ADR is needed.
-- [ ] 6.2 Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
-- [ ] 6.3 Run `openspec validate add-customer-search-and-profile --strict`.
+- [x] 6.1 Write `docs/changes/add-customer-search-and-profile.md` using `docs/templates/change.md`, and evaluate whether an ADR is needed.
+- [x] 6.2 Run `pnpm format:check`, `pnpm verify`, `pnpm test:coverage`, `pnpm test:integration`, and `pnpm build`.
+- [x] 6.3 Run `openspec validate add-customer-search-and-profile --strict`.
 - [ ] 6.4 After BACK-03 and BACK-04 are reviewed, merge their branches, run the sync against the ERP, and check the profile of real clients (limit, open, and overdue amounts).
 - [ ] 6.5 Open the pull request to `feat/authAndUsers`, noting the dependency on BACK-01, BACK-03, and BACK-04 and the project manager's confirmation that the administrator has no access to clients.
