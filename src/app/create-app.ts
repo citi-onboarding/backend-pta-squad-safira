@@ -12,6 +12,9 @@ import swaggerUi from "swagger-ui-express";
 
 import { PrismaAuthRepository } from "../modules/auth/auth.repository.js";
 import { createAuthRouter } from "../modules/auth/auth.router.js";
+import { PrismaCustomersRepository } from "../modules/customers/customers.repository.js";
+import { createCustomersRouter } from "../modules/customers/customers.router.js";
+import { CustomersService } from "../modules/customers/customers.service.js";
 import { AuthService } from "../modules/auth/auth.service.js";
 import { PrismaUsersRepository } from "../modules/users/users.repository.js";
 import { createUsersRouter } from "../modules/users/users.router.js";
@@ -125,6 +128,16 @@ export function createApp({
       usersService: new UsersService(
         new PrismaUsersRepository(database),
         hashPassword,
+      ),
+      authenticate,
+    }),
+  );
+  app.use(
+    "/clientes",
+    createCustomersRouter({
+      customersService: new CustomersService(
+        new PrismaCustomersRepository(database),
+        () => new Date(),
       ),
       authenticate,
     }),

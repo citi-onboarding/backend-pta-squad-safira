@@ -20,16 +20,16 @@
 - [x] 3.2 Developer writes unit tests for the service with an in-memory repository: portfolio filter passed to the search, search term normalization (CNPJ with and without punctuation, at least 3 digits, digit-only terms), pagination, overdue list with days overdue, and 404 for a client outside the portfolio.
 - [x] 3.3 Developer writes router tests: 401 without a session, 403 for the administrator and for a salesperson without a code, 400 for an invalid page, a long term, and a malformed id, and responses that match the schemas.
 - [x] 3.4 Developer writes PostgreSQL integration tests with their own clients, users, receivables, and sync records: search by partial name, code, and CNPJ with and without punctuation; salesperson sees only V01 and gets 404 for a V02 client; manager and finance see both; 61 clients make two pages; credit position for a client without receivables, with receivables, with a paid receivable, and above the limit; last successful sync times.
-- [ ] 3.5 Run the tests and confirm that they fail for the expected reason.
+- [x] 3.5 Run the tests and confirm that they fail for the expected reason.
 
 ## 4. Green
 
-- [ ] 4.1 Implement `calcularLimiteDisponivel` in `src/shared/credit/available-credit.ts`.
-- [ ] 4.2 Implement `customers.repository.ts`: search with the portfolio filter, count, profile by id and portfolio, unpaid ERP receivables per client, salesperson names, and the last successful sync times.
-- [ ] 4.3 Implement `customers.service.ts` with the clock injected and today's date in America/Recife.
-- [ ] 4.4 Implement `customers.router.ts` with the session middleware, the portfolio filter, request validation, and response parsing.
-- [ ] 4.5 Register the router at `/clientes` in `src/app/create-app.ts`.
-- [ ] 4.6 Regenerate `openapi.json` and run the tests until they pass.
+- [x] 4.1 Implement `calcularLimiteDisponivel` in `src/shared/credit/available-credit.ts`.
+- [x] 4.2 Implement `customers.repository.ts`: search with the portfolio filter, count, profile by id and portfolio, unpaid ERP receivables per client, salesperson names, and the last successful sync times.
+- [x] 4.3 Implement `customers.service.ts` with the clock injected and today's date in America/Recife.
+- [x] 4.4 Implement `customers.router.ts` with the session middleware, the portfolio filter, request validation, and response parsing.
+- [x] 4.5 Register the router at `/clientes` in `src/app/create-app.ts`.
+- [x] 4.6 Regenerate `openapi.json` and run the tests until they pass.
 
 ## 5. Refactor
 

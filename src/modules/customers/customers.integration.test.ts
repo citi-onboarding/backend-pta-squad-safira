@@ -377,7 +377,13 @@ describe("customer search and profile with PostgreSQL", () => {
         .query({ busca: "C900" })
         .expect(200);
 
+      // Company name order: Construtora, Distribuidora, Elétrica.
       expect(response.body.itens).toEqual([
+        expect.objectContaining({
+          codigoErp: "C9001",
+          vendedorNome: "Patrícia Lima",
+          limiteDisponivelCentavos: 1_200_000,
+        }),
         expect.objectContaining({
           codigoErp: "C9003",
           vendedorNome: "Juliana Freitas",
@@ -387,11 +393,6 @@ describe("customer search and profile with PostgreSQL", () => {
           codigoErp: "C9002",
           vendedorNome: "Patrícia Lima",
           limiteDisponivelCentavos: 1_000_000,
-        }),
-        expect.objectContaining({
-          codigoErp: "C9001",
-          vendedorNome: "Patrícia Lima",
-          limiteDisponivelCentavos: 1_200_000,
         }),
       ]);
     });

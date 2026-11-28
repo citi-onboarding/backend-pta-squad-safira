@@ -3,7 +3,7 @@ import { z } from "../../shared/http/openapi-zod.js";
 
 // Each search page has at most this many clients; the screen asks the user
 // to refine the search when the total is larger (prototype 3.2).
-export const CUSTOMER_PAGE_SIZE = 60;
+export const CUSTOMER_PAGE_SIZE = 60 as const;
 
 export const customerSearchQuerySchema = z.strictObject({
   busca: z.string().trim().max(100).optional().openapi({
