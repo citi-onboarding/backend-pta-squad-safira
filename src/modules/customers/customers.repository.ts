@@ -26,6 +26,10 @@ function toDateOnly(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+function containsIgnoringCase(value: string) {
+  return { contains: value, mode: "insensitive" as const };
+}
+
 function searchWhere({ filter, texto, digitosCnpj }: CustomerSearchCriteria) {
   if (texto === undefined) {
     return { ...filter };
@@ -33,8 +37,8 @@ function searchWhere({ filter, texto, digitosCnpj }: CustomerSearchCriteria) {
   return {
     ...filter,
     OR: [
-      { razaoSocial: { contains: texto, mode: "insensitive" as const } },
-      { codigoErp: { contains: texto, mode: "insensitive" as const } },
+      { razaoSocial: containsIgnoringCase(texto) },
+      { codigoErp: containsIgnoringCase(texto) },
       ...(digitosCnpj === undefined
         ? []
         : [{ cnpj: { contains: digitosCnpj } }]),

@@ -73,6 +73,18 @@ function cnpjDigits(term: string): string | undefined {
   return digits.length >= MINIMUM_CNPJ_DIGITS ? digits : undefined;
 }
 
+function groupByCustomer(
+  receivables: ReceivableRecord[],
+): Map<string, ReceivableRecord[]> {
+  const byCustomer = new Map<string, ReceivableRecord[]>();
+  for (const receivable of receivables) {
+    const group = byCustomer.get(receivable.clienteId) ?? [];
+    group.push(receivable);
+    byCustomer.set(receivable.clienteId, group);
+  }
+  return byCustomer;
+}
+
 export class CustomersService {
   constructor(
     private readonly repository: CustomersRepository,
@@ -110,27 +122,21 @@ export class CustomersService {
         ...new Set(customers.map(({ codigoVendedor }) => codigoVendedor)),
       ]),
     ]);
+    const receivablesByCustomer = groupByCustomer(receivables);
     const hoje = businessDate(this.now());
 
     return {
-      itens: customers.map((customer) => ({
-        id: customer.id,
-        codigoErp: customer.codigoErp,
-        razaoSocial: customer.razaoSocial,
-        cnpj: customer.cnpj,
-        cidade: customer.cidade,
-        uf: customer.uf,
-        status: customer.status,
-        codigoVendedor: customer.codigoVendedor,
-        vendedorNome: salespersonNames.get(customer.codigoVendedor) ?? null,
-        limiteDisponivelCentavos: calcularLimiteDisponivel({
-          limiteCreditoCentavos: customer.limiteCreditoCentavos,
-          titulos: receivables.filter(
-            ({ clienteId }) => clienteId === customer.id,
-          ),
-          hoje,
-        }).limiteDisponivelCentavos,
-      })),
+      itens: customers.map(
+        ({ segmento: _segmento, limiteCreditoCentavos, ...listed }) => ({
+          ...listed,
+          vendedorNome: salespersonNames.get(listed.codigoVendedor) ?? null,
+          limiteDisponivelCentavos: calcularLimiteDisponivel({
+            limiteCreditoCentavos,
+            titulos: receivablesByCustomer.get(listed.id) ?? [],
+            hoje,
+          }).limiteDisponivelCentavos,
+        }),
+      ),
       ...page,
     };
   }
